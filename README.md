@@ -4,12 +4,13 @@
 
 > ### ⚠️ Đây là bản demo ý tưởng
 >
-> Dự án **chưa thuộc và chưa liên kết với AI VIETNAM**. Đây không phải trang tuyển sinh
-> chính thức. Toàn bộ thông tin khoá học, tên giảng viên và số hotline chỉ để minh hoạ
-> giao diện. **Form đăng ký không hoạt động** (Supabase chưa dựng, xem mục 4) — điền vào
-> sẽ báo lỗi chứ không báo thành công giả.
+> **Khoá học là có thật.** Nội dung lấy từ
+> [tài liệu gốc của khoá](https://drive.google.com/drive/folders/1JlXxhr-m3yKF8m8oZxoSg5hcq77CwNMh).
 >
-> Nội dung lấy cảm hứng từ [tài liệu gốc của khoá học](https://drive.google.com/drive/folders/1JlXxhr-m3yKF8m8oZxoSg5hcq77CwNMh).
+> Nhưng **trang này** chỉ là bản phác thảo giao diện, **không phải trang tuyển sinh chính
+> thức** và **chưa liên kết với AI VIETNAM**. **Form đăng ký không hoạt động** (Supabase
+> chưa dựng, xem mục 4) — điền vào sẽ báo lỗi chứ không báo thành công giả. Muốn đăng ký
+> thật thì liên hệ trực tiếp AI VIETNAM.
 
 Bản phác thảo trang tuyển sinh cho khoá **End2End Data Analytics 2026**, kèm backend
 nhận đăng ký và trang quản trị xem danh sách.
