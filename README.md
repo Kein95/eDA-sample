@@ -215,9 +215,9 @@ node scripts/test-bao-mat.mjs
 
 ### Việc còn phải làm
 
-- **Turnstile chưa gắn widget.** Form không gửi `turnstileToken`, nên nếu đặt
-  `EDA_TURNSTILE_SECRET` mà chưa gắn widget thì **mọi đơn bị từ chối 403**. Hoặc gắn
-  widget, hoặc để trống secret và dựa vào honeypot + rate limit.
+- **Không có CAPTCHA**, đây là lựa chọn có chủ đích. Chống bot chỉ gồm honeypot và giới
+  hạn tần suất theo IP, nên một bot chịu khó vẫn gửi được đơn rác. Đổi lại người đăng ký
+  thật không vướng màn kiểm tra nào. Đơn rác nhiều thì hạ `EDA_MAX_PER_HOUR` trước.
 - **Không có nhật ký truy cập.** Ai đăng nhập admin, ai tải CSV đều không ghi lại.
 - **Chưa có backup.** Supabase Free không tự sao lưu; nên xuất CSV định kỳ.
 
@@ -232,7 +232,8 @@ node scripts/test-bao-mat.mjs
 | `/docs` ra danh sách thư mục | `try_files` có `$uri/`, bỏ đi |
 | Đăng nhập admin không phản hồi | `REPLACE-ME` trong CSP `connect-src` chưa điền |
 | Đăng nhập được nhưng bảng trống | Tài khoản chưa gán `EDA_ADMIN`, hoặc chưa đăng xuất/đăng nhập lại |
-| Gửi đăng ký báo lỗi 403 | `EDA_ALLOWED_ORIGINS` chưa có tên miền hiện tại, hoặc đã bật secret Turnstile mà chưa gắn widget |
+| Gửi đăng ký báo lỗi 403 | `EDA_ALLOWED_ORIGINS` chưa có tên miền hiện tại |
+| Gửi đăng ký báo lỗi 429 | Vượt `EDA_MAX_PER_HOUR` (mặc định 10 đơn/IP/giờ) |
 | Chữ tàng hình ở dark mode | Xem mục dưới |
 
 ### Bẫy màu ở dark mode

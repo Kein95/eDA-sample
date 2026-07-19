@@ -5,6 +5,11 @@
 // Modelled on IAIO's iaio-interest, with two deliberate differences:
 //   * no dedupe — see the comment in 0001_eda_registration.sql
 //   * many more fields, including guardian contact details for minors
+//
+// CO Y khong dung CAPTCHA. Chong bot o day dua vao honeypot (truong an) va gioi han
+// tan suat theo IP ben duoi. Danh doi: mot bot chiu kho van gui duoc don rac, nhung
+// doi lai khong co them dich vu ben thu ba, khong co bien moi truong nao co the bi
+// xoa nham lam bao ve tat am tham, va khong co man kiem tra chan nguoi that dang ky.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 // Chi nhan don tu chinh trang tuyen sinh. Truoc day de "*", tuc bat ky website nao
@@ -44,28 +49,6 @@ const isPhone = (v: string) => /^0\d{8,10}$/.test(v.replace(/[\s.]/g, ''));
 
 // Trim and cap every free-text field so a bot cannot push megabytes into the table.
 const clean = (v: unknown, max = 300) => String(v ?? '').trim().slice(0, max) || null;
-
-async function verifyTurnstile(token: string, ip: string | null): Promise<boolean> {
-  // Chua dat secret thi bo qua, de chay thu duoc. Nhung day la fail-open: neu ai do
-  // lo xoa bien moi truong tren production thi chong bot bien mat am tham, khong
-  // bao loi gi. Dat EDA_REQUIRE_CAPTCHA=1 de bat fail-closed - thieu secret la tu
-  // choi luon, hong to chu khong hong lang.
-  const secret = Deno.env.get('EDA_TURNSTILE_SECRET');
-  if (!secret) {
-    if (Deno.env.get('EDA_REQUIRE_CAPTCHA') === '1') {
-      console.error('EDA_REQUIRE_CAPTCHA=1 nhung thieu EDA_TURNSTILE_SECRET - tu choi don.');
-      return false;
-    }
-    return true;
-  }
-  if (!token) return false;
-  const form = new URLSearchParams({ secret, response: token });
-  if (ip) form.set('remoteip', ip);
-  try {
-    const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form });
-    return !!(await r.json())?.success;
-  } catch { return false; }
-}
 
 async function ack(email: string, name: string, code: string) {
   const key = Deno.env.get('RESEND_API_KEY');
@@ -112,7 +95,6 @@ Deno.serve(async (req) => {
   if (clean(b.website)) return json({ status: 'received' }, 200, cors);
 
   const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || null;
-  if (!(await verifyTurnstile(String(b.turnstileToken ?? ''), ip))) return json({ error: 'captcha_failed' }, 403, cors);
 
   const name = clean(b.name, 120);
   const phone = clean(b.phone, 30);

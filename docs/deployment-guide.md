@@ -32,17 +32,16 @@ Biến môi trường (Settings → Edge Functions → Secrets):
 | Tên | Bắt buộc | Ghi chú |
 |---|---|---|
 | `EDA_ALLOWED_ORIGINS` | **trước khi chạy thật** | danh sách tên miền ngăn bởi dấu phẩy, ví dụ `https://aivietnam.edu.vn`. Để trống = nhận từ mọi tên miền (chỉ hợp lúc chạy thử) |
-| `EDA_TURNSTILE_SECRET` | xem cảnh báo dưới | chưa đặt thì bỏ qua chống bot |
-| `EDA_REQUIRE_CAPTCHA` | không | đặt `1` để **từ chối đơn** khi thiếu secret, thay vì âm thầm bỏ qua |
 | `EDA_IP_SALT` | nên đặt | chuỗi ngẫu nhiên để băm IP phục vụ giới hạn tần suất. Không đặt thì dùng tạm service-role key |
 | `EDA_MAX_PER_HOUR` | không | số đơn tối đa mỗi IP mỗi giờ, mặc định `10` |
 | `RESEND_API_KEY` | không | có thì gửi email xác nhận cho người đăng ký |
 | `EDA_EMAIL_FROM` | không | mặc định `no-reply@aivietnam.edu.vn` |
 
-> **Cảnh báo về Turnstile.** Form hiện **chưa có widget Turnstile**, nên nó không gửi
-> `turnstileToken`. Nếu bạn đặt `EDA_TURNSTILE_SECRET` mà chưa gắn widget vào form thì
-> **mọi đơn đăng ký sẽ bị từ chối 403**. Hoặc gắn widget trước, hoặc để trống secret và
-> dựa vào honeypot + giới hạn tần suất theo IP (đã có sẵn).
+> **Không dùng CAPTCHA.** Chống bot dựa vào honeypot (trường ẩn trong form) và giới hạn
+> tần suất theo IP. Đánh đổi: bot chịu khó vẫn gửi được đơn rác, bù lại người đăng ký
+> thật không phải qua màn kiểm tra nào, và không có biến môi trường nào xoá nhầm là
+> tắt bảo vệ âm thầm. Nếu về sau lượng đơn rác thành vấn đề thì hạ `EDA_MAX_PER_HOUR`
+> trước đã, rồi mới tính tới CAPTCHA.
 
 `SUPABASE_URL` và `SUPABASE_SERVICE_ROLE_KEY` Supabase tự cấp, không cần khai.
 
