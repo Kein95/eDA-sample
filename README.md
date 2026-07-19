@@ -8,6 +8,8 @@
 > chính thức. Toàn bộ thông tin khoá học, tên giảng viên và số hotline chỉ để minh hoạ
 > giao diện. **Form đăng ký không hoạt động** (Supabase chưa dựng, xem mục 4) — điền vào
 > sẽ báo lỗi chứ không báo thành công giả.
+>
+> Nội dung lấy cảm hứng từ [tài liệu gốc của khoá học](https://drive.google.com/drive/folders/1JlXxhr-m3yKF8m8oZxoSg5hcq77CwNMh).
 
 Bản phác thảo trang tuyển sinh cho khoá **End2End Data Analytics 2026**, kèm backend
 nhận đăng ký và trang quản trị xem danh sách.
