@@ -11,53 +11,31 @@
   <!-- Trang chay o /pathway, /docs... nen moi duong dan tuong doi (assets/, globe.html)
        phai neo ve goc site, khong theo duong dan hien tai -->
   <base href="/">
-  <title>eDA 2026 - End2End Data Analytics · AI VIETNAM | Tuyển sinh</title>
-  <meta name="description" content="Khoá End2End Data Analytics 2026 của AI VIETNAM: 8 module, 9 domain thật, 100 buổi live online (Excel, Power BI, SQL, Agentic AI, pipeline, forecasting). Khai giảng 06.09.2026.">
-  <link rel="canonical" href="https://aivietnam.edu.vn/eda-2026">
+  <!-- QUAN TRONG: day la BAN DEMO Y TUONG, chua thuoc va chua lien ket voi AI VIETNAM.
+       Moi the mo ta duoi day phai noi dung nhu vay. Truoc day trang dat canonical ve
+       aivietnam.edu.vn, og:site_name la "AI VIETNAM" va JSON-LD khai provider la
+       AI VIETNAM - tuc la chu dong bao voi Google rang day la trang chinh thuc cua ho.
+       Neu sau nay du an duoc AI VIETNAM tiep nhan that thi moi doi lai. -->
+  <title>eDA 2026 · Bản demo ý tưởng trang tuyển sinh End2End Data Analytics</title>
+  <meta name="description" content="BẢN DEMO Ý TƯỞNG, chưa thuộc AI VIETNAM. Phác thảo trang tuyển sinh khoá End2End Data Analytics 2026: 8 module, 9 domain thật, 100 buổi live online (Excel, Power BI, SQL, Agentic AI, pipeline, forecasting). Khai giảng 06.09.2026.">
+  <link rel="canonical" href="https://eda.luonvuituoi.work/">
   <link rel="icon" href="assets/logo-mark.png">
   <meta name="theme-color" content="#b68235">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="vi_VN">
-  <meta property="og:site_name" content="AI VIETNAM">
-  <meta property="og:title" content="eDA 2026 - End2End Data Analytics · AI VIETNAM">
-  <meta property="og:description" content="8 module End2End, mỗi module một domain thật, một project thật. Học online buổi tối 8:00–10:30 PM. Khai giảng 06.09.2026.">
-  <meta property="og:url" content="https://aivietnam.edu.vn/eda-2026">
+  <meta property="og:site_name" content="Bản demo ý tưởng - eDA 2026">
+  <meta property="og:title" content="eDA 2026 · Bản demo ý tưởng trang tuyển sinh (chưa thuộc AI VIETNAM)">
+  <meta property="og:description" content="Bản demo ý tưởng, chưa thuộc AI VIETNAM. 8 module End2End, mỗi module một domain thật, một project thật. Học online buổi tối 8:00–10:30 PM. Khai giảng 06.09.2026.">
+  <meta property="og:url" content="https://eda.luonvuituoi.work/">
   <meta property="og:image" content="assets/logo-full.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="eDA 2026 - End2End Data Analytics · AI VIETNAM">
-  <meta name="twitter:description" content="8 module · 9 domain thật · 100 buổi live online. Khai giảng 06.09.2026.">
+  <meta name="twitter:title" content="eDA 2026 · Bản demo ý tưởng (chưa thuộc AI VIETNAM)">
+  <meta name="twitter:description" content="Bản demo ý tưởng, chưa thuộc AI VIETNAM. 8 module · 9 domain thật · 100 buổi live online. Khai giảng 06.09.2026.">
   <meta name="twitter:image" content="assets/logo-full.png">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Course",
-    "name": "End2End Data Analytics 2026 (eDA 2026)",
-    "description": "Khoá End2End Data Analytics 8 module của AI VIETNAM: Excel, Power BI, SQL, Agentic AI, modern analytics stack, data pipeline và forecasting - mỗi module gắn một domain thật và một project thật. Học online buổi tối, khai giảng 06.09.2026.",
-    "provider": {
-      "@type": "Organization",
-      "name": "AI VIETNAM",
-      "sameAs": "https://aivietnam.edu.vn"
-    },
-    "inLanguage": "vi-VN",
-    "educationalLevel": "Intermediate",
-    "educationalCredentialAwarded": "Chứng nhận hoàn thành eDA 2026",
-    "courseCode": "eDA2026",
-    "startDate": "2026-09-06",
-    "endDate": "2027-05-09",
-    "hasCourseInstance": [
-      {
-        "@type": "CourseInstance",
-        "courseMode": "Online",
-        "courseWorkload": "PT100H",
-        "instructor": [
-          { "@type": "Person", "name": "Dr. Quang Vinh" },
-          { "@type": "Person", "name": "Dr. Đình Vinh" }
-        ],
-        "location": { "@type": "Place", "name": "Vietnam (online, Zoom)" }
-      }
-    ]
-  }
-  </script>
+  <!-- Da bo JSON-LD Course: no khai provider la AI VIETNAM va liet ke ten that cua
+       bon giang vien nhu nguoi day mot khoa co ngay khai giang. Google doc du lieu co
+       cau truc nay va hieu la mot khoa hoc co that dang duoc chao ban. Chi dat lai khi
+       du an duoc AI VIETNAM tiep nhan va cac giang vien dong y dung ten. -->
 </helmet>
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -485,6 +463,17 @@
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#17140f"></rect><circle cx="50" cy="50" r="26" fill="none" stroke="#b68235" stroke-width="3"></circle><circle cx="50" cy="50" r="16" fill="none" stroke="#b68235" stroke-width="1.5"></circle><text x="50" y="56" font-family="sans-serif" font-size="15" font-weight="700" fill="#f1e5cf" text-anchor="middle">eDA</text></svg></template>
 <div style="{{ themeVars }};min-height:100vh;background:transparent;color:var(--ink,#211d17);font-family:'Be Vietnam Pro',system-ui,sans-serif">
 
+  <!-- ===== Dai mien tru ===== -->
+  <!-- Dat NGOAI moi khoi sc-if tab, va dat TRUOC masthead, nen hien o ca sau tab va la
+       thu dau tien nguoi doc thay. Mau cung (khong dung var) de dung o ca hai theme.
+       Day khong phai trang tuyen sinh chinh thuc: no co logo, hotline that, ten va anh
+       giang vien that, va mot form dang ky - du de nguoi la tin la that neu khong noi ro. -->
+  <div style="background:#7f1d1d;color:#fff5f5;border-bottom:3px solid #211d17;padding:11px clamp(16px,4vw,56px);font-size:13.5px;line-height:1.55;text-align:center">
+    <strong style="font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:0.02em">BẢN DEMO Ý TƯỞNG</strong>
+    · Đây <strong>không phải</strong> trang tuyển sinh chính thức. Dự án <strong>chưa thuộc và chưa liên kết với AI VIETNAM</strong>.
+    Thông tin khoá học chỉ để minh hoạ, <strong>form đăng ký không hoạt động</strong>.
+  </div>
+
   <!-- ===== Masthead ===== -->
   <div class="glass-nav" style="position:sticky;top:0;z-index:60;">
     <nav style="max-width:1200px;margin:0 auto;padding:12px clamp(16px,4vw,56px);display:flex;align-items:center;gap:10px;flex-wrap:nowrap">
@@ -636,12 +625,12 @@
     <!-- Dai domain: khoi mau dac ngay duoi hero, cat trang thanh hai manh ro rang -->
 <div style="border-top:3px solid var(--ink,#211d17);border-bottom:3px solid var(--ink,#211d17);overflow:hidden;display:flex;padding:15px 0;background:var(--surface,#fffdf9);color:var(--ink,#211d17)" aria-hidden="true">
       <div style="display:flex;align-items:center;gap:34px;padding-right:34px;flex:none;width:max-content;animation:marquee 42s linear infinite">
-        <sc-for list="{{ domains }}" as="d" hint-placeholder-count="9">
+        <sc-for list="{{ domains }}" as="d" hint-placeholder-count="17">
           <span class="domain-chip">{{ d }}</span><span style="width:12px;height:12px;flex:none;background:currentColor;opacity:0.75;-webkit-mask:url('assets/dongson-drum.svg') center/contain no-repeat;mask:url('assets/dongson-drum.svg') center/contain no-repeat"></span>
         </sc-for>
       </div>
       <div style="display:flex;align-items:center;gap:34px;padding-right:34px;flex:none;width:max-content;animation:marquee 42s linear infinite">
-        <sc-for list="{{ domains }}" as="d" hint-placeholder-count="9">
+        <sc-for list="{{ domains }}" as="d" hint-placeholder-count="17">
           <span class="domain-chip">{{ d }}</span><span style="width:12px;height:12px;flex:none;background:currentColor;opacity:0.75;-webkit-mask:url('assets/dongson-drum.svg') center/contain no-repeat;mask:url('assets/dongson-drum.svg') center/contain no-repeat"></span>
         </sc-for>
       </div>
@@ -1682,7 +1671,14 @@ class Component extends DCLogic {
     const r = this.state.recap;
     return {
       tabs,
-      domains: ['Sales', 'Finance', 'Digital Marketing', 'Game', 'EdTech', 'Supply Chain', 'Operations', 'HR', 'Credit Risk'],
+      // Ky nang hoc vien lam duoc sau khoa, khong phai ten nganh. Nguoi doc luot qua
+      // dai nay muon biet "hoc xong biet dung gi", con ten nganh da co bang 10 nganh x
+      // 10 mang phan tich o duoi. Moi tu deu lay tu sheet Module trong data/eDA_v9.xlsx,
+      // theo thu tu hoc: M1 Excel -> M2 Power BI -> M3 SQL -> M4 Agentic AI ->
+      // M5 Snowflake/Fabric -> M6 Python/pipeline -> M7 forecasting/clustering.
+      domains: ['Excel', 'Power Query', 'Power BI', 'SQL', 'BigQuery', 'Data Modeling',
+                'Dashboard', 'Agentic AI', 'Snowflake', 'Microsoft Fabric', 'A/B Testing',
+                'Python', 'Pandas', 'Data Pipeline', 'Forecasting', 'Clustering', 'Anomaly Detection'],
       // Nen sang truoc day de rong nen moi var() roi ve gia tri du phong #f5f2ec (kem am,
       // ngả nâu) khien ca trang mot tong. Dat bien tuong minh o day la doi duoc nen toan trang
       // bang mot chuoi: nen gan trung tinh, the trang han, de mau tung module noi len.

@@ -2,11 +2,15 @@
 
 ### 🔗 Xem trang chạy thật: **https://eda.luonvuituoi.work**
 
-> Đây là **bản xem thử**. Form đăng ký chưa lưu được vì Supabase chưa dựng (xem mục 4),
-> điền vào sẽ báo lỗi chứ không báo thành công giả.
+> ### ⚠️ Đây là bản demo ý tưởng
+>
+> Dự án **chưa thuộc và chưa liên kết với AI VIETNAM**. Đây không phải trang tuyển sinh
+> chính thức. Toàn bộ thông tin khoá học, tên giảng viên và số hotline chỉ để minh hoạ
+> giao diện. **Form đăng ký không hoạt động** (Supabase chưa dựng, xem mục 4) — điền vào
+> sẽ báo lỗi chứ không báo thành công giả.
 
-Trang tuyển sinh khoá **End2End Data Analytics 2026** của AI VIETNAM, kèm backend nhận
-đăng ký và trang quản trị xem danh sách.
+Bản phác thảo trang tuyển sinh cho khoá **End2End Data Analytics 2026**, kèm backend
+nhận đăng ký và trang quản trị xem danh sách.
 
 Khai giảng 06.09.2026, kết thúc 05.2027. 8 module, 9 domain, 100 buổi live online.
 
