@@ -26,3 +26,6 @@ __pycache__/
 
 # Cache cua wrangler - chua account id va email, khong dua len repo public.
 .wrangler/
+
+# Thu muc xuat ban, sinh boi scripts/dung-thu-muc-xuat-ban.mjs
+.xuat-ban/

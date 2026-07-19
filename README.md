@@ -1,5 +1,10 @@
 # eDA 2026 · Trang tuyển sinh End2End Data Analytics
 
+### 🔗 Xem trang chạy thật: **https://eda.luonvuituoi.work**
+
+> Đây là **bản xem thử**. Form đăng ký chưa lưu được vì Supabase chưa dựng (xem mục 4),
+> điền vào sẽ báo lỗi chứ không báo thành công giả.
+
 Trang tuyển sinh khoá **End2End Data Analytics 2026** của AI VIETNAM, kèm backend nhận
 đăng ký và trang quản trị xem danh sách.
 
@@ -183,9 +188,28 @@ thì đăng nhập vẫn được nhưng bảng trống trơn.
 |---|---|
 | nginx | `try_files $uri /TuyenSinh-eDA2026.dc.html;` |
 | Vercel | `vercel.json`: `{"rewrites":[{"source":"/(.*)","destination":"/TuyenSinh-eDA2026.dc.html"}]}` |
-| Netlify / Cloudflare Pages | `_redirects`: `/*  /TuyenSinh-eDA2026.dc.html  200` |
+| Cloudflare Pages | file `_redirects`, xem sẵn trong repo |
 
 Thiếu bước này thì bấm tab vẫn chạy, nhưng F5 hoặc mở link chia sẻ sẽ 404.
+
+### Riêng Cloudflare Pages (bản đang chạy)
+
+```bash
+node scripts/dung-thu-muc-xuat-ban.mjs
+npx wrangler pages deploy .xuat-ban --project-name eda --branch master
+```
+
+**Phải deploy từ `.xuat-ban`, đừng deploy từ thư mục gốc.** `wrangler pages deploy`
+không đọc `.gitignore` (cũng không đọc `.assetsignore`), nên deploy từ gốc là
+`data/eDA_v9.xlsx`, toàn bộ migration SQL và tài liệu PDF đều thành URL công khai.
+Script trên chép ra đúng 17 file trang thật sự cần, khoảng 1.1MB.
+
+Hai điểm khác nginx, đã ghi trong `_redirects`:
+
+- Pages **tự cắt đuôi `.html`**, nên đích phải là `/TuyenSinh-eDA2026.dc` không kèm
+  `.html`, nếu không Pages trả 308 và mọi tab bị dồn về một địa chỉ.
+- **Đừng dùng luật `/*`.** Trên Pages nó nuốt cả file có thật, `support.js` và ảnh đều
+  bị trả về HTML nên trang không nạp được runtime. Phải liệt kê từng đường dẫn tab.
 
 Hai chỗ dễ vấp: **đừng thêm `$uri/` vào `try_files`** (repo có thư mục `docs/` trùng tên
 slug `/docs`), và trang đang đặt `<base href="/">` nên **phải deploy ở gốc tên miền**.
