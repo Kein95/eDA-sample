@@ -89,7 +89,28 @@ test('admin.html co CSP chan script la', () => {
   const s = doc('admin.html');
   assert.ok(/Content-Security-Policy/.test(s), 'thieu CSP');
   assert.ok(/default-src 'none'/.test(s), 'CSP khong mac dinh chan');
-  assert.ok(/frame-ancestors 'none'/.test(s), 'thieu frame-ancestors, co the bi nhung de clickjack');
+});
+
+test('frame-ancestors nam o HTTP header, khong nam trong the meta', () => {
+  // Trinh duyet BO QUA frame-ancestors khi CSP den tu <meta>, chi nhan tu HTTP header.
+  // Dat trong meta la co cam giac duoc bao ve ma thuc te khong.
+  // Chi xet NOI DUNG the meta CSP, khong xet ca file: chu "frame-ancestors" con
+  // xuat hien trong comment giai thich vi sao no khong nam o day.
+  const meta = doc('admin.html').match(/<meta http-equiv="Content-Security-Policy" content="([^"]*)"/s);
+  assert.ok(meta, 'khong tim thay the meta CSP');
+  assert.equal(/frame-ancestors/.test(meta[1]), false,
+    'frame-ancestors dat trong the meta se bi bo qua, phai dua sang _headers');
+  const h = doc('_headers');
+  assert.ok(/frame-ancestors 'none'/.test(h), '_headers thieu frame-ancestors');
+  assert.ok(/X-Frame-Options: DENY/.test(h), '_headers thieu X-Frame-Options cho trinh duyet cu');
+  assert.ok(/^\/admin$/m.test(h) && /^\/admin\.html$/m.test(h),
+    'phai phu ca /admin lan /admin.html: Pages cat duoi .html nen ton tai ca hai duong dan');
+});
+
+test('trang quan tri bao ro khi chua noi backend', () => {
+  const s = doc('admin.html');
+  assert.ok(/CHUA_CAU_HINH/.test(s), 'khong kiem tra placeholder truoc khi goi mang');
+  assert.ok(/AbortSignal\.timeout/.test(s), 'fetch khong co thoi han, nut co the treo mai');
 });
 
 // ── 5. RLS: bang dang ky khong duoc mo cho anon ────────────────────────────

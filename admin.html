@@ -17,8 +17,11 @@
   img-src 'self' data:;
   connect-src https://REPLACE-ME.supabase.co wss://REPLACE-ME.supabase.co;
   form-action 'none';
-  base-uri 'none';
-  frame-ancestors 'none'">
+  base-uri 'none'">
+<!-- frame-ancestors KHONG dat duoc o day: trinh duyet bo qua chi thi nay khi CSP den
+     tu the <meta>, chi nhan khi den tu HTTP header. Da chuyen sang file _headers
+     (Cloudflare Pages). Neu doi sang host khac thi phai tu cau hinh header tuong duong,
+     neu khong trang quan tri co the bi nhung vao iframe de lua bam. -->
 <title>eDA 2026 · Quản trị đăng ký</title>
 <link rel="icon" href="assets/logo-mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -141,12 +144,26 @@ function fmtTime(iso) {
   return `${p(d.getDate())}/${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
+// Chua dien SUPABASE_URL/ANON_KEY thi noi thang. Truoc day bam Dang nhap se goi ra
+// https://REPLACE-ME.supabase.co roi treo im: nut mo, khong bao loi, khong bao thanh
+// cong - nguoi dung khong biet chuyen gi dang xay ra.
+const CHUA_CAU_HINH = SUPABASE_URL.includes('REPLACE-ME') || SUPABASE_ANON_KEY.includes('REPLACE-ME');
+
 async function login() {
   hideErr($('loginErr'));
+  if (CHUA_CAU_HINH) {
+    return showErr($('loginErr'),
+      'Chưa nối backend nên chưa đăng nhập được. Cần tạo project Supabase rồi điền '
+      + 'SUPABASE_URL, SUPABASE_ANON_KEY và hai URL trong thẻ CSP ở đầu admin.html. '
+      + 'Xem mục 4 trong README.');
+  }
   $('go').disabled = true;
   try {
+    // Bo cuoc sau 15 giay thay vi cho vo han: mang hong hoac URL sai thi fetch co the
+    // treo rat lau, nut khoa cung o trang thai vo hieu.
     const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: 'POST',
+      signal: AbortSignal.timeout(15000),
       headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: $('em').value.trim(), password: $('pw').value })
     });
@@ -156,7 +173,10 @@ async function login() {
     $('pw').value = '';
     await load();
   } catch (e) {
-    showErr($('loginErr'), e.message);
+    // TimeoutError/AbortError khong co message de hieu, doi thanh cau nguoi doc hieu duoc.
+    showErr($('loginErr'), e.name === 'TimeoutError' || e.name === 'AbortError'
+      ? 'Máy chủ không phản hồi sau 15 giây. Kiểm tra mạng và SUPABASE_URL.'
+      : (e.message || 'Không gọi được máy chủ. Kiểm tra mạng và SUPABASE_URL.'));
   } finally {
     $('go').disabled = false;
   }

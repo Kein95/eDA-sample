@@ -22,6 +22,7 @@ const FILE = [
   'image-slot.js',               // web component khung anh
   'globe.html',                  // nhung bang iframe
   '_redirects',                  // dinh tuyen tab tren Pages
+  '_headers',                    // frame-ancestors cho /admin (the meta khong an)
   'assets/logo-full.png',
   'assets/logo-mark.png',
   'assets/dongson-drum.svg',

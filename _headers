@@ -1,0 +1,23 @@
+# HTTP header cho Cloudflare Pages.
+#
+# frame-ancestors chi co hieu luc khi den tu HTTP header - dat trong the <meta> thi
+# trinh duyet bo qua (co canh bao trong console). Vi vay phan chong nhung iframe phai
+# nam o day, khong nam trong admin.html.
+#
+# Doi sang host khac (Vercel, Netlify, nginx) thi phai cau hinh header tuong duong,
+# file nay chi Pages doc.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Trang quan tri: khong cho nhung vao iframe o bat ky dau, tranh bi phu giao dien gia
+# len tren de lua nguoi phu trach bam (clickjacking). X-Frame-Options de phong trinh
+# duyet cu chua hieu frame-ancestors.
+/admin
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY
+
+/admin.html
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY

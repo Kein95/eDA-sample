@@ -1,6 +1,13 @@
 # eDA 2026 · Trang tuyển sinh End2End Data Analytics
 
-### 🔗 Xem trang chạy thật: **https://eda.luonvuituoi.work**
+### 🔗 Xem trang chạy thật
+
+| | |
+|---|---|
+| Trang tuyển sinh | **https://eda.luonvuituoi.work** |
+| Trang quản trị | **https://eda.luonvuituoi.work/admin** |
+
+*(Cloudflare Pages cắt đuôi `.html`, nên `/admin.html` sẽ bị chuyển hướng sang `/admin`.)*
 
 > ### ⚠️ Đây là bản demo ý tưởng
 >
@@ -243,6 +250,18 @@ Chạy kiểm tra:
 ```bash
 node scripts/test-bao-mat.mjs
 ```
+
+### Trước khi nối Supabase thật, phải làm
+
+Bản demo đang **công khai link tới trang quản trị** (dải miễn trừ ở đỉnh trang, và
+`admin.html` nằm trong danh sách xuất bản). Hiện vô hại vì chưa có backend, và thứ chặn
+dữ liệu là RLS chứ không phải giấu URL.
+
+Nhưng khi bảng `eda_registration` đã có dữ liệu thật, quảng cáo công khai màn đăng nhập
+quản trị là mời người ta dò mật khẩu. Lúc đó gỡ **hai chỗ**:
+
+1. Link `/admin` trong dải miễn trừ ở `TuyenSinh-eDA2026.dc.html`
+2. `'admin.html'` trong mảng `FILE` của `scripts/dung-thu-muc-xuat-ban.mjs`
 
 ### Việc còn phải làm
 
