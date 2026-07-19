@@ -1,0 +1,19 @@
+# Cloudflare Pages: moi tab la mot duong dan that nhung ca trang chi co mot file.
+# Cac dong duoi tra file do cho dung 6 duong dan tab, de F5 tai /pathway khong ra 404.
+#
+# CO Y liet ke tung duong dan thay vi dung "/*":
+# Tren Pages, luat "/*  ...  200" nuot ca file co that - /support.js, /assets/*.png
+# deu bi tra ve trang HTML thay vi noi dung that, va trang chet vi khong nap duoc
+# runtime. (Khac nginx trong docker/nginx-eda.conf: o do try_files thu file truoc.)
+#
+# Dich KHONG co ".html": Pages tu cat duoi .html cua trang HTML, nen file
+# TuyenSinh-eDA2026.dc.html duoc phuc vu tai /TuyenSinh-eDA2026.dc. Ghi kem ".html"
+# thi Pages tra 308 doi sang ban khong duoi va moi tab bi day ve mot dia chi.
+#
+# Them tab moi thi phai them mot dong o day, khop voi TAB_SLUGS trong trang.
+/             /TuyenSinh-eDA2026.dc    200
+/pathway      /TuyenSinh-eDA2026.dc    200
+/early        /TuyenSinh-eDA2026.dc    200
+/docs         /TuyenSinh-eDA2026.dc    200
+/mentors      /TuyenSinh-eDA2026.dc    200
+/register     /TuyenSinh-eDA2026.dc    200

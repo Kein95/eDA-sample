@@ -23,3 +23,6 @@ __pycache__/
 
 # File rong tao nham boi mot lenh shell dut giua chung, khong phai noi dung du an.
 Đăng
+
+# Cache cua wrangler - chua account id va email, khong dua len repo public.
+.wrangler/
