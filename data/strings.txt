@@ -1,0 +1,175 @@
+
+===== eDA_v9 shared strings (154) =====
+0: Thứ 4
+1: Thứ 6
+2: Chủ Nhật
+3: THỜI GIAN
+4: STT
+5: Thứ
+6: Ngày
+7: CÔNG VIỆC
+8: Exam
+9: 8:00 PM - 10:30 PM
+10: Exercise
+11: Data Cleaning Using Excel
+12: Data Modeling (Data Analysis Expressions)
+13: Thống kê cơ bản; Trực quan hoá dữ liệu với Excel
+14: Data Aggregation and Calculation Using SQL
+15: Exercise 
+16: Introduction to Python
+17: Hiểu về dữ liệu bảng và các cách lưu trữ
+18: Data Cleaning Using SQL
+19: Data Retrieval Using Excel (Power Query)
+20: Explain Insights Using Advanced Statistics (A/B testing)
+21: Data validation using Pydantic
+22: Basic Python for DA
+23:                                                                                                    Final Exam
+24: Final Exam - Part 2: Advanced DA 
+25:     Final Exam - Part 1: SQL & Power BI
+26: Customer segmentation Using K-Means
+27: Module 1: Foundation of Data Analysis (Basic Data Analysis Using Excel; Domain: Sales Analytics)
+28: Lớp luyện thi chứng chỉ Power BI (PL 300) - Sẽ xếp lịch cụ thể sau
+29: Giới thiệu Power BI
+(Data from Excel and CSV)
+30: Giới thiệu về Cơ sở dữ liệu và BigQuery
+Kết nối Power BI với BigQuery
+31: Data Transformation Using SQL
+(Window Function & CTE)
+32: Data source (noise) -> [Bronze Layer] -> Pydantic -> [Layer Silver]-> SQL cleaning/transformation -> [Layer Gold] -> DA (Power BI Query/Cleaning&transformer)
+33: Power Query Using Power BI
+34:  Data Modeling in Power BI
+35: DAX in Power BI
+36: Data Retrieval
+37: Query Optimization in SQL
+38: Sales Forecasting Using Linear Regression
+39: Data Relationship and Data Modeling (Pivot Tables)
+40: Seminar: DA in Sales; Common Concepts
+41: Soft Skill: Problem Framing in DA
+42: Seminar: DA in Finance; Common Concepts
+43: Soft Skill: Working with Stakeholder
+44: Seminar: DA in Operations Analytics
+45: Data Transformation Using DBT (SQL)
+46: Implementing Data Pipeline
+47: Project: Credit Risk Analytics and Recommendation System
+48: Buổi 1: Data Preparation and Modeling
+49: Buổi 2: Visualization and Analysis
+50: Buổi 3: Management and Security
+51: Buổi 4: Test Strategy and Practice
+52: Buổi 5: Mock Test
+53: Buổi 1: Cloud Concepts
+54: Buổi 2: Global Infrastructure
+55: Buổi 3: Compute & Serverless
+56: Buổi 4: Storage
+57: Buổi 5: Database & Integration
+58: Buổi 6: Networking & Delivery
+59: Buổi 7: Security & Compliance
+60: Buổi 8: Pricing & Billing
+61: Buổi 10: Project ứng dụng
+62: Lớp luyện thi chứng chỉ AWS Certified Cloud Practitioner - Sẽ xếp lịch cụ thể sau
+63: Buổi 9: Mock Test
+64: Seminar: DA in Supply Chain; Common Concepts
+65: Soft Skill: Analysis and business mindset
+66: Project: E2E Data Analytics Using Modern Approach
+67: Soft Skill: Presentation and Teamwork Skills for DA
+68: HR
+69: Đặt tên các project
+70: Industry\Domain
+71: Sales
+Analytics
+72: Marketing
+Analytics
+73: Customer
+Analytics
+74: Product
+Analytics
+75: Finance
+Analytics
+76: Risk
+Analytics
+77: Operations
+Analytics
+78: Supply Chain
+Analytics
+79: HR/People
+Analytics
+80: Growth
+Analytics
+81: Banking
+82: 🟡
+83: 🔴
+84: ➖
+85: ⚪
+86: Fintech
+87: E-commerce
+88: Manufacturing
+89: Telecom
+90: FMCG
+91: Retail Chain
+92: Logistics/3PL
+93: Healthcare
+94: Insurance
+95: 🔴 CORE
+96: Mission-critical (dedicated teams, heavy budget)
+97: 🟡 RELEVANT
+98: Có làm nhưng không core
+99: ⚪ MINIMAL
+100: Function tồn tại nhưng ít DA focus
+101: ➖ RARE
+102: Industry này ít cần
+103: Game
+104: Digital Omnichannel Marketing Project: 
+Understanding Digital Omnichannel Marketing Analytics
+105: Project: Excel Data Analytics for Sales Domain
+106: Project 2.2: Data Analytics for Finance Domain
+107: M1
+108: Sales
+109: M2
+110: Finance
+111: M3
+112: Digital Marketing
+113: M4
+114: M5
+115: EdTech
+116: Omnichannel Marketing
+117: Supply Chain
+118: M6
+119: Operations
+120: Agentic AI for Data Analytics Process
+121: Project: Advanced Power BI+SQL for [Domain Marketing]
+122: Module 2: Data Query and Bussiness Intelligence (Power BI; Domain: Finance)
+123: Agentic AI in Excel for Game Analytics (EDA)
+124: Agentic AI in Excel for Game Analytics (end2end)
+125: Module 5: Modern Analytics Ecosystem (Domain: Supply Chain)
+126: Explain Insights Using Advanced Statistics 
+(confident interval, p-value)
+127: Introduction to SQL (BigQuery)
+128: Module 3: Advanced Power BI&SQL (Domain: Digital Marketing)
+129: Module 6: Data Pipeline & Automation (Understanding Data Pipeline; Domain: Operations Analytics)
+130: Data Retrieval from Snowflake
+131: Data Retrieval from Microsoft Fabric
+132: Decision Tree for Classification
+133: Game Project: Understanding Game Data Analytics
+(domain discussion, bussiness objectives, and data)
+134: Seminar: DA in Marketing; Common Concepts
+135:                     Module 4: Agentic AI for Data Analytics in Different Domains
+136: EdTech Project: Understanding EdTech Analytics
+137: Agentic AI in Power BI for EdTech Analytics (EDA&Dashboard)
+138: Agentic AI in Power BI for EdTech Analytics (end2end)
+139: Agentic AI for Data Retrieval and Transformation (SQL)
+140: HR Project: Understanding HR Analytics
+141: Introduction to Tableau
+142: Introduction to Looker
+143: Claude/Copilot for HR Analytics
+144: Harness Engineering for HR Analytics
+145: Soft Skill: Logical Thinking and Problem Solving for DA
+146: Pandas and Plotly for EDA
+147: Project: Data Pipeline + Automatic EDA
+148: Basic Linear Algebra for DA
+149: Dashboard Using Power BI; Power BI Optimization
+150: Soft Skill: Visualization Principles and Storytelling
+151: Module 7: Extension to Forecasting, Clustering, and Anomaly Detection
+152: Anomaly Detection for Credit Risk Using KNN
+153: Random Forest for Classification and Anomaly Detection
+
+===== warmup shared strings (0) =====
+

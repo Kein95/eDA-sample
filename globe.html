@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eDA 2026 — Học viên toàn cầu</title>
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; background: transparent; height: 100%; }
+  #wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  canvas { display: block; width: 100%; height: auto; max-height: 100%; }
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="globe"></canvas></div>
+<script>
+(async () => {
+  const dark = new URLSearchParams(location.search).get('theme') === 'dark';
+  const GOLD = '#b68235';
+  const C = dark ? {
+    sphereStroke: 'rgba(240,236,227,0.3)', graticule: 'rgba(240,236,227,0.08)',
+    land: 'rgba(182,130,53,0.16)', landStroke: 'rgba(240,236,227,0.35)',
+    vn: GOLD, arc: 'rgba(217,168,96,0.55)', dot: '#d9a860', halo: 'rgba(217,168,96,0.25)'
+  } : {
+    sphereStroke: 'rgba(33,29,23,0.3)', graticule: 'rgba(33,29,23,0.07)',
+    land: 'rgba(182,130,53,0.14)', landStroke: 'rgba(33,29,23,0.4)',
+    vn: GOLD, arc: 'rgba(138,98,40,0.5)', dot: '#8a6228', halo: 'rgba(182,130,53,0.25)'
+  };
+  const size = 560, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const canvas = document.getElementById('globe');
+  canvas.width = size * dpr; canvas.height = size * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const topo = await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')).json();
+  const countries = topojson.feature(topo, topo.objects.countries);
+  const vn = countries.features.find(f => f.id === '704');
+  const proj = d3.geoOrthographic().fitExtent([[14, 14], [size - 14, size - 14]], { type: 'Sphere' }).clipAngle(90);
+  const path = d3.geoPath(proj, ctx);
+  const graticule = d3.geoGraticule10();
+  // Diem xuat phat cua moi cung bay: Ninh Thuan (Phan Rang - Thap Cham).
+  const NT = [108.99, 11.56], HN = [105.85, 21.03], HCM = [106.70, 10.78];
+  // Quần đảo Hoàng Sa & Trường Sa — thuộc chủ quyền Việt Nam (110m atlas không vẽ đảo nhỏ nên tự vẽ)
+  const hoangSa = [[111.6, 16.8], [112.3, 16.4], [112.8, 16.05]];
+  const truongSa = [[113.8, 10.2], [114.4, 9.7], [115.1, 10.05], [114.0, 8.85]];
+  const islands = { type: 'MultiPoint', coordinates: [...hoangSa, ...truongSa] };
+  const islandLabels = [
+    { name: 'QĐ. Hoàng Sa', at: [112.2, 16.4], dy: -10 },
+    { name: 'QĐ. Trường Sa', at: [114.4, 9.7], dy: 14 }
+  ];
+  const abroad = [
+    // Châu Á
+    [126.98, 37.57], [139.69, 35.68], [103.82, 1.35], [114.06, 22.54],
+    [100.50, 13.76], [121.47, 31.23], [77.21, 28.61], [72.88, 19.08],
+    [55.27, 25.20], [35.23, 31.77],
+    // Châu Âu
+    [2.35, 48.86], [13.40, 52.52], [-0.13, 51.51], [4.90, 52.37],
+    [18.06, 59.33], [21.01, 52.23], [37.62, 55.75],
+    // Châu Mỹ
+    [-74.01, 40.71], [-122.42, 37.77], [-79.38, 43.65], [-123.12, 49.28],
+    [-99.13, 19.43], [-46.63, -23.55], [-58.38, -34.60], [-70.67, -33.45],
+    // Châu Phi
+    [31.24, 30.04], [36.82, -1.29], [28.05, -26.20], [-17.45, 14.69],
+    // Châu Đại Dương
+    [151.21, -33.87], [144.96, -37.81], [174.76, -36.85]
+  ];
+  const arcs = { type: 'MultiLineString', coordinates: abroad.map(p => [NT, p]) };
+  const dots = { type: 'MultiPoint', coordinates: [NT, HN, HCM, ...abroad] };
+  let t0 = Date.now();
+  const baseRotate = [-100, -18]; // hướng ban đầu nhìn vào Đông Nam Á
+  d3.timer(() => {
+    const dt = (Date.now() - t0) / 1000;
+    proj.rotate([baseRotate[0] + dt * 5, baseRotate[1]]);
+    ctx.clearRect(0, 0, size, size);
+    // sphere
+    ctx.beginPath(); path({ type: 'Sphere' }); ctx.strokeStyle = C.sphereStroke; ctx.lineWidth = 1.2; ctx.stroke();
+    // graticule
+    ctx.beginPath(); path(graticule); ctx.strokeStyle = C.graticule; ctx.lineWidth = 0.7; ctx.stroke();
+    // land
+    ctx.beginPath(); path(countries); ctx.fillStyle = C.land; ctx.fill();
+    ctx.beginPath(); path(countries); ctx.strokeStyle = C.landStroke; ctx.lineWidth = 0.6; ctx.stroke();
+    // Vietnam highlight + Hoàng Sa, Trường Sa
+    if (vn) { ctx.beginPath(); path(vn); ctx.fillStyle = C.vn; ctx.fill(); }
+    ctx.beginPath(); path.pointRadius(1.7)(islands); ctx.fillStyle = C.vn; ctx.fill();
+    const center = [-proj.rotate()[0], -proj.rotate()[1]];
+    ctx.font = "600 10.5px 'Be Vietnam Pro', system-ui, sans-serif";
+    ctx.textAlign = 'left';
+    for (const l of islandLabels) {
+      if (d3.geoDistance(l.at, center) < 1.45) {
+        const p = proj(l.at);
+        if (p) { ctx.fillStyle = C.dot; ctx.fillText(l.name, p[0] + 7, p[1] + l.dy); }
+      }
+    }
+    // arcs
+    ctx.beginPath(); path(arcs); ctx.strokeStyle = C.arc; ctx.lineWidth = 1; ctx.stroke();
+    // dots (clipAngle ẩn mặt sau)
+    ctx.beginPath(); path.pointRadius(5.5)(dots); ctx.fillStyle = C.halo; ctx.fill();
+    ctx.beginPath(); path.pointRadius(2.6)(dots); ctx.fillStyle = C.dot; ctx.fill();
+  });
+})();
+</script>
+</body>
+</html>

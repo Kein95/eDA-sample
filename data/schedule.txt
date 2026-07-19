@@ -1,0 +1,222 @@
+WARMUP SHEETS: <sheet state="visible" name="copy" sheetId="1" r:id="rId4"/> <sheet state="visible" name="Warmup" sheetId="2" r:id="rId5"/> <sheet state="visible" name="Sheet1" sheetId="3" r:id="rId6"/>
+
+--- warmup xl/worksheets/sheet1.xml (11 rows) ---
+1 | A:Warm-up Class (Python&SQL) - HỌC LIVE ZOOM
+2 | A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN ; F:ĐẢM NHẬN
+3 | A:1.0 ; B:Thứ 4 ; C:05/08/2026 ; D:Giới thiệu Python
+(Variables and Basic Operators; Functions) ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+4 | A:2.0 ; B:Chủ Nhật ; C:09/08/2026 ; D:Branches (if-else), String, and FOR loop ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+5 | A:3.0 ; B:Thứ 4 ; C:12/08/2026 ; D:List in Python ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+6 | A:4.0 ; B:Chủ Nhật ; C:16/08/2026 ; D:Data Visualization Using Pandas ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+7 | A:5.0 ; B:Thứ 4 ; C:19/08/2026 ; D:Data Analysis Using Pandas ; E:20:00- 22:00 ; F:Dr. Đình Vinh
+8 | A:6.0 ; B:Chủ Nhật ; C:23/08/2026 ; D:Giới thiệu cơ sở dữ liệu và SQL ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+9 | A:7.0 ; B:Thứ 4 ; C:26/08/2026 ; D:Data Retrieval Using SQL ; E:20:00- 22:00 ; F:Dr. Đình Vinh
+10 | A:8.0 ; B:Chủ Nhật ; C:30/08/2026 ; D:Cloud for Data Retrieval (SQL) ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+11 | A:9.0 ; B:Thứ 4 ; C:02/09/2026 ; D:Contructing Dashboard automatically Using Python, Cloud and SQL ; E:20:00- 22:00 ; F:Dr. Đình Vinh
+
+--- warmup xl/worksheets/sheet2.xml (18 rows) ---
+1 | A:Warm-up Class (Math and Programming for AI/DS)
+2 | A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN ; F:ĐẢM NHẬN ; H:Reading
+3 | A:1.0 ; B:Thứ 2 ; C:45950.0 ; D:Variables and Basic Operators
+(Math: Contruct the e number, average and softmax) ; E:20:00- 22:00 ; F:Dr. Quang Vinh ; H:Colab
+4 | A:2.0 ; B:Thứ 5 ; C:45953.0 ; D:Built-in and User-definedFunctions
+(Math: Tính đạo hàm và giới hạn cho hàm số)
+(Math: Tính diện tích hình tròn dùng sin và cos) ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+5 | A:3.0 ; B:Thứ 2 ; C:45957.0 ; D:Branches (if-else), string
+(Math: equation conversion, simple chatbot) ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+6 | A:4.0 ; B:Thứ 5 ; C:45960.0 ; D:(Discussion) Function Selection ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+7 | A:5.0 ; B:Thứ 2 ; C:45964.0 ; D:FOR loop (1)
+(Math: Tính số PI và tính căn, root-n-infinity) ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+8 | A:6.0 ; B:Thứ 5 ; C:45967.0 ; D:FOR loop (2)
+(Math: Ôn đạo hàm và dùng chuỗi Taylor để tính sin(x), cos(x), và e^x) ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+9 | A:7.0 ; B:Thứ 2 ; C:45971.0 ; D:List in Python
+(Math: Tính sum, min, max) ; E:20:00- 22:00 ; F:Dr. Đình Vinh
+10 | A:8.0 ; B:Thứ 5 ; C:45974.0 ; D:Exam&solution ; E:20:00- 22:00 ; F:Dr. Quang Vinh ; H:STA
+11 | A:9.0 ; B:Thứ 2 ; C:45978.0 ; D:Algorithms on List ; E:20:00- 22:00 ; F:Dr. Đình Vinh
+12 | A:10.0 ; B:Thứ 5 ; C:45981.0 ; D:Project: Deployment using Streamlit ; E:20:00- 22:00 ; F:MSc. Quốc Thái
+13 | A:11.0 ; B:Thứ 2 ; C:45985.0 ; D:Vectors & Numpy
+(Math: Vector, distance giữa 2 vector)
+ứng dụng tìm similarity (~KNN) ; E:20:00- 22:00 ; F:Dr. Đình Vinh ; G:48
+14 | A:12.0 ; B:Thứ 5 ; C:45988.0 ; D:Matrices & Numpy
+(Math: matrix, dữ liệu ảnh, BG Subtraction) ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+15 | A:13.0 ; B:Thứ 2 ; C:45992.0 ; D:Phân tích dữ liệu dùng Excel
+(Data & Math) ; E:20:00- 22:00 ; F:Dr. Đình Vinh ; G:48
+16 | A:14.0 ; B:Thứ 5 ; C:45995.0 ; D:Data Visualization & Analysis
+(Using Pandas) ; E:20:00- 22:00 ; F:Dr. Quang Vinh
+17 | A:15.0 ; B:Thứ 2 ; C:45999.0 ; D:Pandas & SQL
+(Data Manipulation) ; E:20:00- 22:00 ; F:Dr. Quang Vinh ; H:STA
+18 | A:16.0 ; B:Thứ 5 ; C:46002.0 ; D:Exam&solution ; E:20:00- 22:00 ; F:Dr. Quang Vinh ; H:STA
+
+--- warmup xl/worksheets/sheet3.xml (9 rows) ---
+5 | A:No. ; B:Task ; C:Mô tả ; D:Tài liệu
+6 | A:1.0 ; B:Bacterial growth; công thức tính số e ; C:Thảo luận và xây dựng công thức mô tả sự phát triển population của bacteria và tính lãi suất
+Mục tiêu giới thiệu cách xây dựng công thức toán cơ bản và cài đặt theo công thức (ko dùng cách tạo hàm, cứ cài theo công thức luôn) ; D:Sách calculus I, trang 97 và 99; 
+và slide
+7 | A:2.0 ; B:Xây dựng công thức cross-entropy ; C:Xây dựng theo cách cảm nhận, mục đích ứng dụng kiến thức hàm log và giới thiệu hàm đánh giá ; D:Slide và video
+8 | A:3.0 ; B:ứng dụng idea của limit để tính diện tích ; C:học cách lập luận để giải bài tính diện tích; ứng dụng sin, cos và cài đặt ; D:Slide, video
+9 | A:4.0 ; B:lý thuyết branches; simple chatbot ; C:Ứng dụng if-else để tạo một chatbot đơn giản; triển khai streamlit để chạy demo minh họa ; D:slide, code
+10 | A:5.0 ; B:Lý thuyết for; PI estimation và square root ; C:Ước lượng số PI dựa vào ngẫu nhiên; ứng dụng for và các hàm built-in
+Tính căn cho một số N (ứng dụng for) ; D:slide, code
+11 | A:6.0 ; B:Gaussian Distribution và 
+central limit theorem ; C:Giới thiệu về Gaussian distribution và CLT; minh họa CLT với 2 ví dụ ; D:slide, code
+12 | A:7.0 ; B:Naive Bayes classifier ; C:Bài tutorial cho NBC ; D:slide, code
+13 | A:8.0 ; B:Histogram và histogram equalization ; C:ứng dụng histogram để cân bằng sáng cho ảnh; ứng dụng kiến thức pdf và cdf
+
+EDA sheet map:
+Domain -> sheet1.xml
+Module 1 -> sheet2.xml
+Module 2 -> sheet3.xml
+Module 3 -> sheet4.xml
+Module 4 -> sheet5.xml
+Module 5 -> sheet6.xml
+Module 6 -> sheet7.xml
+Module 7 -> sheet8.xml
+Module 8 (optional) -> sheet9.xml
+
+=== Module 1 ===
+HDR 1: A:Module 1: Foundation of Data Analysis (Basic Data Analysis Using Excel; Domain: Sales Analytics)
+HDR 2: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+1 | CN 6/9/2026 | Seminar: DA in Sales; Common Concepts | 8:00 PM - 10:30 PM
+2 | Thứ 4 9/9/2026 | Hiểu về dữ liệu bảng và các cách lưu trữ | 8:00 PM - 10:30 PM
+3 | Thứ 6 11/9/2026 | Thống kê cơ bản; Trực quan hoá dữ liệu với Excel | 8:00 PM - 10:30 PM
+4 | CN 13/9/2026 | Exercise  | 8:00 PM - 10:30 PM
+5 | Thứ 4 16/9/2026 | Data Cleaning Using Excel | 8:00 PM - 10:30 PM
+6 | Thứ 6 18/9/2026 | Data Retrieval Using Excel (Power Query) | 8:00 PM - 10:30 PM
+7 | CN 20/9/2026 | Exercise  | 8:00 PM - 10:30 PM
+8 | Thứ 4 23/9/2026 | Data Relationship and Data Modeling (Pivot Tables) | 8:00 PM - 10:30 PM
+9 | Thứ 6 25/9/2026 | Data Modeling (Data Analysis Expressions) | 8:00 PM - 10:30 PM
+10 | CN 27/9/2026 | Exercise  | 8:00 PM - 10:30 PM
+11 | Thứ 4 30/9/2026 | Soft Skill: Problem Framing in DA | 8:00 PM - 10:30 PM
+12 | Thứ 6 2/10/2026 | Project: Excel Data Analytics for Sales Domain | 8:00 PM - 10:30 PM
+13 | CN 4/10/2026 | Exam | 8:00 PM - 10:30 PM
+
+=== Module 2 ===
+HDR 1: A:Module 2: Data Query and Bussiness Intelligence (Power BI; Domain: Finance)
+HDR 2: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+1 | CN 11/10/2026 | Seminar: DA in Finance; Common Concepts | 8:00 PM - 10:30 PM
+2 | Thứ 4 14/10/2026 | Giới thiệu Power BI
+(Data from Excel and CSV) | 8:00 PM - 10:30 PM
+3 | Thứ 6 16/10/2026 | Giới thiệu về Cơ sở dữ liệu và BigQuery
+Kết nối Power BI với BigQuery | 8:00 PM - 10:30 PM
+4 | CN 18/10/2026 | Exercise | 8:00 PM - 10:30 PM
+5 | Thứ 4 21/10/2026 | Power Query Using Power BI | 8:00 PM - 10:30 PM
+6 | Thứ 6 23/10/2026 |  Data Modeling in Power BI | 8:00 PM - 10:30 PM
+7 | CN 25/10/2026 | Exercise | 8:00 PM - 10:30 PM
+8 | Thứ 4 28/10/2026 | DAX in Power BI | 8:00 PM - 10:30 PM
+9 | Thứ 6 30/10/2026 | Dashboard Using Power BI; Power BI Optimization | 8:00 PM - 10:30 PM
+10 | CN 1/11/2026 | Exercise | 8:00 PM - 10:30 PM
+11 | Thứ 4 4/11/2026 | Soft Skill: Visualization Principles and Storytelling | 8:00 PM - 10:30 PM
+12 | Thứ 6 6/11/2026 | Project 2.2: Data Analytics for Finance Domain | 8:00 PM - 10:30 PM
+13 | CN 8/11/2026 | Exam | 8:00 PM - 10:30 PM
+
+=== Module 3 ===
+HDR 1: A:Module 3: Advanced Power BI&SQL (Domain: Digital Marketing)
+HDR 2: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+1 | CN 15/11/2026 | Seminar: DA in Marketing; Common Concepts | 8:00 PM - 10:30 PM
+2 | Thứ 4 18/11/2026 | Introduction to SQL (BigQuery) | 8:00 PM - 10:30 PM
+3 | Thứ 6 20/11/2026 | Data Retrieval | 8:00 PM - 10:30 PM
+4 | CN 22/11/2026 | Exercise | 8:00 PM - 10:30 PM
+5 | Thứ 4 25/11/2026 | Data Aggregation and Calculation Using SQL | 8:00 PM - 10:30 PM
+6 | Thứ 6 27/11/2026 | Data Cleaning Using SQL | 8:00 PM - 10:30 PM
+7 | CN 29/11/2026 | Exercise | 8:00 PM - 10:30 PM
+8 | Thứ 4 2/12/2026 | Data Transformation Using SQL
+(Window Function & CTE) | 8:00 PM - 10:30 PM
+9 | Thứ 6 4/12/2026 | Query Optimization in SQL | 8:00 PM - 10:30 PM
+10 | CN 6/12/2026 | Exercise | 8:00 PM - 10:30 PM
+11 | Thứ 4 9/12/2026 | Soft Skill: Working with Stakeholder | 8:00 PM - 10:30 PM
+12 | Thứ 6 11/12/2026 | Project: Advanced Power BI+SQL for [Domain Marketing] | 8:00 PM - 10:30 PM
+13 | CN 13/12/2026 | Exam | 8:00 PM - 10:30 PM
+HDR 24: A:32
+
+=== Module 4 ===
+HDR 1: A:                    Module 4: Agentic AI for Data Analytics in Different Domains
+HDR 2: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+1 | Thứ 4 16/12/2026 | Game Project: Understanding Game Data Analytics
+(domain discussion, bussiness objectives, and data) | 8:00 PM - 10:30 PM
+2 | Thứ 6 18/12/2026 | Agentic AI in Excel for Game Analytics (EDA) | 8:00 PM - 10:30 PM
+3 | CN 20/12/2026 | Agentic AI in Excel for Game Analytics (end2end) | 8:00 PM - 10:30 PM
+4 | Thứ 4 23/12/2026 | EdTech Project: Understanding EdTech Analytics | 8:00 PM - 10:30 PM
+5 | Thứ 6 25/12/2026 | Agentic AI in Power BI for EdTech Analytics (EDA&Dashboard) | 8:00 PM - 10:30 PM
+6 | CN 27/12/2026 | Agentic AI in Power BI for EdTech Analytics (end2end) | 8:00 PM - 10:30 PM
+7 | Thứ 4 30/12/2026 | Digital Omnichannel Marketing Project: 
+Understanding Digital Omnichannel Marketing Analytics | 8:00 PM - 10:30 PM
+8 | Thứ 6 1/1/2027 | Agentic AI for Data Retrieval and Transformation (SQL) | 8:00 PM - 10:30 PM
+9 | CN 3/1/2027 | Agentic AI for Data Analytics Process | 8:00 PM - 10:30 PM
+10 | Thứ 6 8/1/2027 | HR Project: Understanding HR Analytics | 8:00 PM - 10:30 PM
+11 | CN 10/1/2027 | Claude/Copilot for HR Analytics | 8:00 PM - 10:30 PM
+12 | CN 15/11/2026 | Harness Engineering for HR Analytics | 8:00 PM - 10:30 PM
+
+=== Module 5 ===
+HDR 1: A:Module 5: Modern Analytics Ecosystem (Domain: Supply Chain)
+HDR 2: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+1 | CN 17/1/2027 | Seminar: DA in Supply Chain; Common Concepts | 8:00 PM - 10:30 PM
+2 | Thứ 4 20/1/2027 | Data Retrieval from Snowflake | 8:00 PM - 10:30 PM
+3 | Thứ 6 22/1/2027 | Data Retrieval from Microsoft Fabric | 8:00 PM - 10:30 PM
+4 | CN 24/1/2027 | Exercise | 8:00 PM - 10:30 PM
+5 | Thứ 4 27/1/2027 | Explain Insights Using Advanced Statistics 
+(confident interval, p-value) | 8:00 PM - 10:30 PM
+6 | Thứ 6 29/1/2027 | Explain Insights Using Advanced Statistics (A/B testing) | 8:00 PM - 10:30 PM
+7 | CN 31/1/2027 | Exercise | 8:00 PM - 10:30 PM
+8 | Thứ 4 10/2/2027 | Introduction to Tableau | 8:00 PM - 10:30 PM
+9 | Thứ 6 12/2/2027 | Introduction to Looker | 8:00 PM - 10:30 PM
+10 | CN 14/2/2027 | Exercise | 8:00 PM - 10:30 PM
+11 | Thứ 4 17/2/2027 | Soft Skill: Analysis and business mindset | 8:00 PM - 10:30 PM
+12 | Thứ 6 19/2/2027 | Project: E2E Data Analytics Using Modern Approach | 8:00 PM - 10:30 PM
+13 | CN 21/2/2027 | Exam | 8:00 PM - 10:30 PM
+
+=== Module 6 ===
+HDR 1: A:Module 6: Data Pipeline & Automation (Understanding Data Pipeline; Domain: Operations Analytics)
+HDR 2: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+1 | CN 28/2/2027 | Seminar: DA in Operations Analytics | 8:00 PM - 10:30 PM
+2 | Thứ 4 3/3/2027 | Introduction to Python | 8:00 PM - 10:30 PM
+3 | Thứ 6 5/3/2027 | Basic Python for DA | 8:00 PM - 10:30 PM
+4 | CN 7/3/2027 | Exercise | 8:00 PM - 10:30 PM
+5 | Thứ 4 10/3/2027 | Pandas and Plotly for EDA | 8:00 PM - 10:30 PM
+6 | Thứ 6 12/3/2027 | Data validation using Pydantic | 8:00 PM - 10:30 PM
+7 | CN 14/3/2027 | Exercise | 8:00 PM - 10:30 PM
+8 | Thứ 4 17/3/2027 | Data Transformation Using DBT (SQL) | 8:00 PM - 10:30 PM
+9 | Thứ 6 19/3/2027 | Implementing Data Pipeline | 8:00 PM - 10:30 PM
+10 | CN 21/3/2027 | Exercise  | 8:00 PM - 10:30 PM
+11 | Thứ 4 24/3/2027 | Soft Skill: Logical Thinking and Problem Solving for DA | 8:00 PM - 10:30 PM
+12 | Thứ 6 26/3/2027 | Project: Data Pipeline + Automatic EDA | 8:00 PM - 10:30 PM
+13 | CN 28/3/2027 | Exam | 8:00 PM - 10:30 PM
+
+=== Module 7 ===
+HDR 1: A:Module 7: Extension to Forecasting, Clustering, and Anomaly Detection
+HDR 2: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+1 | Thứ 4 31/3/2027 | Basic Linear Algebra for DA | 8:00 PM - 10:30 PM
+2 | Thứ 6 2/4/2027 | Customer segmentation Using K-Means | 8:00 PM - 10:30 PM
+3 | CN 4/4/2027 | Exercise | 8:00 PM - 10:30 PM
+4 | Thứ 4 7/4/2027 | Anomaly Detection for Credit Risk Using KNN | 8:00 PM - 10:30 PM
+5 | Thứ 6 9/4/2027 | Sales Forecasting Using Linear Regression | 8:00 PM - 10:30 PM
+6 | CN 11/4/2027 | Exercise | 8:00 PM - 10:30 PM
+7 | Thứ 4 14/4/2027 | Decision Tree for Classification | 8:00 PM - 10:30 PM
+8 | Thứ 6 16/4/2027 | Random Forest for Classification and Anomaly Detection | 8:00 PM - 10:30 PM
+9 | CN 18/4/2027 | Exercise  | 8:00 PM - 10:30 PM
+10 | Thứ 4 21/4/2027 | Soft Skill: Presentation and Teamwork Skills for DA | 8:00 PM - 10:30 PM
+11 | Thứ 6 23/4/2027 | Project: Credit Risk Analytics and Recommendation System | 8:00 PM - 10:30 PM
+12 | CN 25/4/2027 | Exam | 8:00 PM - 10:30 PM
+HDR 16: A:                                                                                                   Final Exam
+1 | CN 2/5/2027 |     Final Exam - Part 1: SQL & Power BI | 8:00 PM - 10:30 PM
+2 | CN 9/5/2027 | Final Exam - Part 2: Advanced DA  | 8:00 PM - 10:30 PM
+
+=== Module 8 (optional) ===
+HDR 1: A:Lớp luyện thi chứng chỉ Power BI (PL 300) - Sẽ xếp lịch cụ thể sau
+HDR 2: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+HDR 3: A:1 ; B:48 ; E:8:00 PM - 10:30 PM
+HDR 4: A:2 ; B:49 ; E:8:00 PM - 10:30 PM
+HDR 5: A:3 ; B:50 ; E:8:00 PM - 10:30 PM
+HDR 6: A:4 ; B:51 ; E:8:00 PM - 10:30 PM
+HDR 7: A:5 ; B:52 ; E:8:00 PM - 10:30 PM
+HDR 9: A:Lớp luyện thi chứng chỉ AWS Certified Cloud Practitioner - Sẽ xếp lịch cụ thể sau
+HDR 10: A:STT ; B:Thứ ; C:Ngày ; D:CÔNG VIỆC ; E:THỜI GIAN
+HDR 11: A:1 ; B:53 ; E:8:00 PM - 10:30 PM
+HDR 12: A:2 ; B:54 ; E:8:00 PM - 10:30 PM
+HDR 13: A:3 ; B:55 ; E:8:00 PM - 10:30 PM
+HDR 14: A:4 ; B:56 ; E:8:00 PM - 10:30 PM
+HDR 15: A:5 ; B:57 ; E:8:00 PM - 10:30 PM
+HDR 16: A:6 ; B:58 ; E:8:00 PM - 10:30 PM
+HDR 17: A:7 ; B:59 ; E:8:00 PM - 10:30 PM
+HDR 18: A:8 ; B:60 ; E:8:00 PM - 10:30 PM
+HDR 19: A:9 ; B:63 ; E:8:00 PM - 10:30 PM
+HDR 20: A:10 ; B:61 ; E:8:00 PM - 10:30 PM

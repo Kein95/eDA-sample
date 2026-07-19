@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eDA 2026 — Học viên khắp Việt Nam</title>
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; background: transparent; }
+  #wrap { width: 100%; }
+  svg { display: block; width: 100%; height: auto; }
+  .city-label { font: 600 11px 'Be Vietnam Pro', system-ui, sans-serif; fill: rgba(33,29,23,0.72); letter-spacing: 0.04em; }
+  body[data-theme="dark"] .city-label { fill: rgba(240,236,227,0.78); }
+  .pulse { animation: pulse 2.4s ease-out infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes pulse { 0% { opacity: 0.55; transform: scale(1); } 70% { opacity: 0; transform: scale(3.2); } 100% { opacity: 0; transform: scale(3.2); } }
+</style>
+</head>
+<body>
+<div id="wrap"></div>
+<script>
+(async () => {
+  const dark = new URLSearchParams(location.search).get('theme') === 'dark';
+  if (dark) document.body.setAttribute('data-theme', 'dark');
+  const W = 520, H = 660;
+  const svg = d3.select('#wrap').append('svg').attr('viewBox', `0 0 ${W} ${H}`);
+  const topo = await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')).json();
+  const countries = topojson.feature(topo, topo.objects.countries);
+  const vn = countries.features.find(f => f.id === '704');
+  const proj = d3.geoMercator().fitExtent([[30, 20], [W - 30, H - 20]], vn);
+  const path = d3.geoPath(proj);
+  svg.append('path').attr('d', path(vn))
+    .attr('fill', dark ? 'rgba(182,130,53,0.14)' : 'rgba(182,130,53,0.08)')
+    .attr('stroke', dark ? 'rgba(240,236,227,0.45)' : 'rgba(33,29,23,0.35)')
+    .attr('stroke-width', 1.2)
+    .attr('stroke-linejoin', 'round');
+  const cities = [
+    { name: 'Hà Nội', lon: 105.85, lat: 21.03, dx: 10, dy: 4 },
+    { name: 'Hải Phòng', lon: 106.68, lat: 20.86, dx: 10, dy: 14 },
+    { name: 'Huế', lon: 107.59, lat: 16.46, dx: 10, dy: 4 },
+    { name: 'Đà Nẵng', lon: 108.22, lat: 16.06, dx: 10, dy: 12 },
+    { name: 'TP. Hồ Chí Minh', lon: 106.70, lat: 10.78, dx: 12, dy: 4 },
+    { name: 'Cần Thơ', lon: 105.78, lat: 10.03, dx: -8, dy: 16 }
+  ];
+  const g = svg.append('g');
+  for (const c of cities) {
+    const [x, y] = proj([c.lon, c.lat]);
+    g.append('circle').attr('cx', x).attr('cy', y).attr('r', 5).attr('fill', 'rgba(182,130,53,0.9)').attr('class', 'pulse');
+    g.append('circle').attr('cx', x).attr('cy', y).attr('r', 4.2).attr('fill', '#b68235').attr('stroke', dark ? '#14110c' : '#f5f2ec').attr('stroke-width', 1.5);
+    g.append('text').attr('class', 'city-label').attr('x', x + c.dx).attr('y', y + c.dy).text(c.name)
+      .attr('text-anchor', c.dx < 0 ? 'end' : 'start');
+  }
+})();
+</script>
+</body>
+</html>

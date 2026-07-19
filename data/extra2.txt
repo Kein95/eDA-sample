@@ -1,0 +1,24 @@
+DOCX entries: word/numbering.xml, word/settings.xml, word/fontTable.xml, word/styles.xml, word/document.xml, word/_rels/document.xml.rels, _rels/.rels, word/theme/theme1.xml, [Content_Types].xml
+--- docx text ---
+Admin gửi thêm thông tin: Video Demo và tài liệu demo cho khóa học eDA2026, phần quy trình học mình sẽ học trong hệ thống học AI VIET NAM, có quy trình học tập và làm team cụ thể.
+1.Data Retrieval Using SQL
+https://youtu.be/kdbbHuBJfz8
+2.Power Query in Power BI
+https://youtu.be/Ec4qxPrzT30
+3.Trực quan hóa và phân tích dữ liệu dùng Pandas
+https://youtu.be/yWCBeGDfwWA
+4.Phân tích dữ liệu nâng cao dùng pivot table trong Excel
+https://youtu.be/F03IgMEgAv0
+Nội dung và tài liệu tham khảo:
+https://drive.google.com/drive/folders/1JlXxhr-m3yKF8m8oZxoSg5hcq77CwNMh?usp=sharing
+LINKS: https://drive.google.com/drive/folders/1JlXxhr-m3yKF8m8oZxoSg5hcq77CwNMh?usp=sharing
+https://youtu.be/F03IgMEgAv0
+https://youtu.be/kdbbHuBJfz8
+https://youtu.be/Ec4qxPrzT30
+https://youtu.be/yWCBeGDfwWA
+--- xl/drawings/drawing1.xml ---
+
+--- xl/drawings/drawing2.xml ---
+
+--- xl/drawings/drawing3.xml ---
+

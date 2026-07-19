@@ -1,0 +1,19 @@
+# Server xem thu tai cho. Chay: docker compose -f docker/docker-compose.yml up -d
+# Mo http://localhost:8791/
+#
+# Ten project dat tay: mac dinh Compose lay ten thu muc ("docker"), trung voi stack
+# chatbot cung nam trong mot thu muc ten "docker" => Compose coi container cua nhau
+# la orphan. Dat ten rieng de khong bao gio xoa nham stack khac.
+name: eda
+
+services:
+  eda-web:
+    image: nginx:alpine
+    container_name: eda-web
+    ports:
+      - "8791:80"
+    volumes:
+      # Ma nguon gan read-only: sua file la F5 thay ngay, khong can build lai
+      - ..:/usr/share/nginx/html:ro
+      - ./nginx-eda.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped

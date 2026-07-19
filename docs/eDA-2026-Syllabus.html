@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>eDA 2026 — End2End Data Analytics · AI VIETNAM</title>
+<link rel="icon" href="../assets/logo-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Be+Vietnam+Pro:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#f5f2ec;--ink:#211d17;--surface:#fffdf9;--gold:#b68235;--deep:#8a6228;--line:#e0d8c8;--dot:rgba(33,29,23,0.15)}
+@media (prefers-color-scheme:dark){
+:root{--bg:#14110c;--ink:#f0ebe1;--surface:#1e1913;--line:#3a3227;--dot:rgba(255,255,255,0.08)}
+}
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--bg);background-image:radial-gradient(var(--dot) 2px, transparent 2px);background-size:24px 24px;color:var(--ink);
+  font:16px/1.75 'Be Vietnam Pro',system-ui,-apple-system,Segoe UI,sans-serif;
+  padding:clamp(24px,5vw,64px) clamp(16px,5vw,32px)}
+main{max-width:920px;margin:0 auto;background:var(--surface);border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);padding:clamp(20px,4vw,48px)}
+h1{font-family:'Space Grotesk',system-ui,sans-serif;font-size:clamp(28px,4vw,42px);
+  line-height:1.15;letter-spacing:-.02em;margin:0 0 16px;text-transform:uppercase}
+h2{font-family:'Space Grotesk',system-ui,sans-serif;font-size:clamp(20px,2.6vw,26px);
+  letter-spacing:-.01em;margin:56px 0 20px;padding:12px 20px;border:3px solid var(--ink);background:var(--gold);color:#1c1710;box-shadow:4px 4px 0 var(--ink)}
+h3{font-family:'Space Grotesk',system-ui,sans-serif;font-size:19px;margin:32px 0 12px;display:inline-block;border-bottom:3px solid var(--ink)}
+p{margin:12px 0}
+em{color:var(--deep);font-style:normal;font-weight:600;font-size:14.5px;background:var(--line);padding:2px 6px;border:2px solid var(--ink)}
+ul{list-style:none;padding:0;margin:16px 0}
+li{margin:10px 0;padding-left:32px;position:relative}
+li::before{content:"";position:absolute;left:8px;top:10px;width:10px;height:10px;background:var(--gold);border:2px solid var(--ink)}
+a{color:var(--deep);text-decoration:none;border-bottom:2px solid var(--ink);font-weight:700;transition:all 0.15s}
+a:hover{background:var(--ink);color:var(--surface)}
+code{background:color-mix(in srgb,var(--ink) 8%,transparent);padding:2px 6px;border:2px solid var(--ink);font-size:14px;font-weight:700}
+.tablewrap{overflow-x:auto;margin:24px 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;min-width:520px;background:var(--surface);
+  border:3px solid var(--ink);font-size:14.5px}
+th,td{border-bottom:2px solid var(--ink);border-right:2px solid var(--ink);padding:12px 16px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb,var(--gold) 20%,transparent);font-weight:700;
+  font-family:'Space Grotesk',system-ui,sans-serif;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td:last-child,th:last-child{border-right:0}
+td:first-child,th:first-child{width:1%;white-space:nowrap;color:var(--deep);font-weight:700}
+.back{display:inline-block;margin-bottom:32px;font-weight:700;font-size:15px;text-decoration:none;
+  border:3px solid var(--ink);padding:10px 20px;background:var(--gold);color:#1c1710;box-shadow:4px 4px 0 var(--ink);transition:transform 0.15s, box-shadow 0.15s}
+.back:hover{transform:translate(-4px,-4px);box-shadow:8px 8px 0 var(--ink);background:var(--ink);color:var(--surface)}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="../TuyenSinh-eDA2026.dc.html">← Về trang tuyển sinh</a>
+<h1>eDA 2026 — End2End Data Analytics · AI VIETNAM</h1>
+<p>Syllabus tổng hợp từ kế hoạch đào tạo chính thức (eDA_v9).</p>
+<ul>
+<li><strong>Khai giảng:</strong> Chủ Nhật, 06.09.2026</li>
+<li><strong>Lịch học:</strong> Thứ 4 · Thứ 6 · Chủ Nhật, 8:00 – 10:30 PM (online)</li>
+<li><strong>Final Exam:</strong> Part 1 (SQL &amp; Power BI) — 02.05.2027 · Part 2 (Advanced DA) — 09.05.2027</li>
+<li><strong>Ưu đãi vào sớm:</strong> 9 buổi warm-up Python &amp; SQL (05.08 – 02.09.2026, 20:00–22:00, live Zoom) + 18 buổi bổ trợ</li>
+</ul>
+<h2>Module 1: Foundation of Data Analysis</h2>
+<p><em>Excel · Domain: Sales Analytics · 06.09 – 04.10.2026</em></p>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Ngày</th><th>Nội dung</th></tr></thead><tbody>
+<tr><td>1</td><td>CN 6/9/2026</td><td>Seminar: DA in Sales; Common Concepts</td></tr>
+<tr><td>2</td><td>Thứ 4 9/9/2026</td><td>Hiểu về dữ liệu bảng và các cách lưu trữ</td></tr>
+<tr><td>3</td><td>Thứ 6 11/9/2026</td><td>Thống kê cơ bản; Trực quan hoá dữ liệu với Excel</td></tr>
+<tr><td>4</td><td>CN 13/9/2026</td><td>Exercise</td></tr>
+<tr><td>5</td><td>Thứ 4 16/9/2026</td><td>Data Cleaning Using Excel</td></tr>
+<tr><td>6</td><td>Thứ 6 18/9/2026</td><td>Data Retrieval Using Excel (Power Query)</td></tr>
+<tr><td>7</td><td>CN 20/9/2026</td><td>Exercise</td></tr>
+<tr><td>8</td><td>Thứ 4 23/9/2026</td><td>Data Relationship and Data Modeling (Pivot Tables)</td></tr>
+<tr><td>9</td><td>Thứ 6 25/9/2026</td><td>Data Modeling (Data Analysis Expressions)</td></tr>
+<tr><td>10</td><td>CN 27/9/2026</td><td>Exercise</td></tr>
+<tr><td>11</td><td>Thứ 4 30/9/2026</td><td>Soft Skill: Problem Framing in DA</td></tr>
+<tr><td>12</td><td>Thứ 6 2/10/2026</td><td>Project: Excel Data Analytics for Sales Domain</td></tr>
+<tr><td>13</td><td>CN 4/10/2026</td><td>Exam</td></tr>
+</tbody></table></div>
+<h2>Module 2: Data Query &amp; Business Intelligence</h2>
+<p><em>Power BI · Domain: Finance · 11.10 – 08.11.2026</em></p>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Ngày</th><th>Nội dung</th></tr></thead><tbody>
+<tr><td>1</td><td>CN 11/10/2026</td><td>Seminar: DA in Finance; Common Concepts</td></tr>
+<tr><td>2</td><td>Thứ 4 14/10/2026</td><td>Giới thiệu Power BI (Data from Excel and CSV)</td></tr>
+<tr><td>3</td><td>Thứ 6 16/10/2026</td><td>Giới thiệu về Cơ sở dữ liệu và BigQuery Kết nối Power BI với BigQuery</td></tr>
+<tr><td>4</td><td>CN 18/10/2026</td><td>Exercise</td></tr>
+<tr><td>5</td><td>Thứ 4 21/10/2026</td><td>Power Query Using Power BI</td></tr>
+<tr><td>6</td><td>Thứ 6 23/10/2026</td><td>Data Modeling in Power BI</td></tr>
+<tr><td>7</td><td>CN 25/10/2026</td><td>Exercise</td></tr>
+<tr><td>8</td><td>Thứ 4 28/10/2026</td><td>DAX in Power BI</td></tr>
+<tr><td>9</td><td>Thứ 6 30/10/2026</td><td>Dashboard Using Power BI; Power BI Optimization</td></tr>
+<tr><td>10</td><td>CN 1/11/2026</td><td>Exercise</td></tr>
+<tr><td>11</td><td>Thứ 4 4/11/2026</td><td>Soft Skill: Visualization Principles and Storytelling</td></tr>
+<tr><td>12</td><td>Thứ 6 6/11/2026</td><td>Project 2.2: Data Analytics for Finance Domain</td></tr>
+<tr><td>13</td><td>CN 8/11/2026</td><td>Exam</td></tr>
+</tbody></table></div>
+<h2>Module 3: Advanced Power BI &amp; SQL</h2>
+<p><em>SQL, BigQuery · Domain: Digital Marketing · 15.11 – 13.12.2026</em></p>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Ngày</th><th>Nội dung</th></tr></thead><tbody>
+<tr><td>1</td><td>CN 15/11/2026</td><td>Seminar: DA in Marketing; Common Concepts</td></tr>
+<tr><td>2</td><td>Thứ 4 18/11/2026</td><td>Introduction to SQL (BigQuery)</td></tr>
+<tr><td>3</td><td>Thứ 6 20/11/2026</td><td>Data Retrieval</td></tr>
+<tr><td>4</td><td>CN 22/11/2026</td><td>Exercise</td></tr>
+<tr><td>5</td><td>Thứ 4 25/11/2026</td><td>Data Aggregation and Calculation Using SQL</td></tr>
+<tr><td>6</td><td>Thứ 6 27/11/2026</td><td>Data Cleaning Using SQL</td></tr>
+<tr><td>7</td><td>CN 29/11/2026</td><td>Exercise</td></tr>
+<tr><td>8</td><td>Thứ 4 2/12/2026</td><td>Data Transformation Using SQL (Window Function &amp; CTE)</td></tr>
+<tr><td>9</td><td>Thứ 6 4/12/2026</td><td>Query Optimization in SQL</td></tr>
+<tr><td>10</td><td>CN 6/12/2026</td><td>Exercise</td></tr>
+<tr><td>11</td><td>Thứ 4 9/12/2026</td><td>Soft Skill: Working with Stakeholder</td></tr>
+<tr><td>12</td><td>Thứ 6 11/12/2026</td><td>Project: Advanced Power BI+SQL for [Domain Marketing]</td></tr>
+<tr><td>13</td><td>CN 13/12/2026</td><td>Exam</td></tr>
+</tbody></table></div>
+<h2>Module 4: Agentic AI for Data Analytics in Different Domains</h2>
+<p><em>Game · EdTech · Omnichannel Marketing · HR · 16.12.2026 – 13.01.2027</em></p>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Ngày</th><th>Nội dung</th></tr></thead><tbody>
+<tr><td>1</td><td>Thứ 4 16/12/2026</td><td>Game Project: Understanding Game Data Analytics (domain discussion, bussiness objectives, and data)</td></tr>
+<tr><td>2</td><td>Thứ 6 18/12/2026</td><td>Agentic AI in Excel for Game Analytics (EDA)</td></tr>
+<tr><td>3</td><td>CN 20/12/2026</td><td>Agentic AI in Excel for Game Analytics (end2end)</td></tr>
+<tr><td>4</td><td>Thứ 4 23/12/2026</td><td>EdTech Project: Understanding EdTech Analytics</td></tr>
+<tr><td>5</td><td>Thứ 6 25/12/2026</td><td>Agentic AI in Power BI for EdTech Analytics (EDA&amp;Dashboard)</td></tr>
+<tr><td>6</td><td>CN 27/12/2026</td><td>Agentic AI in Power BI for EdTech Analytics (end2end)</td></tr>
+<tr><td>7</td><td>Thứ 4 30/12/2026</td><td>Digital Omnichannel Marketing Project: Understanding Digital Omnichannel Marketing Analytics</td></tr>
+<tr><td>8</td><td>Thứ 6 1/1/2027</td><td>Agentic AI for Data Retrieval and Transformation (SQL)</td></tr>
+<tr><td>9</td><td>CN 3/1/2027</td><td>Agentic AI for Data Analytics Process</td></tr>
+<tr><td>10</td><td>Thứ 6 8/1/2027</td><td>HR Project: Understanding HR Analytics</td></tr>
+<tr><td>11</td><td>CN 10/1/2027</td><td>Claude/Copilot for HR Analytics</td></tr>
+<tr><td>12</td><td>Thứ 4 13/1/2027</td><td>Harness Engineering for HR Analytics</td></tr>
+</tbody></table></div>
+<h2>Module 5: Modern Analytics Ecosystem</h2>
+<p><em>Snowflake, Fabric, Tableau, Looker · Domain: Supply Chain · 17.01 – 21.02.2027</em></p>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Ngày</th><th>Nội dung</th></tr></thead><tbody>
+<tr><td>1</td><td>CN 17/1/2027</td><td>Seminar: DA in Supply Chain; Common Concepts</td></tr>
+<tr><td>2</td><td>Thứ 4 20/1/2027</td><td>Data Retrieval from Snowflake</td></tr>
+<tr><td>3</td><td>Thứ 6 22/1/2027</td><td>Data Retrieval from Microsoft Fabric</td></tr>
+<tr><td>4</td><td>CN 24/1/2027</td><td>Exercise</td></tr>
+<tr><td>5</td><td>Thứ 4 27/1/2027</td><td>Explain Insights Using Advanced Statistics (confident interval, p-value)</td></tr>
+<tr><td>6</td><td>Thứ 6 29/1/2027</td><td>Explain Insights Using Advanced Statistics (A/B testing)</td></tr>
+<tr><td>7</td><td>CN 31/1/2027</td><td>Exercise</td></tr>
+<tr><td>8</td><td>Thứ 4 10/2/2027</td><td>Introduction to Tableau</td></tr>
+<tr><td>9</td><td>Thứ 6 12/2/2027</td><td>Introduction to Looker</td></tr>
+<tr><td>10</td><td>CN 14/2/2027</td><td>Exercise</td></tr>
+<tr><td>11</td><td>Thứ 4 17/2/2027</td><td>Soft Skill: Analysis and business mindset</td></tr>
+<tr><td>12</td><td>Thứ 6 19/2/2027</td><td>Project: E2E Data Analytics Using Modern Approach</td></tr>
+<tr><td>13</td><td>CN 21/2/2027</td><td>Exam</td></tr>
+</tbody></table></div>
+<h2>Module 6: Data Pipeline &amp; Automation</h2>
+<p><em>Python, DBT, Pydantic · Domain: Operations · 28.02 – 28.03.2027</em></p>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Ngày</th><th>Nội dung</th></tr></thead><tbody>
+<tr><td>1</td><td>CN 28/2/2027</td><td>Seminar: DA in Operations Analytics</td></tr>
+<tr><td>2</td><td>Thứ 4 3/3/2027</td><td>Introduction to Python</td></tr>
+<tr><td>3</td><td>Thứ 6 5/3/2027</td><td>Basic Python for DA</td></tr>
+<tr><td>4</td><td>CN 7/3/2027</td><td>Exercise</td></tr>
+<tr><td>5</td><td>Thứ 4 10/3/2027</td><td>Pandas and Plotly for EDA</td></tr>
+<tr><td>6</td><td>Thứ 6 12/3/2027</td><td>Data validation using Pydantic</td></tr>
+<tr><td>7</td><td>CN 14/3/2027</td><td>Exercise</td></tr>
+<tr><td>8</td><td>Thứ 4 17/3/2027</td><td>Data Transformation Using DBT (SQL)</td></tr>
+<tr><td>9</td><td>Thứ 6 19/3/2027</td><td>Implementing Data Pipeline</td></tr>
+<tr><td>10</td><td>CN 21/3/2027</td><td>Exercise</td></tr>
+<tr><td>11</td><td>Thứ 4 24/3/2027</td><td>Soft Skill: Logical Thinking and Problem Solving for DA</td></tr>
+<tr><td>12</td><td>Thứ 6 26/3/2027</td><td>Project: Data Pipeline + Automatic EDA</td></tr>
+<tr><td>13</td><td>CN 28/3/2027</td><td>Exam</td></tr>
+</tbody></table></div>
+<h2>Module 7: Extension to Forecasting, Clustering &amp; Anomaly Detection</h2>
+<p><em>ML for DA · Domain: Credit Risk · 31.03 – 25.04.2027</em></p>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Ngày</th><th>Nội dung</th></tr></thead><tbody>
+<tr><td>1</td><td>Thứ 4 31/3/2027</td><td>Basic Linear Algebra for DA</td></tr>
+<tr><td>2</td><td>Thứ 6 2/4/2027</td><td>Customer segmentation Using K-Means</td></tr>
+<tr><td>3</td><td>CN 4/4/2027</td><td>Exercise</td></tr>
+<tr><td>4</td><td>Thứ 4 7/4/2027</td><td>Anomaly Detection for Credit Risk Using KNN</td></tr>
+<tr><td>5</td><td>Thứ 6 9/4/2027</td><td>Sales Forecasting Using Linear Regression</td></tr>
+<tr><td>6</td><td>CN 11/4/2027</td><td>Exercise</td></tr>
+<tr><td>7</td><td>Thứ 4 14/4/2027</td><td>Decision Tree for Classification</td></tr>
+<tr><td>8</td><td>Thứ 6 16/4/2027</td><td>Random Forest for Classification and Anomaly Detection</td></tr>
+<tr><td>9</td><td>CN 18/4/2027</td><td>Exercise</td></tr>
+<tr><td>10</td><td>Thứ 4 21/4/2027</td><td>Soft Skill: Presentation and Teamwork Skills for DA</td></tr>
+<tr><td>11</td><td>Thứ 6 23/4/2027</td><td>Project: Credit Risk Analytics and Recommendation System</td></tr>
+<tr><td>12</td><td>CN 25/4/2027</td><td>Exam</td></tr>
+</tbody></table></div>
+<h2>Final Exam</h2>
+<div class="tablewrap"><table><thead><tr><th>Phần</th><th>Ngày</th><th>Nội dung</th></tr></thead><tbody>
+<tr><td>1</td><td>CN 02.05.2027</td><td>SQL &amp; Power BI</td></tr>
+<tr><td>2</td><td>CN 09.05.2027</td><td>Advanced DA</td></tr>
+</tbody></table></div>
+<h2>Module 8 (tuỳ chọn): Luyện chứng chỉ</h2>
+<h3>Microsoft PL-300 (5 buổi)</h3>
+<p>1. Data Preparation and Modeling</p>
+<p>2. Visualization and Analysis</p>
+<p>3. Management and Security</p>
+<p>4. Test Strategy and Practice</p>
+<p>5. Mock Test</p>
+<h3>AWS Certified Cloud Practitioner (10 buổi)</h3>
+<p>1. Cloud Concepts</p>
+<p>2. Global Infrastructure</p>
+<p>3. Compute &amp; Serverless</p>
+<p>4. Storage</p>
+<p>5. Database &amp; Integration</p>
+<p>6. Networking &amp; Delivery</p>
+<p>7. Security &amp; Compliance</p>
+<p>8. Pricing &amp; Billing</p>
+<p>9. Mock Test</p>
+<p>10. Project ứng dụng</p>
+<h2>Warm-up: Python &amp; SQL (live Zoom, 20:00 – 22:00)</h2>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Ngày</th><th>Nội dung</th><th>Giảng viên</th></tr></thead><tbody>
+<tr><td>1</td><td>Thứ 4 05.08.2026</td><td>Giới thiệu Python (Variables, Operators, Functions)</td><td>Dr. Quang Vinh</td></tr>
+<tr><td>2</td><td>CN 09.08.2026</td><td>Branches (if-else), String và FOR loop</td><td>Dr. Quang Vinh</td></tr>
+<tr><td>3</td><td>Thứ 4 12.08.2026</td><td>List in Python</td><td>Dr. Quang Vinh</td></tr>
+<tr><td>4</td><td>CN 16.08.2026</td><td>Data Visualization Using Pandas</td><td>Dr. Quang Vinh</td></tr>
+<tr><td>5</td><td>Thứ 4 19.08.2026</td><td>Data Analysis Using Pandas</td><td>Dr. Đình Vinh</td></tr>
+<tr><td>6</td><td>CN 23.08.2026</td><td>Giới thiệu cơ sở dữ liệu và SQL</td><td>Dr. Quang Vinh</td></tr>
+<tr><td>7</td><td>Thứ 4 26.08.2026</td><td>Data Retrieval Using SQL</td><td>Dr. Đình Vinh</td></tr>
+<tr><td>8</td><td>CN 30.08.2026</td><td>Cloud for Data Retrieval (SQL)</td><td>Dr. Quang Vinh</td></tr>
+<tr><td>9</td><td>Thứ 4 02.09.2026</td><td>Dashboard tự động với Python, Cloud và SQL</td><td>Dr. Đình Vinh</td></tr>
+</tbody></table></div>
+<h2>Bổ trợ: 18 buổi nền tảng</h2>
+<p>1. Excel 1: Basic Data Analysis &amp; Power Query</p>
+<p>2. Excel 2: Pivot Tables</p>
+<p>3. Excel 3: (project) Data Analysis</p>
+<p>4. Advanced Variables, Numeric Types &amp; Expression Optimization</p>
+<p>5. Built-in and User-defined Functions</p>
+<p>6. Modern Control Flow</p>
+<p>7. Python Loop</p>
+<p>8. Loop Optimizer &amp; Iteration Patterns</p>
+<p>9. Advanced List</p>
+<p>10. Dictionary</p>
+<p>11. Tabular Data &amp; Pandas</p>
+<p>12. Pandas&amp;SQL 1: Data Retrieval (Querying)</p>
+<p>13. Pandas&amp;SQL 2: Data Aggregation and Calculation</p>
+<p>14. Pandas&amp;SQL 3: Data Cleaning and Preparation</p>
+<p>15. Data Visualization Using Python+Tableau — Buổi 1</p>
+<p>16. Data Visualization Using Python+Tableau — Buổi 2</p>
+<p>17. Power Query Using Power BI</p>
+<p>18. Data Modelling Using Power BI</p>
+<h2>Video demo buổi học</h2>
+<p>1. <a href="https://youtu.be/kdbbHuBJfz8">Data Retrieval Using SQL</a></p>
+<p>2. <a href="https://youtu.be/Ec4qxPrzT30">Power Query in Power BI</a></p>
+<p>3. <a href="https://youtu.be/yWCBeGDfwWA">Trực quan hoá &amp; phân tích dữ liệu dùng Pandas</a></p>
+<p>4. <a href="https://youtu.be/F03IgMEgAv0">Phân tích nâng cao với Pivot Table trong Excel</a></p>
+<p><strong>Nội dung &amp; tài liệu tham khảo:</strong> <a href="https://drive.google.com/drive/folders/1JlXxhr-m3yKF8m8oZxoSg5hcq77CwNMh?usp=sharing">Google Drive</a></p>
+</main>
+</body>
+</html>

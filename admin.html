@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<!-- Trang nay giu JWT admin trong sessionStorage va do ra ca bang dang ky. CSP chan
+     script la: chi cho phep script cua chinh trang + jsDelivr (da ghim SRI), va chi
+     cho ket noi ra Supabase. connect-src dung ca https lan wss vi Realtime chay
+     WebSocket. Doi du an Supabase thi phai sua ca hai URL trong dong nay.
+     Luu y: 'unsafe-inline' con can vi toan bo logic nam trong <script> noi tuyen. -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  img-src 'self' data:;
+  connect-src https://REPLACE-ME.supabase.co wss://REPLACE-ME.supabase.co;
+  form-action 'none';
+  base-uri 'none';
+  frame-ancestors 'none'">
+<title>eDA 2026 · Quản trị đăng ký</title>
+<link rel="icon" href="assets/logo-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#f5f2ec;--ink:#211d17;--surface:#fffdf9;--gold:#b68235;--deep:#8a6228;--line:#ddd3c2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.6 'Be Vietnam Pro',system-ui,sans-serif}
+h1{font-family:'Space Grotesk',sans-serif;font-size:26px;margin:0;letter-spacing:-.02em}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+  padding:18px clamp(14px,3vw,28px);border-bottom:3px solid var(--ink);background:var(--surface)}
+.wrap{padding:clamp(14px,3vw,28px)}
+input,select{font:inherit;padding:10px 13px;border:2px solid var(--ink);background:var(--surface);
+  color:var(--ink);border-radius:0;width:100%}
+input:focus,select:focus{outline:0;box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
+button{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer;
+  padding:10px 18px;border:2px solid var(--ink);background:var(--gold);color:#fff;
+  box-shadow:3px 3px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+button:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+button:disabled{opacity:.55;cursor:default;transform:none;box-shadow:3px 3px 0 var(--ink)}
+button.ghost{background:var(--surface);color:var(--ink)}
+/* Man dang nhap */
+#login{max-width:380px;margin:14vh auto;padding:32px 28px;background:var(--surface);
+  border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink)}
+#login label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--deep);margin:16px 0 6px}
+.err{color:#b3261e;font-size:13.5px;font-weight:600;margin-top:14px}
+.muted{color:color-mix(in srgb,var(--ink) 55%,transparent);font-size:13px}
+/* Bang */
+.tablewrap{overflow-x:auto;border:3px solid var(--ink);background:var(--surface);box-shadow:5px 5px 0 var(--ink)}
+table{border-collapse:collapse;width:100%;min-width:1180px;font-size:13.5px}
+th,td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb,var(--gold) 14%,transparent);font-family:'Space Grotesk',sans-serif;
+  font-weight:700;white-space:nowrap;position:sticky;top:0}
+tr:hover td{background:color-mix(in srgb,var(--gold) 6%,transparent)}
+td.code{font-weight:700;color:var(--deep);white-space:nowrap}
+td.note{max-width:280px;white-space:pre-wrap}
+.count{font-family:'Space Grotesk',sans-serif;font-weight:700}
+.hide{display:none}
+.livedot{font-size:12px;font-weight:600;white-space:nowrap;
+  color:color-mix(in srgb,var(--ink) 45%,transparent)}
+.livedot.on{color:#1a7f37}
+.livedot.off{color:#b3261e}
+/* Dong vua nhay vao qua realtime, nhap nhay mot lan cho de thay */
+@keyframes newrow{from{background:#ffe9a8}to{background:transparent}
+}
+tr.new td{animation:newrow 2.4s ease-out}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h1>eDA 2026 · Quản trị</h1>
+  <p class="muted" style="margin:8px 0 0">Xem danh sách đăng ký giữ chỗ.</p>
+  <label for="em">Email</label>
+  <input id="em" type="email" autocomplete="username">
+  <label for="pw">Mật khẩu</label>
+  <input id="pw" type="password" autocomplete="current-password">
+  <button id="go" style="width:100%;margin-top:22px">Đăng nhập</button>
+  <p id="loginErr" class="err hide"></p>
+</div>
+
+<div id="app" class="hide">
+  <div class="bar">
+    <h1>Đăng ký eDA 2026 · <span id="n" class="count">0</span></h1>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span id="live" class="livedot" title="Trạng thái kết nối trực tiếp">•  đang nối…</span>
+      <input id="q" type="search" placeholder="Tìm tên, SĐT, email, tỉnh…" style="width:min(300px,52vw)">
+      <button id="reload" class="ghost">Tải lại</button>
+      <button id="csv" class="ghost">Tải CSV</button>
+      <button id="out" class="ghost">Thoát</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <p id="listErr" class="err hide"></p>
+    <div class="tablewrap"><table>
+      <thead><tr>
+        <th>Mã</th><th>Lúc</th><th>Họ tên</th><th>SĐT</th><th>Email</th><th>Zalo</th>
+        <th>Facebook</th><th>Tỉnh</th><th>Đang là</th><th>Ngành/nghề</th><th>Hứng thú</th>
+        <th>Phụ huynh</th><th>SĐT phụ huynh</th><th>Biết qua</th><th>Ghi chú</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- Chi dung cho Realtime. Supabase Realtime chay tren giao thuc Phoenix channel
+     (join, heartbeat, rejoin, doi token) — tu viet lai bang WebSocket tran la chuoc loi.
+     Auth va doc bang van la fetch thuan, khong phu thuoc script nay: neu CDN hong
+     thi bang van chay binh thuong, chi mat cap nhat truc tiep. -->
+<!-- Ghim phien ban + SRI. Truoc day dung "@2" tha noi va khong co integrity: neu
+     jsDelivr bi chiem hoac ban dung sau tu phat hanh script doc, no chay ngay trong
+     trang dang giu JWT admin va toan bo bang dang ky (co SDT phu huynh tre vi thanh
+     nien) - lay sach du lieu ma khong de lai dau vet. globe.html va map-vietnam.html
+     von da ghim + SRI cho d3; trang nay la cho duy nhat bo sot, va lai la cho rui ro
+     nhat. Doi phien ban thi phai tinh lai hash. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"
+        integrity="sha384-KX6Y/AMIv9qA8TLCDul2JatZWeyrJVgj3Xu/0r30Nr05xO8md1+wHAgtdsRV9LoE"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+// Cung du an Supabase voi edge function eda-register.
+// Anon key la khoa cong khai theo thiet ke; thu chan truy cap la RLS
+// (chi tai khoan co app_metadata.role = 'EDA_ADMIN' moi doc duoc bang nay).
+const SUPABASE_URL = 'https://REPLACE-ME.supabase.co';
+const SUPABASE_ANON_KEY = 'REPLACE-ME';
+
+const $ = (id) => document.getElementById(id);
+const COLS = ['code','created_at','name','phone','email','zalo','facebook','province',
+              'job','field','interest','guardian_name','guardian_phone','channel','note'];
+let rows = [];
+
+const showErr = (el, msg) => { el.textContent = msg; el.classList.remove('hide'); };
+const hideErr = (el) => el.classList.add('hide');
+
+function fmtTime(iso) {
+  const d = new Date(iso);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+async function login() {
+  hideErr($('loginErr'));
+  $('go').disabled = true;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: $('em').value.trim(), password: $('pw').value })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error_description || data.msg || 'Sai email hoặc mật khẩu.');
+    sessionStorage.setItem('eda_token', data.access_token);
+    $('pw').value = '';
+    await load();
+  } catch (e) {
+    showErr($('loginErr'), e.message);
+  } finally {
+    $('go').disabled = false;
+  }
+}
+
+async function load() {
+  const token = sessionStorage.getItem('eda_token');
+  if (!token) return;
+  const r = await fetch(
+    `${SUPABASE_URL}/rest/v1/eda_registration?select=${COLS.join(',')}&order=created_at.desc`,
+    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` } });
+
+  if (r.status === 401) {           // het han phien
+    sessionStorage.removeItem('eda_token');
+    $('app').classList.add('hide'); $('login').classList.remove('hide');
+    showErr($('loginErr'), 'Phiên đã hết hạn, đăng nhập lại giúp.');
+    return;
+  }
+  $('login').classList.add('hide'); $('app').classList.remove('hide');
+  if (!r.ok) { showErr($('listErr'), 'Không tải được danh sách (' + r.status + ').'); return; }
+
+  rows = await r.json();
+  hideErr($('listErr'));
+  subscribe(token);
+  // Danh sach rong + dang nhap duoc = tai khoan chua duoc gan role EDA_ADMIN,
+  // vi RLS tra ve 0 dong thay vi bao loi. Noi ro de khoi tuong la chua ai dang ky.
+  if (rows.length === 0) {
+    showErr($('listErr'),
+      'Không có dòng nào. Nếu chắc chắn đã có người đăng ký thì tài khoản này chưa được gán quyền EDA_ADMIN (xem migration 0002).');
+  }
+  render();
+}
+
+function render() {
+  const q = $('q').value.trim().toLowerCase();
+  const shown = q
+    ? rows.filter(r => COLS.some(c => String(r[c] ?? '').toLowerCase().includes(q)))
+    : rows;
+  $('n').textContent = shown.length + (q ? ' / ' + rows.length : '');
+  $('rows').innerHTML = shown.map(r => '<tr>'
+    + `<td class="code">${esc(r.code)}</td>`
+    + `<td>${esc(fmtTime(r.created_at))}</td>`
+    + COLS.slice(2).map(c => c === 'note'
+        ? `<td class="note">${esc(r[c])}</td>`
+        : `<td>${esc(r[c])}</td>`).join('')
+    + '</tr>').join('');
+}
+
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+}
+
+function toCsv() {
+  // Chan CSV formula injection. O nay do NGUOI DANG KY tu go (ho ten, ghi chu...),
+  // nen mot o bat dau bang = + - @ hoac tab/CR se duoc Excel/Sheets hieu la cong thuc
+  // va chay khi nguoi phu trach mo file: =HYPERLINK(...) de danh cap, hoac =cmd|...
+  // Dat dau nhay don o dau lam Excel coi la van ban thuan.
+  const cell = (v) => {
+    let s = String(v ?? '');
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  };
+  const body = [COLS.join(','), ...rows.map(r => COLS.map(c => cell(r[c])).join(','))].join('\r\n');
+  // BOM de Excel mo tieng Viet khong bi loi font
+  const url = URL.createObjectURL(new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dang-ky-eda2026-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Realtime: don moi tu nhay vao dau bang ─────────────────────────────────
+// RLS ap dung ca cho realtime, nen tai khoan khong co role EDA_ADMIN se khong
+// nhan duoc su kien nao. Bang van tai duoc binh thuong neu phan nay hong.
+let channel = null;
+
+function setLive(state, text) {
+  const el = $('live');
+  el.className = 'livedot' + (state ? ' ' + state : '');
+  el.textContent = text;
+}
+
+function subscribe(token) {
+  if (channel || !window.supabase) {
+    if (!window.supabase) setLive('off', '•  không nối được (tải lại thủ công)');
+    return;
+  }
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  client.realtime.setAuth(token);
+  channel = client
+    .channel('eda-registration-feed')
+    .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'eda_registration' },
+        (payload) => {
+          rows.unshift(payload.new);
+          render();
+          const first = document.querySelector('#rows tr');
+          if (first) first.classList.add('new');
+          document.title = `(${rows.length}) eDA 2026 · Quản trị đăng ký`;
+        })
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') setLive('on', '•  đang nhận trực tiếp');
+      else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT')
+        setLive('off', '•  mất kết nối trực tiếp');
+    });
+}
+
+$('go').onclick = login;
+$('pw').onkeydown = (e) => { if (e.key === 'Enter') login(); };
+$('q').oninput = render;
+$('csv').onclick = toCsv;
+$('reload').onclick = load;
+$('out').onclick = () => { sessionStorage.removeItem('eda_token'); location.reload(); };
+
+if (sessionStorage.getItem('eda_token')) load();
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Tai lieu doc cua khoa hoc - phat qua link Drive, khong dua len repo public.
+# Trong so do co ban doc cua ben thu ba, dua len day la phat tan.
+assets/docs/
+
+# Rac cua he dieu hanh / cong cu
+.thumbnail
+.zcode/
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Bien moi truong. Khong bao gio commit khoa that (nhat la service_role key).
+.env
+.env.*
+!.env.example
+
+# Ket qua chay thu
+*.log
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+
+# File rong tao nham boi mot lenh shell dut giua chung, khong phai noi dung du an.
+"Đăng"
