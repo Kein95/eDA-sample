@@ -131,12 +131,47 @@
       /* Lưới hai cột tỉ lệ cố định xuống một cột.
          Chỉ áp cho lưới ĐẶT TỈ LỆ CỨNG (7fr/5fr, 1fr 1fr...). Các lưới dùng
          repeat(auto-fit,minmax(...)) đã tự xuống dòng, không cần và không được
-         đụng tới. Lưới lịch học (34px 56px 52px 1fr) cũng để nguyên: đó là bảng,
-         xuống một cột là mất nghĩa hàng.
+         đụng tới.
+         Lưới lịch học (.sched-row) trên điện thoại được phép đổi bố cục (đẩy cột mô tả và giảng viên xuống dòng) để đảm bảo phần nội dung chữ dài không bị ép hẹp, trong khi phần ngày tháng (3 cột đầu) vẫn giữ nguyên để dễ tra cứu.
          !important vì trị gốc nằm ở style inline, có cái còn do JS sinh ra. */
       .co-doi-cot {
         grid-template-columns: minmax(0, 1fr) !important;
         gap: 28px !important;
+      }
+
+      /* Nhiệm vụ 1: Khắc phục tràn nội dung 10px thẻ Tài liệu và Giảng viên */
+      a[style*="flex-direction:column"][style*="gap:8px"],
+      div[style*="flex-direction:column"][style*="align-items:flex-start"][style*="gap:20px"],
+      div[style*="padding:32px 26px"][style*="justify-content:center"] {
+        min-width: 0 !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+      }
+
+      /* Nhiệm vụ 2: Nâng cỡ chữ các nhãn nhỏ lên tối thiểu 11px (ưu tiên 12px) */
+      .legend-symbol,
+      .doc-label,
+      .duration-label,
+      span.module-chip__label,
+      p.eyebrow, span.eyebrow, span.pill-tag {
+        font-size: 12px !important;
+      }
+
+      /* Nhiệm vụ 3: Điều chỉnh bảng lịch học (div.sched-row) */
+      .sched-row {
+        grid-template-columns: 34px 56px minmax(0, 1fr) !important;
+      }
+      /* Bám theo VỊ TRÍ con thứ 4, không bám class. Chỉ 57 trên 99 hàng có class
+         .sched-row__topic; số còn lại ô mô tả là <span> trần không class. Bám class
+         thì những hàng đó không được span, rơi xuống hàng ngầm ở cột 1 rộng 34px và
+         chữ vỡ mỗi từ một dòng. Cấu trúc hàng là cố định (số, thứ, ngày, mô tả) nên
+         nth-child ở đây chắc hơn class. */
+      .sched-row > *:nth-child(4) {
+        grid-column: 1 / -1 !important;
+        padding-top: 4px !important;
+      }
+      .sched-row--mentor > span:nth-child(5) {
+        grid-column: 1 / -1 !important;
       }
     }
     
@@ -737,10 +772,10 @@
         <div style="background:var(--surface,#fffdf9);border:2.5px solid var(--ink,#211d17);box-shadow:4px 4px 0 var(--ink,#211d17);padding:16px 20px;margin:24px auto 0;font-size:14.5px;line-height:1.7;color:var(--ink,#211d17);font-weight:500;text-align:justify;max-width:62ch">Ô càng đậm, lĩnh vực đó càng nằm gần lõi hoạt động của ngành - thường có đội ngũ chuyên trách và ngân sách riêng.<br><br>Đọc theo hàng để biết một ngành cần những năng lực gì; đọc theo cột để xác định lĩnh vực bạn muốn theo đuổi đang được ưu tiên ở đâu.</div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:center;margin-top:26px">
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600"><span style="width:16px;height:16px;background:#DC2626;color:#fff;border:2px solid var(--ink,#211d17);display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1">●</span>CORE · <span style="font-weight:500;opacity:.75">Có đội chuyên trách và ngân sách riêng</span></span>
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600"><span style="width:16px;height:16px;background:#FB923C;color:#3b1a02;border:2px solid var(--ink,#211d17);display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1">◐</span>RELEVANT · <span style="font-weight:500;opacity:.75">Có làm, nhưng không phải trọng tâm</span></span>
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600"><span style="width:16px;height:16px;background:#FEF3C7;color:#5a4708;border:2px solid var(--ink,#211d17);display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1">○</span>MINIMAL · <span style="font-weight:500;opacity:.75">Có bộ phận, ít đầu tư cho phân tích</span></span>
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600"><span style="width:16px;height:16px;background:transparent;border-style:dashed;border:2px solid var(--ink,#211d17);display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1">·</span>RARE · <span style="font-weight:500;opacity:.75">Ngành này hiếm khi cần tới</span></span>
+        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600"><span class="legend-symbol" style="width:16px;height:16px;background:#DC2626;color:#fff;border:2px solid var(--ink,#211d17);display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1">●</span>CORE · <span style="font-weight:500;opacity:.75">Có đội chuyên trách và ngân sách riêng</span></span>
+        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600"><span class="legend-symbol" style="width:16px;height:16px;background:#FB923C;color:#3b1a02;border:2px solid var(--ink,#211d17);display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1">◐</span>RELEVANT · <span style="font-weight:500;opacity:.75">Có làm, nhưng không phải trọng tâm</span></span>
+        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600"><span class="legend-symbol" style="width:16px;height:16px;background:#FEF3C7;color:#5a4708;border:2px solid var(--ink,#211d17);display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1">○</span>MINIMAL · <span style="font-weight:500;opacity:.75">Có bộ phận, ít đầu tư cho phân tích</span></span>
+        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600"><span class="legend-symbol" style="width:16px;height:16px;background:transparent;border-style:dashed;border:2px solid var(--ink,#211d17);display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1">·</span>RARE · <span style="font-weight:500;opacity:.75">Ngành này hiếm khi cần tới</span></span>
       </div>
       <div style="margin-top:26px;overflow-x:auto;overflow-y:hidden">
         <table style="border-collapse:collapse;min-width:920px;width:100%;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);font-size:12.5px">
@@ -1010,19 +1045,19 @@ path[stroke-width="30"] {
         <!-- justify-content:center de khi xuong dong, hang cuoi khong lech han sang trai. -->
         <div style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;justify-content:center">
           
-          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--first module-chip--m1"><span class="module-chip__label" style="opacity:0.8">MODULE 1</span><span class="module-chip__title">Basic DA</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">06.09 – 04.10.2026</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
+          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--first module-chip--m1"><span class="module-chip__label" style="opacity:0.8">MODULE 1</span><span class="module-chip__title">Basic DA</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">06.09 – 04.10.2026</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
           
-          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--deep module-chip--m2"><span class="module-chip__label" style="opacity:0.8">MODULE 2</span><span class="module-chip__title">Power BI</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">11.10 – 08.11.2026</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
+          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--deep module-chip--m2"><span class="module-chip__label" style="opacity:0.8">MODULE 2</span><span class="module-chip__title">Power BI</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">11.10 – 08.11.2026</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
           
-          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--m3"><span class="module-chip__label" style="opacity:0.8">MODULE 3</span><span class="module-chip__title">SQL</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">15.11 – 13.12.2026</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
+          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--m3"><span class="module-chip__label" style="opacity:0.8">MODULE 3</span><span class="module-chip__title">SQL</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">15.11 – 13.12.2026</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
           
-          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--deep module-chip--m4"><span class="module-chip__label" style="opacity:0.8">MODULE 4</span><span class="module-chip__title">AI · Domain</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">16.12 – 13.01.2027</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">12 buổi</p></div></div></div>
+          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--deep module-chip--m4"><span class="module-chip__label" style="opacity:0.8">MODULE 4</span><span class="module-chip__title">AI · Domain</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">16.12 – 13.01.2027</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">12 buổi</p></div></div></div>
           
-          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--m5"><span class="module-chip__label" style="opacity:0.8">MODULE 5</span><span class="module-chip__title">Advanced DA</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">17.01 – 21.02.2027</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
+          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--m5"><span class="module-chip__label" style="opacity:0.8">MODULE 5</span><span class="module-chip__title">Advanced DA</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">17.01 – 21.02.2027</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
           
-          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--deep module-chip--m6"><span class="module-chip__label" style="opacity:0.8">MODULE 6</span><span class="module-chip__title">DA + DE</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">28.02 – 28.03.2027</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
+          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--deep module-chip--m6"><span class="module-chip__label" style="opacity:0.8">MODULE 6</span><span class="module-chip__title">DA + DE</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">28.02 – 28.03.2027</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">13 buổi</p></div></div></div>
           
-          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--m7"><span class="module-chip__label" style="opacity:0.8">MODULE 7</span><span class="module-chip__title">DA + DS</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">31.03 – 25.04.2027</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">12 buổi</p></div></div></div>
+          <div style="flex:1 1 114px;min-width:114px;max-width:160px;display:flex;flex-direction:column"><div class="module-chip module-chip--m7"><span class="module-chip__label" style="opacity:0.8">MODULE 7</span><span class="module-chip__title">DA + DS</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">31.03 – 25.04.2027</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">12 buổi</p></div></div></div>
           
         </div>
 
@@ -1030,9 +1065,9 @@ path[stroke-width="30"] {
              mot la lop chung chi tu chon. Tach ra cho khoi lan voi dai module. -->
         <div style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;justify-content:center;margin-top:12px">
 
-          <div style="flex:0 1 240px;min-width:180px;max-width:300px;display:flex;flex-direction:column"><div class="module-chip module-chip--wide module-chip--exam"><span class="module-chip__label" style="opacity:0.85">CHỐT KHOÁ</span><span class="module-chip__title">Final Exam</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">02.05.2027</p><p style="margin:2px 0 0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">&amp; 09.05.2027</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">SQL·PowerBI · Adv DA</p></div></div></div>
+          <div style="flex:0 1 240px;min-width:180px;max-width:300px;display:flex;flex-direction:column"><div class="module-chip module-chip--wide module-chip--exam"><span class="module-chip__label" style="opacity:0.85">CHỐT KHOÁ</span><span class="module-chip__title">Final Exam</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">02.05.2027</p><p style="margin:2px 0 0;font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums">&amp; 09.05.2027</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">SQL·PowerBI · Adv DA</p></div></div></div>
           
-          <div style="flex:0 1 240px;min-width:180px;max-width:300px;display:flex;flex-direction:column"><div class="module-chip module-chip--outline module-chip--wide module-chip--m8"><span class="module-chip__label" style="opacity:0.8">MODULE 8</span><span class="module-chip__title">Optional</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px">Chứng chỉ</p><p style="margin:2px 0 0;font-size:10.5px;opacity:0.85">PL-300 · AWS</p></div></div></div>
+          <div style="flex:0 1 240px;min-width:180px;max-width:300px;display:flex;flex-direction:column"><div class="module-chip module-chip--outline module-chip--wide module-chip--m8"><span class="module-chip__label" style="opacity:0.8">MODULE 8</span><span class="module-chip__title">Optional</span><div style="text-align:center;margin-top:8px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;width:100%;flex:1"><p style="margin:0;font-weight:600;font-size:11.5px">Chứng chỉ</p><p class="duration-label" style="margin:2px 0 0;font-size:10.5px;opacity:0.85">PL-300 · AWS</p></div></div></div>
           
         </div>
       </div>
@@ -1263,31 +1298,31 @@ path[stroke-width="30"] {
     <div style="background:#e0f2fe;--ink:#211d17;--deep:#7c5a24;border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);padding:16px 20px;margin:22px 0 0;font-size:15px;line-height:1.7;font-weight:500;color:var(--ink,#211d17);text-align:justify;max-width:100%">Một số project và tài liệu đọc của chương trình được chia sẻ công khai để bạn có thể xem trước nội dung, cách triển khai và chất lượng đào tạo thực tế.<br>Học viên chính thức sẽ nhận đầy đủ tài liệu, dữ liệu và code theo từng module.</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:32px;margin-top:40px;padding:20px 0">
       <a href="https://drive.google.com/file/d/1HDr8nKMf5yqfUZoIR_YcIG5Rfkv2Pw3P/view" target="_blank" rel="noopener" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)" style="position:relative;display:flex;flex-direction:column;gap:8px;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:24px 26px;text-decoration:none;color:var(--ink,#211d17);transition:all 0.2s;">
-        <div style="position:absolute;top:-14px;right:-10px;background:#b68235;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Project 2.1</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#b68235;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Project 2.1</div>
         <span style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;margin-top:8px">Marketing Analytics</span>
         <span style="font-size:14px;line-height:1.65;font-weight:500;color:color-mix(in srgb, var(--ink,#211d17) 70%, transparent);text-align:justify;display:block">Phân tích và đánh giá hiệu quả chiến dịch marketing trên dữ liệu đa kênh, theo đúng cấu trúc project trong lớp học.</span>
         <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--deep,#8a6228);margin-top:auto;text-transform:uppercase;letter-spacing:0.05em">Mở đọc thử →</span>
       </a>
       <a href="https://drive.google.com/file/d/1ObBAKfuKm8J1OUCnV50oVyCnQLMSnb3e/view" target="_blank" rel="noopener" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)" style="position:relative;display:flex;flex-direction:column;gap:8px;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:24px 26px;text-decoration:none;color:var(--ink,#211d17);transition:all 0.2s;">
-        <div style="position:absolute;top:-14px;right:-10px;background:#f1e5cf;--ink:#211d17;--deep:#7c5a24;color:#211d17;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Reading</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#f1e5cf;--ink:#211d17;--deep:#7c5a24;color:#211d17;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Reading</div>
         <span style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;margin-top:8px">Retail Analytics - Forecasting</span>
         <span style="font-size:14px;line-height:1.65;font-weight:500;color:color-mix(in srgb, var(--ink,#211d17) 70%, transparent);text-align:justify;display:block">Phân tích trực quan và dự báo chuỗi thời gian trên dữ liệu E-commerce, làm nền cho Module 7: Forecasting &amp; Anomaly Detection.</span>
         <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--deep,#8a6228);margin-top:auto;text-transform:uppercase;letter-spacing:0.05em">Mở đọc thử →</span>
       </a>
       <a href="https://drive.google.com/file/d/1ov8eWsaOJPsDff5nXxBdEuwIjohk1Bk9/view" target="_blank" rel="noopener" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)" style="position:relative;display:flex;flex-direction:column;gap:8px;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:24px 26px;text-decoration:none;color:var(--ink,#211d17);transition:all 0.2s;">
-        <div style="position:absolute;top:-14px;right:-10px;background:#3b82f6;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Project</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#3b82f6;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Project</div>
         <span style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;margin-top:8px">Digital Marketing đa kênh</span>
         <span style="font-size:14px;line-height:1.65;font-weight:500;color:color-mix(in srgb, var(--ink,#211d17) 70%, transparent);text-align:justify;display:block">Phân tích hiệu quả chiến dịch và dự đoán nguy cơ thua lỗ trên dữ liệu Digital Marketing đa kênh.</span>
         <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--deep,#8a6228);margin-top:auto;text-transform:uppercase;letter-spacing:0.05em">Mở đọc thử →</span>
       </a>
       <a href="docs/eDA-2026-Syllabus.html" target="_blank" rel="noopener" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)" style="position:relative;display:flex;flex-direction:column;gap:8px;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:24px 26px;text-decoration:none;color:var(--ink,#211d17);transition:all 0.2s;">
-        <div style="position:absolute;top:-14px;right:-10px;background:#e0f2fe;--ink:#211d17;--deep:#7c5a24;color:#0369a1;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Syllabus</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#e0f2fe;--ink:#211d17;--deep:#7c5a24;color:#0369a1;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Syllabus</div>
         <span style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;margin-top:8px">eDA 2026 - Syllabus đầy đủ</span>
         <span style="font-size:14px;line-height:1.65;font-weight:500;color:color-mix(in srgb, var(--ink,#211d17) 70%, transparent);text-align:justify;display:block">Toàn bộ lộ trình 8 module, lịch từng buổi học, chương trình warm-up và các buổi bổ trợ, được tổng hợp từ kế hoạch đào tạo chính thức.</span>
         <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--deep,#8a6228);margin-top:auto;text-transform:uppercase;letter-spacing:0.05em">Mở tài liệu →</span>
       </a>
       <a href="https://drive.google.com/drive/folders/1JlXxhr-m3yKF8m8oZxoSg5hcq77CwNMh?usp=sharing" target="_blank" rel="noopener" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)" style="position:relative;display:flex;flex-direction:column;gap:8px;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:24px 26px;text-decoration:none;color:var(--ink,#211d17);transition:all 0.2s;">
-        <div style="position:absolute;top:-14px;right:-10px;background:#22c55e;color:#000;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Drive Share</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#22c55e;color:#000;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Drive Share</div>
         <span style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;margin-top:8px;color:var(--ink,#211d17)">Nội dung &amp; tài liệu tham khảo</span>
         <span style="font-size:14px;line-height:1.65;font-weight:500;color:color-mix(in srgb, var(--ink,#211d17) 70%, transparent);text-align:justify;display:block">Thư mục chia sẻ chính thức của chương trình, gồm nội dung học, tài liệu tham khảo và các bản demo.</span>
         <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--deep,#8a6228);margin-top:auto;text-transform:uppercase;letter-spacing:0.05em">Mở thư mục →</span>
@@ -1331,7 +1366,7 @@ path[stroke-width="30"] {
     <div style="background:#fce7f3;--ink:#211d17;--deep:#7c5a24;border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);padding:16px 20px;margin:22px 0 0;font-size:15px;line-height:1.7;font-weight:500;color:var(--ink,#211d17);text-align:justify;max-width:100%">Toàn bộ các buổi học live do giảng viên chính của AI VIETNAM trực tiếp giảng dạy. Xuyên suốt khóa học, đội ngũ mentor sẽ theo sát từng nhóm domain, hỗ trợ học viên giải đáp chuyên môn, hoàn thiện project và phát triển năng lực theo đúng định hướng nghề nghiệp.</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:32px;margin-top:40px;padding:10px 0">
       <div style="position:relative;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:32px 26px;display:flex;flex-direction:column;align-items:flex-start;gap:20px;transition:all 0.2s;" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)">
-        <div style="position:absolute;top:-14px;right:-10px;background:#eab308;color:#000;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Primary</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#eab308;color:#000;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Primary</div>
         <div style="position:relative;width:96px;height:96px;border:3px solid var(--ink,#211d17);box-shadow:4px 4px 0 var(--ink,#211d17);border-radius:0;overflow:hidden;">
           <div style="position:absolute;inset:0;opacity:0.1;background:#b68235;-webkit-mask:url('assets/dongson-drum.svg') center/contain no-repeat;mask:url('assets/dongson-drum.svg') center/contain no-repeat;pointer-events:none"></div>
           <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="mentor-dinh-vinh" src="ava/crop-dinh-vinh.jpg" placeholder="Ảnh Dr. Đình Vinh" shape="rect" style="width:100%;height:100%;object-fit:cover" hint-size="96px,96px"></x-import>
@@ -1342,7 +1377,7 @@ path[stroke-width="30"] {
         </div>
       </div>
       <div style="position:relative;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:32px 26px;display:flex;flex-direction:column;align-items:flex-start;gap:20px;transition:all 0.2s;" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)">
-        <div style="position:absolute;top:-14px;right:-10px;background:#E11D48;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Co-founder</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#E11D48;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Co-founder</div>
         <div style="position:relative;width:96px;height:96px;border:3px solid var(--ink,#211d17);box-shadow:4px 4px 0 var(--ink,#211d17);border-radius:0;overflow:hidden;">
           <div style="position:absolute;inset:0;opacity:0.1;background:#b68235;-webkit-mask:url('assets/dongson-drum.svg') center/contain no-repeat;mask:url('assets/dongson-drum.svg') center/contain no-repeat;pointer-events:none"></div>
           <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="mentor-quang-vinh" src="ava/crop-quang-vinh.jpg" placeholder="Ảnh Dr. Quang Vinh" shape="rect" style="width:100%;height:100%;object-fit:cover" hint-size="96px,96px"></x-import>
@@ -1353,7 +1388,7 @@ path[stroke-width="30"] {
         </div>
       </div>
       <div style="position:relative;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:32px 26px;display:flex;flex-direction:column;align-items:flex-start;gap:20px;transition:all 0.2s;" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)">
-        <div style="position:absolute;top:-14px;right:-10px;background:#3b82f6;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Deployment</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#3b82f6;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Deployment</div>
         <div style="position:relative;width:96px;height:96px;border:3px solid var(--ink,#211d17);box-shadow:4px 4px 0 var(--ink,#211d17);border-radius:0;overflow:hidden;">
           <div style="position:absolute;inset:0;opacity:0.1;background:#b68235;-webkit-mask:url('assets/dongson-drum.svg') center/contain no-repeat;mask:url('assets/dongson-drum.svg') center/contain no-repeat;pointer-events:none"></div>
           <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="mentor-quoc-thai" src="ava/crop-quoc-thai.jpg" placeholder="Ảnh MSc. Quốc Thái" shape="rect" style="width:100%;height:100%;object-fit:cover" hint-size="96px,96px"></x-import>
@@ -1364,7 +1399,7 @@ path[stroke-width="30"] {
         </div>
       </div>
       <div style="position:relative;background:var(--surface,#fffdf9);border:3px solid var(--ink,#211d17);box-shadow:5px 5px 0 var(--ink,#211d17);border-radius:0;padding:32px 26px;display:flex;flex-direction:column;align-items:flex-start;gap:20px;transition:all 0.2s;" style-hover="transform:translate(-6px,-6px);box-shadow:8px 8px 0 var(--ink,#211d17)">
-        <div style="position:absolute;top:-14px;right:-10px;background:#E11D48;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Co-founder</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#E11D48;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Co-founder</div>
         <div style="position:relative;width:96px;height:96px;border:3px solid var(--ink,#211d17);box-shadow:4px 4px 0 var(--ink,#211d17);border-radius:0;overflow:hidden;">
           <div style="position:absolute;inset:0;opacity:0.1;background:#b68235;-webkit-mask:url('assets/dongson-drum.svg') center/contain no-repeat;mask:url('assets/dongson-drum.svg') center/contain no-repeat;pointer-events:none"></div>
           <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="mentor-hong-phuc" src="ava/crop-hong-phuc.jpg" placeholder="Ảnh Dr. Nguyễn Hồng Phúc" shape="rect" style="width:100%;height:100%;object-fit:cover" hint-size="96px,96px"></x-import>
@@ -1375,7 +1410,7 @@ path[stroke-width="30"] {
         </div>
       </div>
       <div style="position:relative;border:3px solid var(--ink,#211d17);border-radius:0;padding:32px 26px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--ink,#211d17) 3%, transparent);">
-        <div style="position:absolute;top:-14px;right:-10px;background:#f43f5e;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Mentors</div>
+        <div class="doc-label" style="position:absolute;top:-14px;right:-10px;background:#f43f5e;color:#fff;border:3px solid var(--ink,#211d17);padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink,#211d17)">Mentors</div>
         <div style="background:#ffedd5;--ink:#211d17;--deep:#7c5a24;border:2.5px solid var(--ink,#211d17);box-shadow:4px 4px 0 var(--ink,#211d17);padding:14px 20px;margin:24px auto 0;font-size:14.5px;line-height:1.65;color:var(--ink,#211d17);text-align:justify;font-weight:600;max-width:60ch">Đội ngũ mentor theo domain (Sales, Finance, Marketing, Supply Chain, HR...).</div>
       </div>
     </div>
