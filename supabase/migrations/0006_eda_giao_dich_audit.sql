@@ -50,6 +50,11 @@ create index if not exists eda_bank_txn_dot_idx
 -- ── Cong no: suy ra, khong luu ─────────────────────────────────────────────
 -- Chi cong giao dich DA XAC NHAN. Giao dich khop nhung chua ai bam xac nhan khong duoc
 -- tinh la da thu - do moi la de xuat cua may, chua phai quyet dinh cua nguoi.
+--
+-- CANH BAO: dinh nghia o day CHUA CO cong chan quyen, vi ham eda_dung_tien() mai 0007 moi
+-- co ma view thi kiem tham chieu ngay luc tao. 0007 tao lai view nay kem menh de where.
+-- View khong co security_invoker chay bang quyen chu so huu va BO QUA RLS cua bang duoi,
+-- nen thieu cong do thi nguoi la cam anon key doc duoc het so tien cua tung nguoi.
 create or replace view public.eda_cong_no as
 select r.id as registration_id,
        coalesce(sum(distinct_i.can_thu), 0) as phai_dong,
@@ -86,6 +91,30 @@ create table if not exists public.eda_audit (
 create index if not exists eda_audit_bang_idx on public.eda_audit (bang, created_at desc);
 create index if not exists eda_audit_nguoi_idx on public.eda_audit (nguoi_dung, created_at desc);
 
+-- Che thong tin ca nhan truoc khi ghi vao nhat ky.
+--
+-- 0004 xoa don dang ky sau 24 thang, nhung trigger ghi log chay AFTER DELETE va chep
+-- nguyen ban ghi vao eda_audit - bang khong co han luu va khong co duong xoa. Nhu vay
+-- chinh sach luu tru chi DI DOI thong tin ca nhan sang mot bang vinh vien chu khong xoa
+-- di, ma day la so dien thoai cua tre vi thanh nien va cua phu huynh.
+--
+-- Che GIA TRI, giu lai TEN COT: nhat ky van tra loi duoc "ai doi cot nao luc nao", chi
+-- khong tra loi "doi thanh so nao". Voi mot cuon so de quy trach nhiem thi the la du, va
+-- do la danh doi co y - doi lay viec khong nhan ban du lieu ca nhan ra ngoai vong doi cua
+-- chinh ban ghi goc.
+create or replace function public.eda_che_pii(d jsonb)
+returns jsonb
+language sql
+immutable
+as $$
+  select case when d is null then null else (
+    select coalesce(jsonb_object_agg(k, case when k in
+             ('phone', 'email', 'guardian_name', 'guardian_phone', 'ip_hash')
+             and v <> 'null'::jsonb then '"(đã che)"'::jsonb else v end), '{}'::jsonb)
+      from jsonb_each(d) as e(k, v)
+  ) end;
+$$;
+
 create or replace function public.eda_ghi_log()
 returns trigger
 language plpgsql
@@ -99,8 +128,8 @@ begin
                                      else (to_jsonb(new) ->> 'id')::uuid end;
   insert into public.eda_audit (nguoi_dung, hanh_dong, bang, ban_ghi, truoc, sau)
   values (auth.uid(), tg_op, tg_table_name, v_id,
-          case when tg_op = 'INSERT' then null else to_jsonb(old) end,
-          case when tg_op = 'DELETE' then null else to_jsonb(new) end);
+          case when tg_op = 'INSERT' then null else public.eda_che_pii(to_jsonb(old)) end,
+          case when tg_op = 'DELETE' then null else public.eda_che_pii(to_jsonb(new)) end);
   return null;
 end;
 $$;
@@ -123,7 +152,11 @@ end $$;
 -- Nhat ky khong duoc sua, khong duoc xoa - ke ca boi admin. Mot nhat ky chinh sua duoc
 -- thi khong con la bang chung, va gia tri duy nhat cua no la lam bang chung.
 alter table public.eda_audit enable row level security;
-revoke insert, update, delete on public.eda_audit from anon, authenticated;
+-- TRUNCATE phai revoke rieng: RLS khong ap cho TRUNCATE, va "revoke delete" khong bao gom
+-- no. Thieu mot chu la ca cuon nhat ky xoa duoc bang mot cau lenh.
+revoke insert, update, delete, truncate on public.eda_audit from anon, authenticated;
+revoke truncate on public.eda_registration, public.eda_bank_txn,
+                   public.eda_registration_installment from anon, authenticated;
 -- Trigger ghi duoc vi ham eda_ghi_log() la security definer, chay quyen chu so huu.
 
 alter table public.eda_statement_upload enable row level security;

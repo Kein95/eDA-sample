@@ -59,9 +59,12 @@ create trigger eda_log_trg
 
 alter table public.eda_noi_dung enable row level security;
 
--- Doc: moi tai khoan da dang nhap (tro giang cung can xem trang dang noi gi).
+-- Doc: moi tai khoan CO VAI (tro giang cung can xem trang dang noi gi).
 -- Ghi: chi admin. Ke toan khong sua noi dung trang cong khai, tro giang cung khong.
+--
+-- Kiem vai chu khong kiem "da dang nhap": Supabase mac dinh mo dang ky email, nen
+-- auth.uid() is not null chi co nghia la co ai do tu tao mot tai khoan.
 create policy "doc noi dung" on public.eda_noi_dung
-  for select to authenticated using (auth.uid() is not null);
+  for select to authenticated using (public.eda_vai() is not null);
 create policy "sua noi dung" on public.eda_noi_dung
   for all to authenticated using (public.eda_la_admin()) with check (public.eda_la_admin());

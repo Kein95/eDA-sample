@@ -80,11 +80,20 @@ set local role authenticated;
 select pg_temp.dang_nhap('EDA_TA', 'aaaaaaaa-0000-0000-0000-000000000003');
 
 do $$
-declare n integer;
+declare n integer; v_du integer;
 begin
   select count(*) into n from eda_registration_tro_giang;
   if n < 1 then raise exception 'THAT BAI: tro giang khong doc duoc view cua chinh minh'; end if;
   perform pg_temp.dat(format('tro giang doc duoc danh sach hoc vien (%s dong)', n));
+
+  -- da_dong_du tinh thang tu bang goc chu khong qua view eda_cong_no (view do da chan lai
+  -- cho vai dung tien). Di qua no thi cot nay im lang thanh null va tro giang mat het thong
+  -- tin ai da dong du - hong ma khong bao gi.
+  select count(*) into v_du from eda_registration_tro_giang where da_dong_du is not null;
+  if v_du <> n then
+    raise exception 'THAT BAI: % / % dong co da_dong_du la null', n - v_du, n;
+  end if;
+  perform pg_temp.dat('tro giang van thay duoc da_dong_du (boolean, khong phai so tien)');
 end $$;
 
 -- Cot nhay cam khong duoc co trong view. Kiem bang cach GOI THAT, khong phai bang
@@ -93,12 +102,18 @@ select pg_temp.phai_hong(
   'tro giang KHONG lay duoc SDT phu huynh qua view',
   $$select guardian_phone from eda_registration_tro_giang limit 1$$);
 
-do $$
-declare n integer;
-begin
-  select count(*) into n from eda_registration;
-  perform pg_temp.dat(format('tro giang doc bang goc: %s dong (policy rieng cua vai TA)', n));
-end $$;
+-- Kiem CA BANG GOC, khong chi cai view.
+--
+-- Ban truoc chi kiem view roi ket luan la kin, trong khi bang goc van mo: tro giang goi
+-- thang REST vao eda_registration la lay duoc guardian_phone. Che mot cua ma khong kiem
+-- cua con lai thi bo kiem chi chung minh duoc rang cua da che thi da che.
+select pg_temp.phai_rong(
+  'tro giang KHONG doc duoc BANG GOC eda_registration',
+  $$select count(*) from eda_registration$$);
+
+select pg_temp.phai_rong(
+  'tro giang KHONG lay duoc SDT phu huynh THANG TU BANG GOC',
+  $$select count(guardian_phone) from eda_registration$$);
 
 select pg_temp.phai_rong(
   'tro giang KHONG doc duoc giao dich ngan hang',
@@ -113,6 +128,14 @@ select pg_temp.phai_rong(
 select pg_temp.phai_rong(
   'tro giang KHONG doc duoc nhat ky',
   $$select count(*) from eda_audit$$);
+
+select pg_temp.phai_rong(
+  'tro giang KHONG doc duoc so tien qua view cong no',
+  $$select count(*) from eda_cong_no$$);
+
+select pg_temp.phai_hong(
+  'tro giang KHONG goi duoc ham gan phuong an',
+  $$select eda_gan_phuong_an('bbbbbbbb-0000-0000-0000-000000000001', null)$$);
 
 select pg_temp.phai_khong_doi(
   'tro giang KHONG sua duoc don dang ky',
@@ -167,6 +190,19 @@ select pg_temp.phai_khong_doi(
   $$update eda_bank_txn
        set xac_nhan_luc = now(), xac_nhan_boi = 'aaaaaaaa-0000-0000-0000-000000000001'
      where ngan_hang = 'TCB'$$);
+
+-- Chan duong UPDATE ma khong chan duong INSERT thi ke toan chen thang mot dong da danh
+-- dau "admin da xac nhan", va nhat ky se ghi rang admin duyet khoan tien do.
+select pg_temp.phai_hong(
+  'ke toan KHONG CHEN duoc giao dich mang ten nguoi khac',
+  $$insert into eda_bank_txn (ngan_hang, ma_gd, posted_at, so_tien, noi_dung,
+                              xac_nhan_luc, xac_nhan_boi)
+    values ('VCB', 'GIA-MAO-1', now(), 1000, 'thu chen ho',
+            now(), 'aaaaaaaa-0000-0000-0000-000000000001')$$);
+
+select pg_temp.phai_hong(
+  'ke toan KHONG goi duoc ham gan phuong an',
+  $$select eda_gan_phuong_an('bbbbbbbb-0000-0000-0000-000000000001', null)$$);
 commit;
 
 -- ── Admin ──────────────────────────────────────────────────────────────────
@@ -184,11 +220,27 @@ do $$ begin
 end $$;
 
 do $$
-declare n integer;
+declare n integer; v jsonb;
 begin
   select count(*) into n from eda_audit;
   if n < 1 then raise exception 'THAT BAI: admin khong doc duoc nhat ky - nhat ky khong doc duoc thi vo dung'; end if;
   perform pg_temp.dat(format('admin DOC duoc nhat ky (%s dong)', n));
+
+  -- 0004 xoa don dang ky sau 24 thang, nhung nhat ky khong co han luu. Ghi nguyen ban ghi
+  -- vao day tuc la chinh sach luu tru chi DI DOI so dien thoai sang mot bang vinh vien.
+  update eda_registration set ghi_chu_noi_bo = 'kiem che pii' where code = 'eDA26-ABC123';
+  select sau into v from eda_audit
+   where bang = 'eda_registration' order by created_at desc limit 1;
+  if v ->> 'phone' is distinct from '(đã che)' then
+    raise exception 'THAT BAI: nhat ky luu nguyen SDT hoc vien: %', v ->> 'phone';
+  end if;
+  if v ->> 'guardian_phone' is not null and v ->> 'guardian_phone' <> '(đã che)' then
+    raise exception 'THAT BAI: nhat ky luu nguyen SDT phu huynh: %', v ->> 'guardian_phone';
+  end if;
+  if v ->> 'code' is null then
+    raise exception 'THAT BAI: che qua tay, mat luon cot khong nhay cam';
+  end if;
+  perform pg_temp.dat('nhat ky CHE thong tin ca nhan, van giu cot de doi chieu');
 end $$;
 
 do $$
@@ -206,10 +258,30 @@ begin;
 set local role anon;
 select pg_temp.phai_rong('nguoi la KHONG doc duoc don dang ky',
                          $$select count(*) from eda_registration$$);
+-- View chay bang quyen nguoi tao nen KHONG bi RLS chan. Cong duy nhat cua no la menh de
+-- where trong chinh view, va grant chi cap cho authenticated. Phai kiem that.
+select pg_temp.phai_rong('nguoi la KHONG doc duoc view cua tro giang',
+                         $$select count(*) from eda_registration_tro_giang$$);
 select pg_temp.phai_rong('nguoi la KHONG doc duoc giao dich',
                          $$select count(*) from eda_bank_txn$$);
 select pg_temp.phai_rong('nguoi la KHONG doc duoc nhat ky',
                          $$select count(*) from eda_audit$$);
+
+-- View KHONG bat security_invoker thi chay bang quyen chu so huu va bo qua RLS cua bang
+-- duoi. Bang goc kin ma view ho la nguoi la cam anon key doc duoc het so tien. Bang goc
+-- kin roi khong co nghia la view kin.
+select pg_temp.phai_rong('nguoi la KHONG doc duoc cong no qua view',
+                         $$select count(*) from eda_cong_no$$);
+select pg_temp.phai_rong('nguoi la KHONG doc duoc bang gia hoc phi',
+                         $$select count(*) from eda_payment_plan$$);
+select pg_temp.phai_rong('nguoi la KHONG doc duoc noi dung trang',
+                         $$select count(*) from eda_noi_dung$$);
+
+-- Ham security definer bo qua RLS. Khong revoke va khong tu kiem vai thi PostgREST bay no
+-- thanh mot endpoint /rpc/... goi duoc bang anon key cong khai.
+select pg_temp.phai_hong(
+  'nguoi la KHONG goi duoc ham gan phuong an',
+  $$select eda_gan_phuong_an('bbbbbbbb-0000-0000-0000-000000000001', null)$$);
 commit;
 
 -- ── Noi dung trang ─────────────────────────────────────────────────────────

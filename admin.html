@@ -378,6 +378,7 @@ tr.new td{animation:newrow 2.4s ease-out}
         <select id="locHanhDong" style="width:auto"><option value="">tất cả</option></select></label>
       <input id="timLog" type="search" placeholder="Tìm trong chi tiết…" style="width:min(260px,45vw)">
       <button id="taiLog" class="ghost" style="margin-left:auto">Tải CSV</button>
+      <button id="taiLogTxt" class="ghost">Tải TXT</button>
     </div>
     <div class="tablewrap"><table class="ds">
       <thead><tr>
@@ -513,6 +514,7 @@ function vaoDemo() {
   $('app').classList.remove('hide');
   $('demoBanner').classList.remove('hide');
   setLive('off', '•  demo, không nối trực tiếp');
+  dangDemo = true;
   $('oDoiVai').classList.remove('hide');
   apVai(vaiHienTai);
   veTaiKhoan();
@@ -574,12 +576,35 @@ function vaiTrongToken(token) {
   } catch { return 'EDA_TA'; }
 }
 
+// Trợ giảng đọc từ VIEW, không đọc bảng gốc: bảng gốc có SĐT phụ huynh, và migration
+// 0007 đã bỏ hẳn quyền của vai TA trên bảng đó. Gọi bảng gốc bằng vai TA sẽ ra 0 dòng
+// chứ không báo lỗi, nên nếu ở đây không đổi thì trợ giảng đăng nhập vào thấy bảng trống.
+const NGUON_THEO_VAI = {
+  EDA_TA: { bang: 'eda_registration_tro_giang', cot: COLS.filter(c => !c.startsWith('guardian_')) },
+};
+const nguonDocDon = (vai) => NGUON_THEO_VAI[vai] || { bang: 'eda_registration', cot: COLS };
+
 async function load() {
   const token = sessionStorage.getItem('eda_token');
   if (!token) return;
-  const r = await fetch(
-    `${SUPABASE_URL}/rest/v1/eda_registration?select=${COLS.join(',')}&order=created_at.desc`,
-    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` } });
+  const vai = vaiTrongToken(token);
+  const { bang, cot } = nguonDocDon(vai);
+  let r;
+  try {
+    // Có hạn giờ như lúc đăng nhập. Thiếu thì mất mạng là nút "Tải lại" im lặng hoàn
+    // toàn: fetch treo hoặc reject, không ai bắt, người dùng bấm mãi không hiểu vì sao.
+    r = await fetch(
+      `${SUPABASE_URL}/rest/v1/${bang}?select=${cot.join(',')}&order=created_at.desc`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(15000) });
+  } catch (e) {
+    $('login').classList.add('hide'); $('app').classList.remove('hide');
+    apVai(vai);
+    showErr($('listErr'), e.name === 'TimeoutError' || e.name === 'AbortError'
+      ? 'Máy chủ không phản hồi sau 15 giây. Kiểm tra mạng rồi bấm Tải lại.'
+      : 'Không gọi được máy chủ: ' + e.message);
+    return;
+  }
 
   if (r.status === 401) {           // het han phien
     sessionStorage.removeItem('eda_token');
@@ -588,17 +613,20 @@ async function load() {
     return;
   }
   $('login').classList.add('hide'); $('app').classList.remove('hide');
-  apVai(vaiTrongToken(token));
+  apVai(vai);
+  // Nội dung trang cũng phải nạp ở nhánh thật, không chỉ ở nhánh demo: thiếu thì tab
+  // Nội dung mở ra rỗng trơn dù bảng phân vai đã bày nó ra.
+  docMacDinh().then(() => napChuGoc(false)).then(veNoiDung);
   if (!r.ok) { showErr($('listErr'), 'Không tải được danh sách (' + r.status + ').'); return; }
 
   rows = await r.json();
   hideErr($('listErr'));
   subscribe(token);
-  // Danh sach rong + dang nhap duoc = tai khoan chua duoc gan role EDA_ADMIN,
+  // Danh sach rong + dang nhap duoc = tai khoan chua duoc gan vai,
   // vi RLS tra ve 0 dong thay vi bao loi. Noi ro de khoi tuong la chua ai dang ky.
   if (rows.length === 0) {
     showErr($('listErr'),
-      'Không có dòng nào. Nếu chắc chắn đã có người đăng ký thì tài khoản này chưa được gán quyền EDA_ADMIN (xem migration 0002).');
+      'Không có dòng nào. Nếu chắc chắn đã có người đăng ký thì tài khoản này chưa được gán vai (xem README phần B4.5).');
   }
   render();
 }
@@ -704,7 +732,7 @@ function toCsv() {
   const url = URL.createObjectURL(new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8' }));
   const a = document.createElement('a');
   a.href = url;
-  a.download = `dang-ky-eda2026-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `dang-ky-eda2026-${ngayMay()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -1050,6 +1078,20 @@ function ghiLog(hanhDong, chiTiet, nguoi) {
 }
 
 // ── Nhật ký ────────────────────────────────────────────────────────────────
+/**
+ * Những dòng nhật ký đang hiện sau khi lọc.
+ *
+ * Dùng chung cho bảng và cho cả hai nút tải: lọc theo một người rồi bấm tải mà ra cả sổ
+ * thì người tải tưởng mình đang cầm bản đã lọc, và đọc sai phạm vi mà không biết.
+ */
+function nhatKyDangXem() {
+  const ng = $('locNguoi').value, hd = $('locHanhDong').value;
+  const tu = $('timLog').value.trim().toLowerCase();
+  return nhatKy.filter(l =>
+    (!ng || l.nguoi === ng) && (!hd || l.hanhDong === hd)
+    && (!tu || (l.chiTiet + ' ' + l.hanhDong).toLowerCase().includes(tu)));
+}
+
 function veNhatKy() {
   // Danh sách lọc dựng lại từ chính dữ liệu, không viết cứng: thêm loại thao tác mới
   // mà quên thêm vào ô lọc thì nó sẽ lọt khỏi tầm nhìn của người kiểm.
@@ -1063,12 +1105,7 @@ function veNhatKy() {
       el.value = moi.includes(giu) ? giu : '';
     }
   }
-  const ng = $('locNguoi').value, hd = $('locHanhDong').value;
-  const tu = $('timLog').value.trim().toLowerCase();
-  const hien = nhatKy.filter(l =>
-    (!ng || l.nguoi === ng) && (!hd || l.hanhDong === hd)
-    && (!tu || (l.chiTiet + ' ' + l.hanhDong).toLowerCase().includes(tu)));
-
+  const hien = nhatKyDangXem();
   $('soLog').textContent = hien.length + (hien.length === nhatKy.length ? '' : ' / ' + nhatKy.length);
   $('dongLog').innerHTML = hien.map(l => `<tr>
       <td class="thoi">${esc(fmtTime(l.luc.toISOString()))}</td>
@@ -1093,25 +1130,38 @@ const VAI = {
  * Nội dung trang: mọi vai ĐỌC được (policy "doc noi dung"), chỉ admin ghi - nên trợ
  * giảng và kế toán vẫn thấy tab nhưng ô sửa để chế độ chỉ xem.
  */
+// "Được xem tiền" khai riêng chứ không suy ra từ việc có tab Đối soát: hai chuyện tình
+// cờ trùng nhau với ba vai hiện tại, thêm một vai lệch khỏi cặp đó là sai âm thầm.
 const TAB_THEO_VAI = {
-  EDA_TA:         ['dangky', 'noidung'],
-  EDA_ACCOUNTANT: ['dangky', 'doisoat', 'noidung'],
-  EDA_ADMIN:      ['dangky', 'doisoat', 'noidung', 'taikhoan', 'nhatky'],
+  EDA_TA:         { tab: ['dangky', 'noidung'], tien: false },
+  EDA_ACCOUNTANT: { tab: ['dangky', 'doisoat', 'noidung'], tien: true },
+  EDA_ADMIN:      { tab: ['dangky', 'doisoat', 'noidung', 'taikhoan', 'nhatky'], tien: true },
 };
 let vaiHienTai = 'EDA_ADMIN';
+let dangDemo = false;      // bật khi vaoDemo() chạy, tức là dữ liệu trên màn hình là bịa
 const laAdmin = () => vaiHienTai === 'EDA_ADMIN';
+const tabChoPhep = (vai) => (TAB_THEO_VAI[vai] || TAB_THEO_VAI.EDA_TA).tab;
 
 function apVai(vai) {
+  if (!TAB_THEO_VAI[vai]) vai = 'EDA_TA';    // vai lạ thì xuống quyền thấp nhất, đừng ném
   vaiHienTai = vai;
-  $('vai').textContent = `vai: ${VAI[vai].toLowerCase()}${LA_DASHBOARD ? ' (demo)' : ''}`;
-  const duoc = TAB_THEO_VAI[vai];
+  // Chữ "(demo)" phải theo NGUỒN DỮ LIỆU chứ không theo đường dẫn: bản thật cũng phục vụ
+  // ở /dashboard/* nên gắn nhãn theo đường dẫn là dán "(demo)" lên dữ liệu thật.
+  $('vai').textContent = `vai: ${VAI[vai].toLowerCase()}${dangDemo ? ' (demo)' : ''}`;
+  // Ô chọn phải khớp vai đang áp. Thiếu dòng này thì ô hiện option đầu tiên (Trợ giảng)
+  // trong khi đang là quản trị, và chọn đúng "Trợ giảng" lại không kích hoạt sự kiện
+  // change nên bấm vào không có gì xảy ra.
+  $('doiVai').value = vai;
+  const duoc = tabChoPhep(vai);
   document.querySelectorAll('.tab').forEach(t =>
     t.classList.toggle('hide', !duoc.includes(t.dataset.tab)));
   // Trợ giảng không thấy tiền. Cột Học phí ẩn bằng CSS theo lớp trên <body> để một
   // chỗ đổi là cả tiêu đề lẫn mọi ô trong cột cùng ẩn, không phải sửa hai nơi.
-  document.body.classList.toggle('an-tien', !TAB_THEO_VAI[vai].includes('doisoat'));
+  document.body.classList.toggle('an-tien', !TAB_THEO_VAI[vai].tien);
   document.body.classList.toggle('chi-xem-noidung', !laAdmin());
-  veNoiDung();                       // vẽ lại để ô sửa nhận đúng chế độ chỉ xem
+  // Đổi thuộc tính tại chỗ chứ KHÔNG gọi veNoiDung(): vẽ lại sẽ dựng lại cả bảng từ bản
+  // đã lưu và xoá sạch chữ người ta đang gõ dở trên 600 dòng, không hỏi han gì.
+  for (const o of $('dongNoiDung').querySelectorAll('textarea[data-khoa]')) o.readOnly = !laAdmin();
   moTab(tabTrenDuongDan());
 }
 const TAI_KHOAN_DANG_DUNG = 'admin@example.com';
@@ -1244,22 +1294,75 @@ $('dongKhop').addEventListener('change', demSoTick);
 $('locNguoi').onchange = veNhatKy;
 $('locHanhDong').onchange = veNhatKy;
 $('timLog').oninput = veNhatKy;
+function taiTep(ten, noiDung, kieu) {
+  const url = URL.createObjectURL(new Blob([noiDung], { type: kieu }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = ten;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Ngày theo múi giờ MÁY, không phải UTC.
+ *
+ * `toISOString()` trả về giờ UTC. Ở UTC+7, xuất lúc 6 giờ sáng ngày 21 sẽ ra tên tệp ghi
+ * ngày 20, trong khi dòng "Xuất lúc" bên trong tệp ghi ngày 21: hai mốc ngày khác nhau
+ * trong cùng một tệp dùng để đối chiếu.
+ */
+const ngayMay = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const tenTepNhatKy = (duoi) => `nhat-ky-eda-${ngayMay()}.${duoi}`;
+
 $('taiLog').onclick = () => {
+  const hien = nhatKyDangXem();
   const cell = (v) => {
     let s = String(v ?? '');
     if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;   // chặn công thức Excel, như bản CSV đăng ký
     return '"' + s.replace(/"/g, '""') + '"';
   };
   const body = ['luc,nguoi,hanh_dong,chi_tiet',
-    ...nhatKy.map(l => [l.luc.toISOString(), l.nguoi, l.hanhDong, l.chiTiet].map(cell).join(','))
+    ...hien.map(l => [l.luc.toISOString(), l.nguoi, l.hanhDong, l.chiTiet].map(cell).join(','))
   ].join('\r\n');
-  const url = URL.createObjectURL(new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `nhat-ky-eda-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  ghiLog('Tải nhật ký', nhatKy.length + ' dòng');
+  taiTep(tenTepNhatKy('csv'), '﻿' + body, 'text/csv;charset=utf-8');
+  ghiLog('Tải nhật ký CSV', hien.length + ' dòng');
+};
+
+/**
+ * Bản .txt để đọc bằng mắt: mở bằng Notepad là thấy ngay, không cần Excel.
+ *
+ * KHÔNG nhẹ hơn CSV - đo 200 dòng thì bản tab nhẹ hơn 2%, bản căn cột còn nặng hơn 4%.
+ * Lý do có nó là dễ đọc và dễ tìm, không phải dung lượng. Ai cần sắp xếp và lọc thì vẫn
+ * tải CSV.
+ *
+ * Mỗi dòng nhật ký nằm gọn một dòng văn bản: chi tiết có xuống dòng thì thay bằng dấu
+ * cách, để tìm bằng Ctrl+F hay grep không bị đứt đoạn giữa chừng.
+ */
+$('taiLogTxt').onclick = () => {
+  const hien = nhatKyDangXem();
+  const mot = (s) => String(s ?? '').replace(/\s*[\r\n]+\s*/g, ' ');
+  const cot = [0, 1, 2].map(i =>
+    Math.max(...hien.map(l => mot([fmtTime(l.luc.toISOString()), l.nguoi, l.hanhDong][i]).length), 0));
+  const loc = [
+    $('locNguoi').value && 'người: ' + $('locNguoi').value,
+    $('locHanhDong').value && 'hành động: ' + $('locHanhDong').value,
+    $('timLog').value.trim() && 'từ khoá: ' + $('timLog').value.trim(),
+  ].filter(Boolean).join(', ');
+  const dau = [
+    `Nhật ký eDA 2026`,
+    `Xuất lúc: ${fmtTime(new Date().toISOString())}`,
+    `Số dòng : ${hien.length}${hien.length === nhatKy.length ? '' : ` (đã lọc — ${loc})`}`,
+    ''.padEnd(60, '─'),
+    '',
+  ].join('\n');
+  const than = hien.map(l => {
+    const o = [fmtTime(l.luc.toISOString()), l.nguoi, l.hanhDong].map(mot);
+    return o.map((v, i) => v.padEnd(cot[i])).join('  ') + '  ' + mot(l.chiTiet);
+  }).join('\n');
+  taiTep(tenTepNhatKy('txt'), dau + (than || '(không có dòng nào)') + '\n', 'text/plain;charset=utf-8');
+  ghiLog('Tải nhật ký TXT', hien.length + ' dòng');
 };
 
 // ── Nội dung trang ─────────────────────────────────────────────────────────
@@ -1567,16 +1670,19 @@ const TAB_THEO_SLUG = Object.fromEntries(Object.entries(SLUG).map(([t, s]) => [s
 const GOC_QT = location.pathname.startsWith('/dashboard') ? '/dashboard' : '/admin';
 const LA_DASHBOARD = GOC_QT === '/dashboard';
 
-function tabTrenDuongDan() {
+/** Slug đang nằm trên thanh địa chỉ, hoặc null nếu đường dẫn không chỉ vào tab nào. */
+function slugTrenDuongDan() {
   const s = location.pathname.slice(GOC_QT.length).replace(/^\/|\/$/g, '');
-  return TAB_THEO_SLUG[s] || 'dangky';
+  return TAB_THEO_SLUG[s] ? s : null;
 }
+const tabTrenDuongDan = () => TAB_THEO_SLUG[slugTrenDuongDan()] || 'dangky';
 
 function moTab(tab, dayDuongDan = true) {
   // Đường dẫn của tab bị cấm vẫn có thể gõ tay hoặc còn trong lịch sử trình duyệt;
   // rơi về tab đầu tiên được phép thay vì hiện khung trống.
-  const duoc = TAB_THEO_VAI[vaiHienTai];
-  if (!duoc.includes(tab)) tab = duoc[0];
+  const duoc = tabChoPhep(vaiHienTai);
+  const biBe = !duoc.includes(tab);
+  if (biBe) tab = duoc[0];
   document.querySelectorAll('.tab').forEach(x => {
     const on = x.dataset.tab === tab;
     x.classList.toggle('on', on);
@@ -1585,11 +1691,16 @@ function moTab(tab, dayDuongDan = true) {
   document.querySelectorAll('[data-khung]').forEach(k =>
     k.classList.toggle('hide', k.dataset.khung !== tab));
   const dich = GOC_QT + '/' + SLUG[tab];
-  // Lần đầu vào bằng đường dẫn trống (/dashboard) thì THAY chứ không ĐẨY: đẩy thì bấm
-  // Back một cái quay về /dashboard rồi lại nhảy sang /dashboard/list, người dùng kẹt.
-  const dangTrong = location.pathname.replace(/\/$/, '') === GOC_QT;
-  if (dayDuongDan && location.pathname !== dich)
-    history[dangTrong ? 'replaceState' : 'pushState']({ tab }, '', dich);
+  if (location.pathname === dich) return tab;
+  // THAY chứ không ĐẨY khi đường dẫn hiện tại không chỉ vào tab nào (/dashboard,
+  // /dashboard/, /admin.html, hay một slug gõ sai): đẩy thì bấm Back một cái quay về
+  // đúng chỗ vừa rời, rồi lại bị nhảy tới đây, người dùng kẹt không thoát ra được.
+  //
+  // Cũng THAY khi tab bị bẻ vì vai không được phép, kể cả lúc đang xử lý Back: bỏ qua
+  // thì thanh địa chỉ ghi một tab còn màn hình hiện tab khác, và lệch đó dai dẳng qua
+  // cả F5 cho tới khi người dùng tự bấm một tab.
+  const thay = slugTrenDuongDan() === null || biBe;
+  if (dayDuongDan || biBe) history[thay ? 'replaceState' : 'pushState']({ tab }, '', dich);
   return tab;
 }
 
@@ -1622,7 +1733,10 @@ Object.assign(window, { LA_DASHBOARD, render, locNhanh, doiSoat, saoKeMau, xacNh
 // Phai la defineProperties chu khong phai Object.assign: Object.assign GOI getter roi
 // gan gia tri tinh, nen ben ngoai se doc phai ban chup luc nap trang chu khong phai
 // gia tri hien tai - test se xanh trong khi giao dien da doi.
-Object.assign(window, { veNhatKy, veNoiDung, locChu, timChu: () => $('timChu') });
+Object.assign(window, {
+  veNhatKy, veNoiDung, locChu, ghiLog, nhatKyDangXem, apVai, moTab,
+  o: (id) => $(id),                 // để kiểm thử đọc/ghi ô lọc mà không cần bày $ ra
+});
 Object.defineProperties(window, {
   gocTheoTab: { get: () => gocTheoTab },
   rows:    { get: () => rows },

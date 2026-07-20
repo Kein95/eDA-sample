@@ -5,18 +5,8 @@
 | | |
 |---|---|
 | Trang tuyển sinh | **https://eda.luonvuituoi.work** |
-| Xem thử bảng đăng ký | **https://eda.luonvuituoi.work/dashboard** |
+| Xem thử trang quản trị | **https://eda.luonvuituoi.work/dashboard** |
 | Trang quản trị (màn đăng nhập) | **https://eda.luonvuituoi.work/admin** |
-
-`/dashboard` và `/admin` là **cùng một file** `admin.html`, khác nhau ở điểm vào:
-
-- `/dashboard` mở thẳng bảng với **10 đăng ký demo** — để xem giao diện sau khi
-  đăng nhập có gì. Số điện thoại đều thuộc dải `0900 0000 xx` (Việt Nam không cấp phát
-  dải này) và email dùng `example.com`, nên không thể trùng người thật.
-- `/admin` giữ màn đăng nhập. Chưa nối Supabase thì bấm Đăng nhập cũng vào dữ liệu mẫu;
-  nối rồi thì đăng nhập thật.
-
-*(Cloudflare Pages cắt đuôi `.html`, nên `/admin.html` sẽ bị chuyển hướng sang `/admin`.)*
 
 > ### ⚠️ Đây là bản demo ý tưởng
 >
@@ -25,13 +15,192 @@
 >
 > Nhưng **trang này** chỉ là bản phác thảo giao diện, **không phải trang tuyển sinh chính
 > thức** và **chưa liên kết với AI VIETNAM**. **Form đăng ký không hoạt động** (Supabase
-> chưa dựng, xem mục 4) — điền vào sẽ báo lỗi chứ không báo thành công giả. Muốn đăng ký
+> chưa dựng, xem phần B4), điền vào sẽ báo lỗi chứ không báo thành công giả. Muốn đăng ký
 > thật thì liên hệ trực tiếp AI VIETNAM.
 
-Bản phác thảo trang tuyển sinh cho khoá **End2End Data Analytics 2026**, kèm backend
-nhận đăng ký và trang quản trị xem danh sách.
-
 Khai giảng 06.09.2026, kết thúc 05.2027. 8 module, 9 domain, 100 buổi live online.
+
+---
+
+## Bạn đang cần gì?
+
+| Việc bạn định làm | Đọc phần nào |
+|---|---|
+| Dùng trang quản trị hằng ngày: xem đăng ký, đối soát tiền, sửa chữ trên trang | **[Phần A](#phần-a--dành-cho-người-vận-hành)**, không cần biết lập trình |
+| Chạy trang trên máy mình, sửa code, đưa lên mạng | **[Phần B](#phần-b--dành-cho-người-kỹ-thuật)** |
+
+---
+
+# PHẦN A · Dành cho người vận hành
+
+Phần này viết cho người **không cần biết lập trình**. Chỉ cần trình duyệt.
+
+## A1. Vào trang quản trị
+
+Có hai cửa vào, **cùng một trang**:
+
+| Địa chỉ | Dùng khi nào |
+|---|---|
+| `eda.luonvuituoi.work/dashboard` | **Xem thử.** Vào thẳng, không cần mật khẩu. Dữ liệu là 10 đăng ký demo, không phải người thật. |
+| `eda.luonvuituoi.work/admin` | **Dùng thật.** Có màn đăng nhập. Chỉ chạy được sau khi kỹ thuật đã dựng xong Supabase (phần B4). |
+
+Số điện thoại trong bản demo đều thuộc dải `0900 0000 xx` (Việt Nam không cấp phát dải
+này) và email dùng `example.com`, nên **không thể trùng người thật**.
+
+Mỗi tab có địa chỉ riêng, lưu vào dấu trang được, gửi cho đồng nghiệp cũng mở đúng chỗ:
+
+| Tab | Địa chỉ |
+|---|---|
+| Đăng ký | `/dashboard/list` |
+| Đối soát | `/dashboard/payments` |
+| Nội dung trang | `/dashboard/web` |
+| Tài khoản | `/dashboard/users` |
+| Nhật ký | `/dashboard/log` |
+
+## A2. Năm tab dùng để làm gì
+
+| Tab | Việc |
+|---|---|
+| **Đăng ký** | Danh sách người đăng ký. Lọc theo khoảng ngày, tìm theo tên hoặc mã, tải CSV. |
+| **Đối soát** | Đưa file sao kê ngân hàng vào, máy tự khớp giao dịch với người đăng ký, bạn tick xác nhận đã thu. |
+| **Nội dung trang** | Sửa chữ và số trên trang tuyển sinh mà không cần đụng code. |
+| **Tài khoản** | Xem ai đang có quyền gì, đổi vai. |
+| **Nhật ký** | Mọi thao tác ai làm lúc nào, tải về CSV hoặc TXT. |
+
+## A3. Ba vai, ai làm được gì
+
+| Việc | Trợ giảng | Kế toán | Quản trị |
+|---|:---:|:---:|:---:|
+| Xem danh sách học viên | ✅ | ✅ | ✅ |
+| Xem số điện thoại phụ huynh | ❌ | ✅ | ✅ |
+| Xem số tiền, giao dịch | ❌ | ✅ | ✅ |
+| Tải sao kê, khớp, xác nhận đã thu | ❌ | ✅ | ✅ |
+| Miễn giảm, đổi số phải đóng | ❌ | ❌ | ✅ |
+| Sửa thông tin đăng ký | ❌ | ❌ | ✅ |
+| Sửa chữ trên trang tuyển sinh | ❌ | ❌ | ✅ |
+| Cấp quyền cho tài khoản khác | ❌ | ❌ | ✅ |
+| Xem nhật ký | ❌ | ❌ | ✅ |
+
+Tab nào vai đó không được dùng thì **không hiện ra**, khỏi bấm nhầm.
+
+> **Vì sao kế toán không được miễn giảm.** Kế toán ghi nhận **tiền vào**, quản trị quyết
+> định **phải thu bao nhiêu**. Một tài khoản làm được cả hai thì miễn giảm khống rồi khớp
+> cho khớp sổ là thao tác không ai phát hiện được. Đây là lý do duy nhất, không phải vì
+> không tin ai.
+
+Ở bản demo (`/dashboard`) có ô **"xem như:"** trên thanh tiêu đề để thử xem mỗi vai nhìn
+thấy gì. Bản thật không có ô này: vai đến từ tài khoản đăng nhập.
+
+## A4. Việc thường làm
+
+### A4.1 Xem và lọc danh sách đăng ký
+
+Tab **Đăng ký**. Có sẵn 4 mốc nhanh (hôm nay, 7 ngày, 30 ngày, tất cả) và hai ô chọn
+ngày để tự đặt khoảng bất kỳ. Ô tìm kiếm dò theo tên, mã, số điện thoại.
+
+Nút **Tải CSV** xuất đúng phần đang hiện trên màn hình. Mở bằng Excel được luôn.
+
+### A4.2 Đối soát tiền
+
+Tab **Đối soát**. Bốn bước:
+
+1. **Bấm "Chọn file sao kê…"** rồi chọn file tải từ ngân hàng. Nhận `.xls`, `.xlsx`,
+   `.csv` của **bất kỳ ngân hàng nào**. Tên cột, thứ tự cột, mấy dòng thừa ở đầu file,
+   ngày kiểu `dd/mm/yyyy` hay kiểu khác, tất cả đều tự nhận.
+
+2. **Kiểm bảng "Cột nào là gì".** Máy đoán cột nào là ngày, cột nào là số tiền, cột nào
+   là nội dung chuyển khoản. Đoán sai thì chọn lại, bấm **"Đọc lại theo cột đã chọn"**.
+   Lần sau mở sao kê cùng ngân hàng nó tự nhớ.
+
+3. **Xem ba nhóm kết quả:**
+   - **Đã khớp**: nhận ra người nộp. Dòng nào khớp bằng **mã đăng ký** thì đã tick sẵn.
+     Dòng khớp bằng **số điện thoại** thì **không** tick sẵn, phải tự nhìn rồi tick, vì
+     số điện thoại có thể là người nhà nộp hộ.
+   - **Chưa khớp**: không nhận ra ai. Cột "Lý do" nói vì sao.
+   - **Đã xác nhận, đã vào sổ**: nộp lại đúng file cũ thì các dòng này nằm ở đây chứ
+     không cộng tiền lần thứ hai.
+
+4. **Bấm "Xác nhận đã thu"**. Chỉ những dòng đang tick mới được ghi.
+
+> **Nộp trùng file không sao.** Mỗi giao dịch có mã riêng của ngân hàng, đã vào sổ rồi thì
+> lần sau bị nhận ra ngay. Cứ nộp lại nếu không nhớ đã nộp chưa.
+
+### A4.3 Sửa chữ trên trang tuyển sinh
+
+Tab **Nội dung trang**. Chỉ vai **quản trị** sửa được, vai khác chỉ xem.
+
+Trang tuyển sinh có hơn 600 câu chữ, gom sẵn theo đúng 5 tab của trang. Có ô **Tìm chữ**
+ở trên, gõ vài chữ trong câu cần sửa là ra.
+
+| Nút | Làm gì |
+|---|---|
+| **Lưu nháp** | Cất lại, **khách chưa thấy gì**. |
+| **Xem thử trên trang** | Mở trang tuyển sinh với bản nháp, chỉ mình bạn thấy. |
+| **Xuất bản** | Đẩy lên trang thật, từ lúc này khách thấy. |
+| **Hoàn về mặc định** | Bỏ hết mọi sửa đổi, trả về chữ gốc. |
+| **Đọc lại trang** | Quét lại danh sách chữ. Thường không cần bấm, máy tự quét lại khi trang đổi. |
+
+Nhóm **"Giá trị lặp nhiều nơi"** ở trên cùng là những thứ xuất hiện ở nhiều chỗ:
+ngày khai giảng nằm ở **12 chỗ** trong trang, sửa một lần là đổi hết cả 12, không sót.
+
+**Không thêm hay bớt khối được**, chỉ sửa chữ có sẵn. Trang này căn tay rất kỹ (vòng tròn
+4 phần, dải 8 module, quả địa cầu), cho thêm khối tuỳ ý là mọi lần sửa đều có thể phá bố
+cục. Cần thêm mục mới thì nhờ kỹ thuật.
+
+Gõ thẻ HTML (kiểu `<b>đậm</b>`) sẽ hiện ra nguyên văn chứ không thành chữ đậm. Cố ý như
+vậy để không ai chèn được mã lạ vào trang công khai.
+
+### A4.4 Cấp quyền cho người mới
+
+Tab **Tài khoản**. Đổi vai bằng ô chọn ở cột cuối, đổi xong có hiệu lực ngay.
+
+**Tạo tài khoản mới và xoá tài khoản không làm ở đây.** Việc đó nhờ kỹ thuật làm trong
+bảng điều khiển Supabase. Lý do: nếu để chức năng tạo tài khoản nằm trong trình duyệt thì
+bất kỳ ai mở được trang cũng tự cấp quyền quản trị cho mình.
+
+Người vừa được đổi vai phải **đăng xuất rồi đăng nhập lại** thì quyền mới có tác dụng.
+
+### A4.5 Xem và tải nhật ký
+
+Tab **Nhật ký**. Mọi thao tác đều được ghi: ai, lúc nào, làm gì, chi tiết ra sao. Lọc
+theo người, theo loại thao tác, hoặc gõ từ khoá.
+
+| Nút | Khi nào dùng |
+|---|---|
+| **Tải CSV** | Cần **sắp xếp, lọc, thống kê** trong Excel hoặc Google Sheets. |
+| **Tải TXT** | Cần **đọc bằng mắt** hoặc gửi kèm email. Mở bằng Notepad là thấy ngay. |
+
+Cả hai đều xuất **đúng phần đang lọc**, không phải cả sổ. Bản TXT ghi rõ ở đầu file là
+đang lọc theo gì.
+
+> Hai định dạng **nặng gần như nhau** (đo 200 dòng: TXT bằng 98% CSV). Chọn theo việc bạn
+> định làm với nó, không phải theo dung lượng.
+
+**Không ai xoá hay sửa được nhật ký, kể cả quản trị.** Một cuốn sổ sửa được thì không còn
+là bằng chứng, mà giá trị duy nhất của nó là làm bằng chứng.
+
+## A5. Những việc KHÔNG làm ở trang quản trị
+
+| Việc | Nhờ ai |
+|---|---|
+| Tạo hoặc xoá tài khoản | Kỹ thuật (bảng điều khiển Supabase) |
+| Thêm mục mới, đổi bố cục trang tuyển sinh | Kỹ thuật |
+| Đổi học phí, đổi số đợt đóng | Kỹ thuật (nằm trong cơ sở dữ liệu) |
+| Xoá dữ liệu người đăng ký | Kỹ thuật, và nhớ đây là dữ liệu cá nhân của trẻ vị thành niên |
+
+## A6. Gặp sự cố
+
+| Hiện tượng | Làm gì |
+|---|---|
+| Đăng nhập được nhưng bảng trống trơn | Tài khoản chưa được cấp vai. Nhờ kỹ thuật chạy bước B4.5. |
+| Vừa được cấp quyền mà vẫn không thấy gì | Đăng xuất rồi đăng nhập lại. |
+| Sửa chữ, bấm Xuất bản mà trang không đổi | Bấm Ctrl+F5 trên trang tuyển sinh để tải lại không dùng bản nhớ. |
+| Sao kê đọc ra sai số tiền | Sai cột. Vào bảng "Cột nào là gì" chọn lại rồi bấm "Đọc lại theo cột đã chọn". |
+| Trang báo lỗi đỏ | Chụp màn hình cả dòng chữ đỏ rồi gửi kỹ thuật. Đừng bấm lại nhiều lần. |
+
+---
+
+# PHẦN B · Dành cho người kỹ thuật
 
 ```
 ┌─ Trình duyệt ────────────┐      ┌─ Supabase ──────────────────────────┐
@@ -39,17 +208,17 @@ Khai giảng 06.09.2026, kết thúc 05.2027. 8 module, 9 domain, 100 buổi liv
 │  (trang tuyển sinh)      │      │   ↓ service-role key                │
 │                          │      │ bảng  public.eda_registration (RLS) │
 │ admin.html               │←GET──│   ↑ PostgREST + Realtime            │
-│  (xem danh sách)         │      │     chỉ role EDA_ADMIN đọc được     │
+│  (quản trị, 5 tab)       │      │     phân quyền theo 3 vai           │
 └──────────────────────────┘      └─────────────────────────────────────┘
 ```
 
----
+`/dashboard` và `/admin` là **cùng một file** `admin.html`, khác nhau ở điểm vào.
+Cloudflare Pages cắt đuôi `.html`, nên `/admin.html` bị chuyển hướng sang `/admin`.
 
-## 1. Chạy thử tại máy
+## B1. Chạy thử tại máy
 
 Trang là file tĩnh, nhưng **không mở trực tiếp bằng `file://` được**: mỗi tab là một
-đường dẫn thật (`/pathway`, `/docs`…) nên cần một web server biết trả về trang chính cho
-mọi đường dẫn lạ.
+đường dẫn thật (`/pathway`, `/dashboard/web`…) nên cần một web server biết rewrite.
 
 ### Cách nhanh nhất (Docker)
 
@@ -60,14 +229,27 @@ docker compose up -d
 
 Mở http://localhost:8791
 
-Dừng: `docker compose down`. Cấu hình nằm ở `docker/nginx-eda.conf`, thư mục gốc repo
-được gắn vào read-only nên sửa file là F5 thấy ngay.
+Dừng: `docker compose down`. Cấu hình ở `docker/nginx-eda.conf`, thư mục gốc repo được
+gắn vào read-only nên sửa file là F5 thấy ngay.
+
+> Cổng chỉ mở cho chính máy này (`127.0.0.1:8791`), không ra mạng LAN. Web root là **cả
+> thư mục repo**, nghĩa là `/supabase/migrations/*.sql`, `/data/eDA_v9.xlsx` và `/.git`
+> đều tải về được. Ở nhà thì không sao, ở quán cà phê hay mạng công ty thì ai cũng xem
+> được. Cần máy khác trong mạng xem thì sửa lại thành `"8791:80"` trong
+> `docker/docker-compose.yml`, và nhớ sửa về sau khi xong.
+
+Máy chủ này **rộng rãi hơn bản live**: mọi đường dẫn sai đều trả trang tuyển sinh với mã
+200, nên link gãy không lộ ra. Bản Cloudflare Pages sẽ trả 404. Trước khi tin là xong,
+kiểm bằng `node scripts/dung-thu-muc-xuat-ban.mjs`, script đó đối chiếu mọi `src=`,
+`href=`, `import` của hai trang với danh sách file được deploy.
+
+> **Đừng chạy `docker compose down --remove-orphans` trong thư mục này.** Máy đang có
+> stack khác dùng chung Docker; cờ đó sẽ xoá luôn container của stack kia.
 
 ### Không có Docker
 
-Cần một server có URL rewrite. Ví dụ với Python thì **không dùng được**
-`http.server` (nó không rewrite). Dùng `npx serve` với cấu hình rewrite, hoặc cài nginx
-và chép `docker/nginx-eda.conf`.
+Cần server có URL rewrite. `python -m http.server` **không dùng được** (không rewrite).
+Dùng `npx serve` với cấu hình rewrite, hoặc cài nginx và chép `docker/nginx-eda.conf`.
 
 ### Kiểm tra sau khi chạy
 
@@ -75,33 +257,74 @@ và chép `docker/nginx-eda.conf`.
 |---|---|
 | Mở `/` | Tab Tổng quan |
 | Mở thẳng `/pathway` rồi F5 | Tab Lộ trình học, **không 404** |
-| Bấm qua lại các tab | URL đổi theo, nút Back trình duyệt hoạt động |
-| `node scripts/test-bao-mat.mjs` | 14 kiểm tra đều đạt |
+| Mở thẳng `/dashboard/web` rồi F5 | Trang quản trị, tab Nội dung trang, **không phải trang tuyển sinh** |
+| Bấm qua lại các tab | URL đổi theo, nút Back trình duyệt chạy đúng |
+### Các bộ kiểm tra
 
----
+Chạy được ngay, không cần gì thêm:
 
-## 2. Cấu trúc thư mục
+```bash
+node scripts/test-bao-mat.mjs      # 20 kiểm tra: CSP, SRI, rò rỉ khoá
+node scripts/test-doi-soat.mjs     # 22 kiểm tra: khớp giao dịch với người đăng ký
+node scripts/test-doc-sao-ke.mjs   # 32 kiểm tra: đọc sao kê của ngân hàng bất kỳ
+node scripts/dung-thu-muc-xuat-ban.mjs   # dựng bản deploy, báo lỗi nếu thiếu file
+```
+
+Cần Docker đang chạy:
+
+```bash
+bash scripts/test-db.sh            # 60 kiểm tra: dựng Postgres sạch, chạy migration
+                                   # thật, giả lập đăng nhập từng vai rồi gọi thật
+```
+
+Cần thêm một Chrome mở cổng gỡ lỗi:
+
+```bash
+chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-eda
+node scripts/test-trinh-duyet-duong-dan-vai.mjs   # 22 kiểm tra: URL từng tab, F5, Back, ba vai
+node scripts/test-trinh-duyet-noi-dung.mjs        # 15 kiểm tra: sửa chữ, đếm trên cả 6 tab
+node scripts/test-trinh-duyet-nhat-ky.mjs         # 16 kiểm tra: xuất CSV/TXT, phạm vi lọc
+```
+
+Ba bộ cuối chạy trên trình duyệt thật vì trang tuyển sinh do `support.js` dựng lại mỗi
+lần đổi tab, và vì History API, CSP, cách trình duyệt đọc `<textarea>` chỉ đúng khi có
+trình duyệt thật. Chúng đã bắt được lỗi mà đọc code không thấy: cả trang chết trắng ở
+đường dẫn con, ô chọn vai hiện sai vai, `<input>` nuốt ngắt dòng.
+
+## B2. Cấu trúc thư mục
 
 | Đường dẫn | Là gì |
 |---|---|
 | `TuyenSinh-eDA2026.dc.html` | **Toàn bộ trang tuyển sinh**, một file duy nhất (~250KB) |
-| `admin.html` | Trang quản trị, xem và tải CSV danh sách đăng ký |
+| `admin.html` | Trang quản trị, 5 tab, phân quyền theo vai |
 | `support.js` | Runtime DesignCombo cho `.dc.html` (không sửa) |
 | `image-slot.js` | Web component khung ảnh (không sửa) |
 | `globe.html` | Quả địa cầu, nhúng bằng iframe vào trang chính |
 | `map-vietnam.html` | Bản đồ Việt Nam (hiện chưa dùng) |
 | `assets/` | Logo, hoạ tiết trống đồng, ảnh thumbnail video |
-| `ava/` | Ảnh 4 giảng viên. `crop-*.jpg` là bản đang dùng, còn lại là ảnh gốc |
+| `ava/` | Ảnh 4 giảng viên. `crop-*.jpg` là bản đang dùng |
 | `data/` | File nguồn: `eDA_v9.xlsx` (giáo trình), sơ đồ drawio, ghi chú |
 | `docker/` | nginx + compose để chạy thử |
 | `docs/` | Tài liệu dự án, quan trọng nhất là `deployment-guide.md` |
-| `scripts/` | Script Python sinh nội dung từ Excel, và test bảo mật |
-| `supabase/` | Migration SQL + edge function nhận đăng ký |
+| `scripts/` | Script sinh nội dung từ Excel, và các bộ kiểm tra |
+| `supabase/` | Migration SQL, edge function, và **logic khớp giao dịch dùng chung** |
+| `_redirects`, `_headers` | Cấu hình Cloudflare Pages |
+
+### Logic dùng chung giữa trình duyệt, edge function và test
+
+`supabase/functions/_shared/doi-soat.js` và `doc-sao-ke.js` được **cả ba nơi** nạp: trang
+quản trị (qua `<script type="module">`), edge function, và `scripts/test-*.mjs`. Chép tay
+ra bản thứ hai thì bản demo sẽ trôi khác bản thật lúc nào không biết, và test sẽ test
+nhầm bản không ai chạy.
+
+Vì vậy `admin.html` import bằng **đường dẫn từ gốc** (`/supabase/...`) chứ không phải
+`./supabase/...`: ở `/dashboard/web` thì `./` tính từ `/dashboard/` và đi tìm sai chỗ,
+mà đường dẫn sai đó lại khớp luật rewrite nên máy chủ trả HTML thay vì JS, trình duyệt từ
+chối module sai MIME và **cả trang chết trắng**.
 
 ### Về file `.dc.html`
 
-Đây là định dạng **DesignCombo**: HTML thường cộng thêm runtime phản ứng trong
-`support.js`. Cú pháp riêng cần biết:
+Định dạng **DesignCombo**: HTML thường cộng runtime phản ứng trong `support.js`.
 
 | Cú pháp | Nghĩa |
 |---|---|
@@ -110,23 +333,24 @@ và chép `docker/nginx-eda.conf`.
 | `<sc-for>` | Lặp danh sách |
 | `<helmet>` | Nội dung đẩy vào `<head>` |
 | `<x-import>` | Nhúng web component |
-| `class Component extends DCLogic` | Khối logic ở cuối file, có `state` và `renderVals()` |
+| `class Component extends DCLogic` | Khối logic cuối file, có `state` và `renderVals()` |
 
-Trang có 6 tab, mỗi tab một đường dẫn. Bảng ánh xạ nằm ở hằng số `TAB_SLUGS`:
+Trang có 6 tab, mỗi tab một đường dẫn, bảng ánh xạ ở hằng `TAB_SLUGS`:
 
 ```js
 const TAB_SLUGS = ['', 'pathway', 'early', 'docs', 'mentors', 'register'];
 ```
 
-Đổi slug thì phải sửa cả `docs/deployment-guide.md` và comment trong
-`docker/nginx-eda.conf`.
+Trang quản trị có bảng tương tự tên là `SLUG` trong `admin.html`. Đổi slug thì phải sửa
+cả `_redirects`, `docker/nginx-eda.conf` và `docs/deployment-guide.md`.
 
----
+**support.js dựng lại DOM mỗi lần đổi tab.** Bất cứ thứ gì chèn vào trang bằng JavaScript
+đều bị ghi đè ở lần dựng kế tiếp, nên phần áp nội dung sửa được dùng `MutationObserver`
+để áp lại.
 
-## 3. Sinh lại nội dung từ file nguồn
+## B3. Sinh lại nội dung từ file nguồn
 
-Một số phần trong trang **không gõ tay** mà sinh ra từ `data/eDA_v9.xlsx`. Sửa Excel rồi
-chạy lại script thì trang tự cập nhật:
+Một số phần **không gõ tay** mà sinh từ `data/eDA_v9.xlsx`:
 
 ```bash
 python scripts/build-domain-matrix.py     # bảng 10 ngành × 10 mảng phân tích
@@ -140,26 +364,44 @@ nhiều lần được, không sinh trùng.
 > `scripts/` còn khoảng 40 file `fix_*.py`, `update_*.py` là script dùng một lần trong
 > quá trình làm. Không cần chạy lại. Giữ để tra cứu lịch sử chỉnh sửa.
 
----
+## B4. Dựng backend
 
-## 4. Dựng backend lưu đăng ký
+**Chưa làm bước này thì form đăng ký không lưu được gì** và trang quản trị chỉ chạy ở chế
+độ demo. Chi tiết đầy đủ ở [`docs/deployment-guide.md`](docs/deployment-guide.md).
 
-**Chưa làm bước này thì form đăng ký không lưu được gì.** Toàn bộ chi tiết nằm ở
-[`docs/deployment-guide.md`](docs/deployment-guide.md). Tóm tắt 6 bước:
+### B4.1 Tạo project Supabase
 
-### 4.1 Tạo project Supabase
-
-Dùng **project riêng cho eDA**, đừng ghép chung với dự án khác. Lý do: bảng đăng ký chứa
-số điện thoại phụ huynh của trẻ vị thành niên, tách riêng thì phân quyền và xoá dữ liệu
-sau này đều gọn.
+Dùng **project riêng cho eDA**, đừng ghép chung dự án khác: bảng đăng ký chứa số điện
+thoại phụ huynh của trẻ vị thành niên, tách riêng thì phân quyền và xoá dữ liệu sau này
+đều gọn.
 
 Ghi lại `Project URL` và `anon key` ở Settings → API.
 
-### 4.2 Chạy migration
+### B4.2 Chạy migration
 
-SQL Editor, chạy lần lượt 4 file trong `supabase/migrations/` theo đúng thứ tự số.
+SQL Editor, chạy lần lượt **8 file** trong `supabase/migrations/` theo đúng thứ tự số.
 
-### 4.3 Deploy edge function
+| File | Thêm gì |
+|---|---|
+| `0001`–`0004` | Bảng đăng ký, RLS, chống spam |
+| `0005` | Phương án học phí, các đợt đóng |
+| `0006` | Giao dịch ngân hàng, nhật ký `eda_audit` |
+| `0007` | Ba vai, quyền theo cột, cổng chặn trong view, quyền đọc nhật ký |
+| `0008` | Nội dung trang sửa được |
+
+Sau khi chạy xong, **kiểm hai thứ trong Supabase**:
+
+1. **Authentication → Providers → Email → tắt "Enable Sign Ups"** nếu không dùng. Để mở
+   thì bất kỳ ai cũng tự tạo được tài khoản và trở thành `authenticated`. Các policy đã
+   đổi sang kiểm **vai** thay vì kiểm "đã đăng nhập" nên tài khoản tự tạo không có vai sẽ
+   không đọc được gì, nhưng tắt hẳn vẫn gọn hơn.
+2. `service_role key` chưa từng xuất hiện trong repo: `git log -p | grep -i service_role`
+
+Muốn kiểm trước khi chạy lên Supabase thật: `bash scripts/test-db.sh` dựng một Postgres
+sạch trong Docker, chạy đúng 8 file đó rồi kiểm phân quyền bằng cách **giả lập đăng nhập
+từng vai và gọi thật**.
+
+### B4.3 Deploy edge function
 
 ```bash
 npx supabase login
@@ -167,10 +409,10 @@ npx supabase link --project-ref <ref-cua-ban>
 npx supabase functions deploy eda-register --no-verify-jwt
 ```
 
-Rồi đặt biến môi trường ở Settings → Edge Functions → Secrets. Bảng đầy đủ trong
-deployment guide; **bắt buộc** là `EDA_ALLOWED_ORIGINS`.
+Rồi đặt biến môi trường ở Settings → Edge Functions → Secrets. **Bắt buộc** là
+`EDA_ALLOWED_ORIGINS`.
 
-### 4.4 Điền các chỗ `REPLACE-ME`
+### B4.4 Điền các chỗ `REPLACE-ME`
 
 ```bash
 grep -rn "REPLACE-ME" TuyenSinh-eDA2026.dc.html admin.html
@@ -186,12 +428,12 @@ Quên CSP là đăng nhập admin bị trình duyệt chặn mà không rõ lý 
 `anon key` là khoá công khai theo thiết kế, lộ không sao. Thứ chặn truy cập là RLS.
 **Tuyệt đối không** đưa `service_role key` vào bất kỳ file nào trong repo.
 
-### 4.5 Tạo tài khoản quản trị
+### B4.5 Tạo tài khoản quản trị
 
 Authentication → Users → Add user. Đặt mật khẩu ngẫu nhiên **ngay trong màn hình đó**,
 lưu vào trình quản lý mật khẩu. Không ghi vào repo, không gửi qua chat.
 
-Rồi cấp quyền trong SQL Editor:
+Rồi cấp vai trong SQL Editor:
 
 ```sql
 update auth.users
@@ -200,125 +442,122 @@ update auth.users
  where email = 'admin@aivietnam.edu.vn';
 ```
 
-Tài khoản phải **đăng xuất rồi đăng nhập lại** thì token mới mang quyền. Thiếu bước này
-thì đăng nhập vẫn được nhưng bảng trống trơn.
+Vai hợp lệ: `EDA_TA` (trợ giảng), `EDA_ACCOUNTANT` (kế toán), `EDA_ADMIN` (quản trị).
+
+Tài khoản phải **đăng xuất rồi đăng nhập lại** thì token mới mang vai. Thiếu bước này thì
+đăng nhập vẫn được nhưng bảng trống trơn.
 
 > Đừng dùng số hotline làm mật khẩu. Số `0911 118 758` đang in công khai ở chân trang.
 
-### 4.6 Bật rewrite trên host
+### B4.6 Bật rewrite trên host
 
 | Host | Cấu hình |
 |---|---|
-| nginx | `try_files $uri /TuyenSinh-eDA2026.dc.html;` |
-| Vercel | `vercel.json`: `{"rewrites":[{"source":"/(.*)","destination":"/TuyenSinh-eDA2026.dc.html"}]}` |
-| Cloudflare Pages | file `_redirects`, xem sẵn trong repo |
+| nginx | xem `docker/nginx-eda.conf` |
+| Vercel | `vercel.json` với rewrite về `/TuyenSinh-eDA2026.dc.html` |
+| Cloudflare Pages | file `_redirects`, có sẵn trong repo |
 
 Thiếu bước này thì bấm tab vẫn chạy, nhưng F5 hoặc mở link chia sẻ sẽ 404.
 
-### Riêng Cloudflare Pages (bản đang chạy)
+Phải phủ **cả đường dẫn con của trang quản trị** (`/dashboard/*`, `/admin/*`), không chỉ
+`/dashboard`. Thiếu thì F5 tại `/dashboard/web` ra trang tuyển sinh và trả **mã 200**,
+nên nhìn qua tưởng không sao.
+
+## B5. Đưa lên Cloudflare Pages
 
 ```bash
 node scripts/dung-thu-muc-xuat-ban.mjs
 npx wrangler pages deploy .xuat-ban --project-name eda --branch master
 ```
 
-**Phải deploy từ `.xuat-ban`, đừng deploy từ thư mục gốc.** `wrangler pages deploy`
-không đọc `.gitignore` (cũng không đọc `.assetsignore`), nên deploy từ gốc là
-`data/eDA_v9.xlsx`, toàn bộ migration SQL và tài liệu PDF đều thành URL công khai.
-Script trên chép ra đúng 17 file trang thật sự cần, khoảng 1.1MB.
+**Phải deploy từ `.xuat-ban`, đừng deploy từ thư mục gốc.** `wrangler pages deploy` không
+đọc `.gitignore` (cũng không đọc `.assetsignore`), nên deploy từ gốc là `data/eDA_v9.xlsx`,
+toàn bộ migration SQL và tài liệu PDF đều thành URL công khai. Script trên chép ra đúng
+20 file trang thật sự cần, khoảng 1.2MB, và **báo lỗi nếu `admin.html` import một file
+không có trong danh sách**.
 
 Hai điểm khác nginx, đã ghi trong `_redirects`:
 
 - Pages **tự cắt đuôi `.html`**, nên đích phải là `/TuyenSinh-eDA2026.dc` không kèm
   `.html`, nếu không Pages trả 308 và mọi tab bị dồn về một địa chỉ.
-- **Đừng dùng luật `/*`.** Trên Pages nó nuốt cả file có thật, `support.js` và ảnh đều
-  bị trả về HTML nên trang không nạp được runtime. Phải liệt kê từng đường dẫn tab.
+- **Đừng dùng luật `/*` ở gốc.** Trên Pages nó nuốt cả file có thật, `support.js` và ảnh
+  đều bị trả về HTML. Luật `/dashboard/*` thì an toàn vì dưới thư mục đó không có file
+  thật nào.
 
-Hai chỗ dễ vấp: **đừng thêm `$uri/` vào `try_files`** (repo có thư mục `docs/` trùng tên
-slug `/docs`), và trang đang đặt `<base href="/">` nên **phải deploy ở gốc tên miền**.
+`_headers` phải lặp lại khối `frame-ancestors` cho **mọi** đường dẫn tới trang quản trị:
+Pages khớp `_headers` theo đường dẫn **người dùng gọi**, không theo file đích.
 
----
+## B6. Bảo mật
 
-## 5. Bảo mật
-
-Bảng `eda_registration` chứa họ tên, số điện thoại, email của học viên, và **tên + số
-điện thoại người giám hộ của trẻ vị thành niên**. Các lớp bảo vệ hiện có:
-
-| Lớp | Cách làm |
+| Lớp | Chặn gì |
 |---|---|
-| Chặn đọc trộm | RLS bật, không policy nào cho `anon`. Chỉ tài khoản có `app_metadata.role = 'EDA_ADMIN'` đọc được, và Realtime cũng đi qua RLS |
-| Chặn ghi trộm | Không cấp `insert` cho ai. Ghi chỉ qua edge function bằng service-role key |
-| Chặn nhúng chéo | `EDA_ALLOWED_ORIGINS` giới hạn tên miền gọi được endpoint |
-| Chặn bot | Honeypot + giới hạn 10 đơn/IP/giờ (băm IP, không lưu IP thô) |
-| Chặn chiếm trang admin | CSP `default-src 'none'`, script pin phiên bản + SRI, `frame-ancestors 'none'` |
-| Chặn CSV injection | Ô bắt đầu bằng `= + - @` được thêm dấu nháy, tránh Excel chạy công thức do người đăng ký cài vào |
-| Giảm thời gian phơi nhiễm | Cron xoá đơn cũ hơn 24 tháng |
+| RLS trên mọi bảng | Người lạ đọc dữ liệu |
+| Mệnh đề `where` **trong view** | View chạy bằng quyền người tạo nên **bỏ qua RLS**. Bảng gốc kín không có nghĩa là view kín. |
+| Kiểm vai **trong thân hàm** `security definer` | Hàm loại này bỏ qua RLS, và PostgREST bày mọi hàm thành một endpoint `/rpc/…` |
+| Quyền theo cột | Kế toán sửa số tiền của giao dịch |
+| Ràng buộc `xac_nhan_boi` ở **cả INSERT lẫn UPDATE** | Chèn thẳng một dòng đã đánh dấu "người khác đã duyệt" |
+| Che thông tin cá nhân khi ghi nhật ký | Nhật ký không có hạn lưu, ghi nguyên bản ghi vào là biến chính sách xoá sau 24 tháng thành di dời |
+| `revoke … truncate` | RLS không áp cho `TRUNCATE`, và `revoke delete` không bao gồm nó |
+| CSP trong `<meta>` | Script lạ, kết nối ra ngoài Supabase |
+| `frame-ancestors` trong `_headers` | Nhúng trang quản trị vào iframe để lừa bấm |
+| SRI trên script CDN | CDN bị đổi nội dung |
+| Lọc thẻ lúc **ghi** | Người trong nhà chèn HTML vào trang công khai |
+| Chặn công thức khi xuất CSV | Ô bắt đầu bằng `=` `+` `-` `@` chạy như công thức khi mở Excel |
 
-Chạy kiểm tra:
+`node scripts/test-bao-mat.mjs` kiểm 20 điểm phía trình duyệt, `bash scripts/test-db.sh`
+kiểm 60 điểm phía cơ sở dữ liệu bằng cách **giả lập đăng nhập từng vai rồi gọi thật**.
 
-```bash
-node scripts/test-bao-mat.mjs
-```
+> **Kiểm cả cửa còn lại, đừng chỉ kiểm cửa đã che.** Bộ kiểm bản trước chứng minh rằng
+> view của trợ giảng không có cột SĐT phụ huynh, rồi kết luận là kín. Nhưng bảng gốc vẫn
+> mở: trợ giảng gọi thẳng `GET /rest/v1/eda_registration?select=guardian_phone` là lấy
+> được. Che một cửa mà không kiểm cửa kia thì bộ kiểm chỉ chứng minh được rằng cửa đã che
+> thì đã che.
 
 ### Trước khi nối Supabase thật, phải làm
 
-Bản demo đang **công khai link tới trang quản trị** (dải miễn trừ ở đỉnh trang, và
-`admin.html` nằm trong danh sách xuất bản). Hiện vô hại vì chưa có backend, và thứ chặn
-dữ liệu là RLS chứ không phải giấu URL.
-
-Nhưng khi bảng `eda_registration` đã có dữ liệu thật, quảng cáo công khai màn đăng nhập
-quản trị là mời người ta dò mật khẩu. Lúc đó gỡ **hai chỗ**:
-
-1. Link `/dashboard` trong dải miễn trừ ở `TuyenSinh-eDA2026.dc.html`
-2. `'admin.html'` trong mảng `FILE` của `scripts/dung-thu-muc-xuat-ban.mjs`
-3. Dòng `/dashboard` trong `_redirects` (không thì vẫn còn đường vào bảng)
-
-Riêng khối `DEMO` trong `admin.html` thì để nguyên cũng được: khi đã điền
-`SUPABASE_URL`/`SUPABASE_ANON_KEY` thì `CHUA_CAU_HINH` thành `false` và chế độ demo
-không bao giờ chạy nữa.
+1. Bỏ dòng link `/dashboard` trong banner cảnh báo demo.
+2. Bỏ `'admin.html'` khỏi danh sách trong `scripts/dung-thu-muc-xuat-ban.mjs` nếu không
+   muốn trang quản trị nằm ở URL đoán được.
+3. Bỏ dòng `/dashboard` trong `_redirects` (giữ `/admin` và `/admin/*`).
+4. Đổi vai mặc định của bản demo: `vaiHienTai` trong `admin.html`.
 
 ### Việc còn phải làm
 
-- **Không có CAPTCHA**, đây là lựa chọn có chủ đích. Chống bot chỉ gồm honeypot và giới
-  hạn tần suất theo IP, nên một bot chịu khó vẫn gửi được đơn rác. Đổi lại người đăng ký
-  thật không vướng màn kiểm tra nào. Đơn rác nhiều thì hạ `EDA_MAX_PER_HOUR` trước.
-- **Không có nhật ký truy cập.** Ai đăng nhập admin, ai tải CSV đều không ghi lại.
-- **Chưa có backup.** Supabase Free không tự sao lưu; nên xuất CSV định kỳ.
+- Edge function `eda-doi-soat` và `eda-xac-nhan-gd`: logic khớp đã xong và đã kiểm, chưa
+  có project Supabase để chạy.
+- Gửi email: `eda-email` với 3 mẫu (nhận đăng ký, đã nhận tiền, nhắc hạn).
+- Học phí và ngân hàng thật: hiện đang để `xx.xxx.xxx`.
+- Nội dung trang hiện lưu trong `localStorage` của trình duyệt (bản demo). Bản thật cần
+  đọc ghi qua bảng `eda_noi_dung`.
 
----
+## B7. Những chỗ dễ vấp
 
-## 6. Những chỗ dễ vấp
-
-| Hiện tượng | Nguyên nhân |
+| Chỗ | Chuyện gì xảy ra |
 |---|---|
-| Sửa file mà trình duyệt không đổi | Cache. Bấm **Ctrl+Shift+R**. iframe (`globe.html`) và ảnh cứng đầu nhất |
-| F5 ở `/pathway` ra 404 | Host chưa bật rewrite, xem mục 4.6 |
-| `/docs` ra danh sách thư mục | `try_files` có `$uri/`, bỏ đi |
-| Đăng nhập admin không phản hồi | `REPLACE-ME` trong CSP `connect-src` chưa điền |
-| Đăng nhập được nhưng bảng trống | Tài khoản chưa gán `EDA_ADMIN`, hoặc chưa đăng xuất/đăng nhập lại |
-| Gửi đăng ký báo lỗi 403 | `EDA_ALLOWED_ORIGINS` chưa có tên miền hiện tại |
-| Gửi đăng ký báo lỗi 429 | Vượt `EDA_MAX_PER_HOUR` (mặc định 10 đơn/IP/giờ) |
-| Chữ tàng hình ở dark mode | Xem mục dưới |
+| Sửa `admin.html` import bằng `./` | Cả trang chết trắng ở mọi đường dẫn con |
+| Thêm tab mà quên `_redirects` | F5 tại tab đó ra 404 hoặc ra trang tuyển sinh |
+| Dùng `<input>` cho chữ nhiều dòng | Trình duyệt nuốt ký tự xuống dòng, tự "xuất bản" thay đổi không ai yêu cầu |
+| Lọc `<style>` bằng regex viết hoa | Thẻ `<style>` trong `<svg>` có tên viết **thường**, lọt qua |
+| Bật RLS mà quên policy SELECT | Không ai đọc được, kể cả quản trị, mà không báo lỗi gì |
+| Thêm policy permissive cho một vai | Postgres **OR** các policy permissive. Mở cho một đường là mở cho cả bảng. |
+| Tạo view mà quên cổng chặn | View bỏ qua RLS của bảng dưới. Người lạ đọc được qua view thứ mà bảng gốc đã cấm. |
+| Hàm `security definer` không `revoke` | PostgREST bày nó thành endpoint `/rpc/…` gọi được bằng anon key |
+| Dùng biểu thức `CASE` trong plpgsql cho hai bảng | Cả hai nhánh đều được phân giải, `new.cot_khong_co` sẽ nổ |
+| Quên BOM khi xuất CSV | Excel mở ra tiếng Việt thành ký tự lạ |
+| Dùng `toISOString()` đặt tên file | Ra ngày UTC, lệch với giờ ghi bên trong file |
 
 ### Bẫy màu ở dark mode
 
-Đã sửa hết, nhưng nếu thêm khối mới thì dễ dính lại. Hai kiểu:
-
-1. `background: var(--ink)` trên **cùng element** có khai `--ink: ...`. Custom property
-   khai trên element áp luôn cho `background` của chính nó, nên nền ra sai màu. Dải tối
-   cố định thì dùng màu cứng.
-2. Khai `--ink` nhưng **quên đặt `color`**. `--ink` chỉ ăn vào thuộc tính nào dùng
-   `var(--ink)` trên element đó (border, box-shadow). `color` thì kế thừa giá trị đã
-   tính từ cha. Nền sáng cứng phải kèm `color: var(--ink,#211d17)`.
+Trang có bảng màu riêng cho dark mode. Sửa màu thì phải kiểm **cả hai chế độ**: nhiều ô
+nền sáng chữ tối ở light mode trở thành nền tối chữ tối ở dark mode. `scripts/audit_white_text.py`
+dò các chỗ chữ trắng trên nền sáng.
 
 ---
 
-## 7. Giấy phép và dữ liệu cá nhân
+## Giấy phép và dữ liệu cá nhân
 
-Mã nguồn theo `LICENSE`. Nhưng **nội dung không phải mã nguồn thì không**:
+Mã nguồn: xem [`LICENSE`](LICENSE).
 
-- `ava/*.jpg` là ảnh chân dung 4 giảng viên có tên thật. Dùng lại phải xin phép.
-- `data/eDA_v9.xlsx`, sơ đồ, nội dung giáo trình là tài sản của AI VIETNAM.
-- Logo và hoạ tiết trong `assets/` cũng vậy.
-
-Tài liệu đọc của khoá học **không nằm trong repo**, phát cho học viên qua link Drive.
+Bảng `eda_registration` chứa **dữ liệu cá nhân của trẻ vị thành niên** (họ tên, số điện
+thoại, số điện thoại phụ huynh). Không sao chép ra ngoài Supabase, không đưa vào repo,
+không gửi qua chat. Sao kê ngân hàng cũng vậy: đọc trong trình duyệt, không lưu lại file.

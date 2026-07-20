@@ -29,6 +29,10 @@ const FILE = [
   'supabase/functions/_shared/doi-soat.js',
   'supabase/functions/_shared/doc-sao-ke.js',
 
+  // Trang tuyen sinh co the "eDA 2026 - Syllabus day du" tro toi day. Thieu file thi
+  // link tra 404 tren ban live ma o may van chay, vi nginx xem thu phuc vu ca repo.
+  'docs/eDA-2026-Syllabus.html',
+
   'assets/logo-full.png',
   'assets/logo-mark.png',
   'assets/dongson-drum.svg',
@@ -55,6 +59,13 @@ for (const d of THUMUC) {
   cpSync(join(GOC, d), join(RA, d), { recursive: true });
   n += readdirSync(join(GOC, d)).length;
 }
+// Trinh duyet TU DONG doi /favicon.ico truoc khi doc xong <head>. Trang tuyen sinh co
+// khai bao <link rel="icon"> nhung the do nam trong <helmet>, ma support.js chi chuyen no
+// vao <head> luc chay - tuc la sau khi yeu cau /favicon.ico da bay di roi. Ket qua la moi
+// lan tai trang deu co mot loi 404 trong console. Phuc vu luon file do la het.
+cpSync(join(GOC, 'assets/logo-mark.png'), join(RA, 'favicon.ico'));
+n++;
+
 mkdirSync(join(RA, 'ava'), { recursive: true });
 for (const f of readdirSync(join(GOC, 'ava'))) {
   if (!ANH_MENTOR.test(f)) continue;
@@ -62,25 +73,46 @@ for (const f of readdirSync(join(GOC, 'ava'))) {
   n++;
 }
 
-// Kiem: moi module admin.html import phai co mat trong thu muc xuat ban.
+// Kiem: moi thu HAI trang nap phai co mat trong thu muc xuat ban.
 //
 // Da hai lan suyt day len ban thieu file: trang nap module bang <script type="module">
 // nen thieu mot file la CA trang chet, khong phai mat mot tinh nang. Danh sach FILE o
 // tren la thu cong nen se con quen nua - de may doi chieu thay vi tin tri nho.
-// Nhan ca "./x.js" lan "/x.js". admin.html dung duong dan tu goc vi moi tab la mot
-// duong dan that (/dashboard/web) va "./" se tinh sai tu do. Bat moi mot dang thi doi
-// cach viet import la bo canh nay im lang cho qua - dung luc no can len tieng nhat.
-const nguonHtml = readFileSync(join(GOC, 'admin.html'), 'utf8');
-const duongDanImport = [...nguonHtml.matchAll(/from\s+'(\.?\/[^']+)'/g)]
-  .map((m) => m[1].replace(/^\.?\//, ''));
-if (!duongDanImport.length) {
-  console.log('KHONG THAY import nao trong admin.html - bo canh nay da hong, sua regex.');
-  process.exit(1);
+//
+// Phai soi CA HAI trang va ca ba kieu tham chieu. Ban truoc chi soi admin.html va chi bat
+// "from '...'", nen no bo lot dung mot link that: the "Syllabus day du" tro toi
+// docs/eDA-2026-Syllabus.html khong duoc chep, tra 404 tren live suot ma bo canh van bao
+// xanh. Bo canh phu mot nua roi bao xanh con nguy hiem hon la khong co bo canh.
+const THAM_CHIEU = [
+  // import ... from '...'   (module cua admin.html)
+  /from\s+'(\.?\/[^']+)'/g,
+  // <script src="...">, <link href="...">, <a href="..."> tro toi file trong repo
+  /\b(?:src|href)="(?!https?:|data:|mailto:|tel:|#|\/\/)([^"#?]+)"/g,
+];
+// Bo qua thu khong phai file trong repo:
+//   {{ ... }}  bieu thuc DesignCombo, dia chi chi co luc chay
+//   khong co duoi  duong dan tab (/dashboard, /pathway) do _redirects lo, khong phai file
+const boQua = (p) =>
+  !p || p.startsWith('..') || /^[A-Za-z]+:/.test(p) || p.includes('{{') || !/\.[a-z0-9]+$/i.test(p);
+const canCo = new Map();      // duong dan -> trang nao tham chieu, de bao loi cho ro
+for (const trang of ['admin.html', 'TuyenSinh-eDA2026.dc.html']) {
+  const nguon = readFileSync(join(GOC, trang), 'utf8');
+  let thay = 0;
+  for (const re of THAM_CHIEU)
+    for (const m of nguon.matchAll(re)) {
+      thay++;
+      const p = m[1].replace(/^\.?\//, '');
+      if (!boQua(p)) canCo.set(p, trang);
+    }
+  if (!thay) {
+    console.log(`KHONG THAY tham chieu nao trong ${trang} - bo canh nay da hong, sua regex.`);
+    process.exit(1);
+  }
 }
-const thieu = duongDanImport.filter((p) => !existsSync(join(RA, p)));
+const thieu = [...canCo].filter(([p]) => !existsSync(join(RA, p)));
 if (thieu.length) {
-  console.log('THIEU trong ban xuat ban (admin.html import nhung khong duoc chep):');
-  thieu.forEach((p) => console.log('  ' + p));
+  console.log('THIEU trong ban xuat ban (trang co tro toi nhung khong duoc chep):');
+  thieu.forEach(([p, trang]) => console.log(`  ${p}   <- ${trang}`));
   console.log('Them vao mang FILE trong scripts/dung-thu-muc-xuat-ban.mjs');
   process.exit(1);
 }

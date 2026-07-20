@@ -36,10 +36,21 @@ returns trigger
 language plpgsql
 as $$
 declare
-  v_plan uuid := coalesce(new.plan_id, old.plan_id);
+  v_plan uuid;
   v_tong bigint;
   v_cong bigint;
 begin
+  -- Chay tren CA HAI bang. Tren eda_plan_installment thi khoa phuong an nam o cot plan_id,
+  -- tren chinh eda_payment_plan thi no la id cua dong.
+  --
+  -- Phai dung IF chu khong dung bieu thuc CASE: plpgsql bien ca bieu thuc CASE thanh MOT
+  -- cau SQL nen moi nhanh deu duoc phan giai, va "new.plan_id" se no khi trigger chay tren
+  -- eda_payment_plan vi ban ghi do khong co cot ay.
+  if tg_table_name = 'eda_payment_plan' then
+    v_plan := coalesce(new.id, old.id);
+  else
+    v_plan := coalesce(new.plan_id, old.plan_id);
+  end if;
   select tong_tien into v_tong from public.eda_payment_plan where id = v_plan;
   if v_tong is null then return null; end if;      -- phuong an vua bi xoa cascade
   select coalesce(sum(so_tien), 0) into v_cong
@@ -56,6 +67,18 @@ $$;
 drop trigger if exists eda_kiem_tong_dot_trg on public.eda_plan_installment;
 create constraint trigger eda_kiem_tong_dot_trg
   after insert or update or delete on public.eda_plan_installment
+  deferrable initially deferred
+  for each row execute function public.eda_kiem_tong_dot();
+
+-- Phai dat o CA HAI phia. Chi canh phia cac dot thi doi thang tong_tien cua phuong an
+-- khong kich hoat gi ca: phuong an ghi 1 dong trong khi cac dot cong lai 26 trieu, va
+-- khong co gi bao. Bat bien lien bang ma chi canh mot ben thi khong phai bat bien.
+-- Chi UPDATE, khong INSERT: luc tao phuong an thi chua co dot nao, va hai buoc do thuong
+-- nam o hai giao dich khac nhau nen kiem ngay luc chen se bao loi oan. Phuong an moi chen
+-- se duoc kiem ngay khi dot dau tien duoc them, boi trigger phia kia.
+drop trigger if exists eda_kiem_tong_phuong_an_trg on public.eda_payment_plan;
+create constraint trigger eda_kiem_tong_phuong_an_trg
+  after update of tong_tien on public.eda_payment_plan
   deferrable initially deferred
   for each row execute function public.eda_kiem_tong_dot();
 
@@ -105,6 +128,14 @@ set search_path = public
 as $$
 declare n integer;
 begin
+  -- security definer nghia la ham chay bang quyen chu so hun VA BO QUA RLS. Bat buoc phai
+  -- tu kiem vai ngay o day: thieu thi bat ky ai cam anon key cong khai cung goi duoc
+  -- rpc/eda_gan_phuong_an va XOA SACH lich dong tien cua mot nguoi, di vong qua dung cai
+  -- policy "chi admin sua duoc phai thu bao nhieu" o 0007.
+  if not public.eda_la_admin() then
+    raise exception 'Chi vai EDA_ADMIN duoc gan phuong an hoc phi.';
+  end if;
+
   -- Da thu tien roi thi khong cho doi phuong an: cac dot cu bi xoa se keo theo lien ket
   -- giao dich, tien da nhan thanh khong gan vao dau.
   if exists (
@@ -126,6 +157,12 @@ begin
   return n;
 end;
 $$;
+
+-- Hai lop, khong phai mot. Kiem vai trong than ham chan nguoi da dang nhap sai vai; revoke
+-- chan luon viec goi duoc ham. Mac dinh Postgres cap execute cho PUBLIC, ma PostgREST bay
+-- moi ham trong schema public thanh mot endpoint /rpc/... - khong revoke thi nguoi la van
+-- goi toi noi va chi dung lai o cau raise.
+revoke all on function public.eda_gan_phuong_an(uuid, uuid) from public, anon;
 
 -- RLS: bat, KHONG policy nao o day. Quyen mo dan o 0007 theo tung vai.
 alter table public.eda_payment_plan            enable row level security;

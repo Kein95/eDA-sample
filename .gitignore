@@ -29,3 +29,7 @@ __pycache__/
 
 # Thu muc xuat ban, sinh boi scripts/dung-thu-muc-xuat-ban.mjs
 .xuat-ban/
+
+# Bo nho cua cong cu tro ly, khong phai noi dung du an. Giu lai tren may de lan sau doc
+# duoc, nhung khong day len repo cong khai.
+.claude/agent-memory/
