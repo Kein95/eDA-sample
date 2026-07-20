@@ -194,6 +194,65 @@ select pg_temp.phai_rong('nguoi la KHONG doc duoc nhat ky',
                          $$select count(*) from eda_audit$$);
 commit;
 
+-- ── Noi dung trang ─────────────────────────────────────────────────────────
+begin;
+set local role authenticated;
+select pg_temp.dang_nhap('EDA_ADMIN', 'aaaaaaaa-0000-0000-0000-000000000001');
+
+do $$
+declare v text;
+begin
+  insert into eda_noi_dung (khoa, gia_tri, mo_ta)
+  values ('khai_giang', '15.10.2026', 'Ngay khai giang');
+  perform pg_temp.dat('admin sua duoc noi dung trang');
+
+  -- Loc the o luc GHI: du lieu sach tu trong kho, moi cho doc ve sau deu an toan ma
+  -- khong phai nho loc lai.
+  insert into eda_noi_dung (khoa, gia_tri, mo_ta)
+  values ('hero_tieu_de', '<img src=x onerror=alert(1)>Xin chao', 'Tieu de');
+  select gia_tri into v from eda_noi_dung where khoa = 'hero_tieu_de';
+  if v like '%<%' or v like '%>%' then
+    raise exception 'THAT BAI: the HTML khong bi loc, con "%"', v;
+  end if;
+  perform pg_temp.dat('the HTML bi loc ngay luc ghi: ' || v);
+
+  select sua_boi::text into v from eda_noi_dung where khoa = 'khai_giang';
+  if v is null then raise exception 'THAT BAI: khong ghi lai ai sua'; end if;
+  perform pg_temp.dat('co ghi lai ai sua noi dung');
+end $$;
+commit;
+
+begin;
+set local role authenticated;
+select pg_temp.dang_nhap('EDA_ACCOUNTANT', 'aaaaaaaa-0000-0000-0000-000000000002');
+do $$
+declare n integer;
+begin
+  select count(*) into n from eda_noi_dung;
+  if n = 0 then raise exception 'THAT BAI: ke toan khong doc duoc noi dung trang'; end if;
+  perform pg_temp.dat('ke toan DOC duoc noi dung trang');
+end $$;
+select pg_temp.phai_khong_doi(
+  'ke toan KHONG sua duoc noi dung trang cong khai',
+  $$update eda_noi_dung set gia_tri = '01.01.2000' where khoa = 'khai_giang'$$);
+commit;
+
+begin;
+set local role authenticated;
+select pg_temp.dang_nhap('EDA_TA', 'aaaaaaaa-0000-0000-0000-000000000003');
+select pg_temp.phai_khong_doi(
+  'tro giang KHONG sua duoc noi dung trang',
+  $$update eda_noi_dung set gia_tri = '01.01.2000' where khoa = 'khai_giang'$$);
+commit;
+
+do $$
+declare n integer;
+begin
+  select count(*) into n from eda_audit where bang = 'eda_noi_dung';
+  if n < 2 then raise exception 'THAT BAI: doi noi dung trang cong khai khong duoc ghi nhat ky'; end if;
+  perform pg_temp.dat(format('doi noi dung trang co vao nhat ky (%s dong)', n));
+end $$;
+
 -- ── Nhat ky khong sua duoc ─────────────────────────────────────────────────
 begin;
 set local role authenticated;

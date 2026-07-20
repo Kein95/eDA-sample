@@ -15,7 +15,7 @@
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src https://fonts.gstatic.com;
   img-src 'self' data:;
-  connect-src https://REPLACE-ME.supabase.co wss://REPLACE-ME.supabase.co;
+  connect-src 'self' https://REPLACE-ME.supabase.co wss://REPLACE-ME.supabase.co;
   form-action 'none';
   base-uri 'none'">
 <!-- frame-ancestors KHONG dat duoc o day: trinh duyet bo qua chi thi nay khi CSP den
@@ -159,6 +159,9 @@ tr.new td{animation:newrow 2.4s ease-out}
   <div class="tabs" role="tablist">
     <button class="tab on" role="tab" aria-selected="true"  data-tab="dangky">Đăng ký</button>
     <button class="tab"    role="tab" aria-selected="false" data-tab="doisoat">Đối soát</button>
+    <button class="tab"    role="tab" aria-selected="false" data-tab="noidung">Nội dung trang</button>
+    <button class="tab"    role="tab" aria-selected="false" data-tab="taikhoan">Tài khoản</button>
+    <button class="tab"    role="tab" aria-selected="false" data-tab="nhatky">Nhật ký</button>
   </div>
 
   <!-- ===== Tab Đăng ký ===== -->
@@ -274,20 +277,90 @@ tr.new td{animation:newrow 2.4s ease-out}
       </div>
     </div>
 
-    <div class="nhomkq">
-      <h2>Nhật ký thao tác</h2>
-      <p class="muted" style="margin:0 0 8px">
-        Mọi thao tác đụng tới tiền đều để lại một dòng. Bản thật ghi bằng trigger ở
-        cơ sở dữ liệu chứ không phải bằng mã ứng dụng, để không đường ghi nào lọt sổ.
-      </p>
+  </div>
+
+  <!-- ===== Tab Nội dung trang ===== -->
+  <div class="wrap khung hide" data-khung="noidung">
+    <p class="muted" style="margin:0 0 14px">
+      Sửa chữ và số trên trang tuyển sinh mà không đụng code. Chỉ sửa được nội dung có
+      sẵn, <b>không</b> thêm hay bớt khối — trang này căn tay kỹ, cho thêm khối tuỳ ý là
+      mọi lần sửa đều có thể phá bố cục.
+    </p>
+    <div class="loc">
+      <button id="luuNhap" class="ghost">Lưu nháp</button>
+      <button id="xuatBan">Xuất bản</button>
+      <button id="xemThu" class="ghost">Xem thử trên trang</button>
+      <button id="hoanNoiDung" class="ghost">Hoàn về mặc định</button>
+      <span id="trangThaiNoiDung" class="muted"></span>
+    </div>
+    <p id="noiDungErr" class="err hide"></p>
+    <div class="tablewrap"><table class="ds" id="bangNoiDung">
+      <thead><tr>
+        <th style="width:22%">Chỗ nào trên trang</th>
+        <th style="width:14%">Khoá</th>
+        <th style="width:32%">Đang hiển thị</th>
+        <th style="width:32%">Sửa thành</th>
+      </tr></thead>
+      <tbody id="dongNoiDung"></tbody>
+    </table></div>
+  </div>
+
+  <!-- ===== Tab Tài khoản ===== -->
+  <div class="wrap khung hide" data-khung="taikhoan">
+    <p class="muted" style="margin:0 0 6px">
+      Ba vai theo chức danh thật. <b>Kế toán khớp tiền vào, admin quyết định phải thu bao
+      nhiêu</b> — một tài khoản làm được cả hai thì miễn giảm khống rồi khớp cho khớp sổ
+      là thao tác không ai phát hiện được.
+    </p>
+    <p class="muted" style="margin:0 0 14px">
+      <b>Tạo và xoá tài khoản không làm ở đây</b> mà ở bảng điều khiển Supabase, hoặc qua
+      edge function dùng service_role. Trang này chỉ gán vai: khoá tạo tài khoản mà nằm
+      trong trình duyệt thì ai mở trang cũng tự cấp quyền cho mình được.
+    </p>
+    <div class="tablewrap"><table class="ds">
+      <thead><tr>
+        <th style="width:28%">Email</th><th style="width:20%">Vai</th>
+        <th style="width:16%">Trạng thái</th><th style="width:18%">Đăng nhập cuối</th>
+        <th style="width:18%">Đổi vai</th>
+      </tr></thead>
+      <tbody id="dongTaiKhoan"></tbody>
+    </table></div>
+    <div class="nhomkq" style="margin-top:22px">
+      <h2>Vai nào làm được gì</h2>
       <div class="tablewrap"><table class="ds">
         <thead><tr>
-          <th style="width:18%">Lúc</th><th style="width:16%">Người</th>
-          <th style="width:20%">Hành động</th><th style="width:46%">Chi tiết</th>
+          <th style="width:24%">Việc</th><th style="width:25%">Trợ giảng</th>
+          <th style="width:25%">Kế toán</th><th style="width:26%">Admin</th>
         </tr></thead>
-        <tbody id="dongLog"><tr><td colspan="4" class="muted">Chưa có thao tác nào.</td></tr></tbody>
+        <tbody id="dongQuyen"></tbody>
       </table></div>
     </div>
+  </div>
+
+  <!-- ===== Tab Nhật ký ===== -->
+  <div class="wrap khung hide" data-khung="nhatky">
+    <p class="muted" style="margin:0 0 14px">
+      Mọi thao tác đụng tới tiền, quyền hay nội dung trang đều để lại một dòng. Bản thật
+      ghi bằng trigger ở cơ sở dữ liệu chứ không phải bằng mã ứng dụng: có nhiều đường
+      ghi (edge function, SQL editor, script vét), quên ghi ở một đường là mất dấu vết
+      mà không ai biết. <b>Nhật ký không sửa, không xoá được, kể cả admin.</b>
+    </p>
+    <div class="loc">
+      <span class="count" id="soLog">0</span>
+      <label class="nhan-loc">Người
+        <select id="locNguoi" style="width:auto"><option value="">tất cả</option></select></label>
+      <label class="nhan-loc">Hành động
+        <select id="locHanhDong" style="width:auto"><option value="">tất cả</option></select></label>
+      <input id="timLog" type="search" placeholder="Tìm trong chi tiết…" style="width:min(260px,45vw)">
+      <button id="taiLog" class="ghost" style="margin-left:auto">Tải CSV</button>
+    </div>
+    <div class="tablewrap"><table class="ds">
+      <thead><tr>
+        <th style="width:16%">Lúc</th><th style="width:20%">Người</th>
+        <th style="width:22%">Hành động</th><th style="width:42%">Chi tiết</th>
+      </tr></thead>
+      <tbody id="dongLog"><tr><td colspan="4" class="muted">Chưa có thao tác nào.</td></tr></tbody>
+    </table></div>
   </div>
 </div>
 
@@ -410,6 +483,10 @@ function vaoDemo() {
   $('demoBanner').classList.remove('hide');
   setLive('off', '•  demo, không nối trực tiếp');
   $('vai').textContent = 'vai: quản trị (demo)';
+  veTaiKhoan();
+  nhap = docJson(KHOA_NHAP);
+  docMacDinh().then(veNoiDung);
+  veNhatKy();
   hideErr($('listErr'));
   render();
 }
@@ -913,14 +990,91 @@ function xacNhan() {
   render();
 }
 
-function ghiLog(hanhDong, chiTiet) {
-  nhatKy.unshift({ luc: new Date(), nguoi: 'demo@aivietnam.edu.vn', hanhDong, chiTiet });
-  $('dongLog').innerHTML = nhatKy.map(l => `<tr>
+function ghiLog(hanhDong, chiTiet, nguoi) {
+  nhatKy.unshift({ luc: new Date(), nguoi: nguoi || TAI_KHOAN_DANG_DUNG, hanhDong, chiTiet });
+  veNhatKy();
+}
+
+// ── Nhật ký ────────────────────────────────────────────────────────────────
+function veNhatKy() {
+  // Danh sách lọc dựng lại từ chính dữ liệu, không viết cứng: thêm loại thao tác mới
+  // mà quên thêm vào ô lọc thì nó sẽ lọt khỏi tầm nhìn của người kiểm.
+  for (const [id, lay] of [['locNguoi', l => l.nguoi], ['locHanhDong', l => l.hanhDong]]) {
+    const el = $(id), giu = el.value;
+    const cu = [...el.options].slice(1).map(o => o.value).join('|');
+    const moi = [...new Set(nhatKy.map(lay))].sort();
+    if (moi.join('|') !== cu) {
+      el.innerHTML = '<option value="">tất cả</option>'
+        + moi.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+      el.value = moi.includes(giu) ? giu : '';
+    }
+  }
+  const ng = $('locNguoi').value, hd = $('locHanhDong').value;
+  const tu = $('timLog').value.trim().toLowerCase();
+  const hien = nhatKy.filter(l =>
+    (!ng || l.nguoi === ng) && (!hd || l.hanhDong === hd)
+    && (!tu || (l.chiTiet + ' ' + l.hanhDong).toLowerCase().includes(tu)));
+
+  $('soLog').textContent = hien.length + (hien.length === nhatKy.length ? '' : ' / ' + nhatKy.length);
+  $('dongLog').innerHTML = hien.map(l => `<tr>
       <td class="thoi">${esc(fmtTime(l.luc.toISOString()))}</td>
       <td>${esc(l.nguoi)}</td><td>${esc(l.hanhDong)}</td>
       <td class="note">${esc(l.chiTiet)}</td>
-    </tr>`).join('');
+    </tr>`).join('') || '<tr><td colspan="4" class="muted">Không có dòng nào khớp.</td></tr>';
 }
+
+// ── Tài khoản ──────────────────────────────────────────────────────────────
+const VAI = {
+  EDA_TA: 'Trợ giảng', EDA_ACCOUNTANT: 'Kế toán', EDA_ADMIN: 'Quản trị',
+};
+const TAI_KHOAN_DANG_DUNG = 'admin@example.com';
+// Dữ liệu mẫu: tên miền example.com (RFC 2606 dành riêng cho tài liệu), không phải
+// địa chỉ thật của ai.
+let taiKhoan = [
+  { email: 'admin@example.com',   vai: 'EDA_ADMIN',      bat: true,  cuoi: 0.2 },
+  { email: 'ketoan@example.com',  vai: 'EDA_ACCOUNTANT', bat: true,  cuoi: 26 },
+  { email: 'trogiang@example.com', vai: 'EDA_TA',        bat: true,  cuoi: 74 },
+  { email: 'nguoi-cu@example.com', vai: 'EDA_TA',        bat: false, cuoi: 2200 },
+];
+
+const QUYEN = [
+  ['Xem danh sách học viên', 1, 1, 1],
+  ['Xem SĐT phụ huynh', 0, 1, 1],
+  ['Xem số tiền, giao dịch', 0, 1, 1],
+  ['Tải sao kê, khớp, xác nhận thu', 0, 1, 1],
+  ['Miễn giảm, đổi số phải đóng', 0, 0, 1],
+  ['Sửa thông tin đăng ký', 0, 0, 1],
+  ['Sửa nội dung trang', 0, 0, 1],
+  ['Gán vai cho tài khoản', 0, 0, 1],
+];
+
+function veTaiKhoan() {
+  const gio = (h) => fmtTime(new Date(Date.now() - h * 36e5).toISOString());
+  $('dongTaiKhoan').innerHTML = taiKhoan.map((t, i) => `<tr>
+    <td>${esc(t.email)}${t.email === TAI_KHOAN_DANG_DUNG
+      ? '<span class="sub">đang đăng nhập</span>' : ''}</td>
+    <td>${esc(VAI[t.vai])}<span class="sub">${esc(t.vai)}</span></td>
+    <td><span class="nhan ${t.bat ? 'du' : 'qua'}">${t.bat ? 'Đang hoạt động' : 'Đã khoá'}</span></td>
+    <td class="thoi">${t.bat ? esc(gio(t.cuoi)) : '—'}</td>
+    <td><select data-tk="${i}" style="width:auto">${Object.entries(VAI)
+      .map(([k, v]) => `<option value="${k}"${t.vai === k ? ' selected' : ''}>${esc(v)}</option>`)
+      .join('')}</select></td>
+  </tr>`).join('');
+
+  const o = (x) => x ? '<span class="nhan du">được</span>' : '<span class="nhan qua">không</span>';
+  $('dongQuyen').innerHTML = QUYEN.map(([ten, a, b, c]) =>
+    `<tr><td>${esc(ten)}</td><td>${o(a)}</td><td>${o(b)}</td><td>${o(c)}</td></tr>`).join('');
+}
+
+$('dongTaiKhoan').addEventListener('change', (e) => {
+  const s = e.target.closest('select[data-tk]');
+  if (!s) return;
+  const t = taiKhoan[Number(s.dataset.tk)];
+  const cu = t.vai;
+  t.vai = s.value;
+  ghiLog('Đổi vai tài khoản', `${t.email}: ${VAI[cu]} → ${VAI[t.vai]}`);
+  veTaiKhoan();
+});
 
 $('apDungAnhXa').onclick = () => {
   for (const s of $('chonCot').querySelectorAll('select'))
@@ -1000,6 +1154,137 @@ $('tickHet').onchange = (e) => {
   demSoTick();
 };
 $('dongKhop').addEventListener('change', demSoTick);
+$('locNguoi').onchange = veNhatKy;
+$('locHanhDong').onchange = veNhatKy;
+$('timLog').oninput = veNhatKy;
+$('taiLog').onclick = () => {
+  const cell = (v) => {
+    let s = String(v ?? '');
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;   // chặn công thức Excel, như bản CSV đăng ký
+    return '"' + s.replace(/"/g, '""') + '"';
+  };
+  const body = ['luc,nguoi,hanh_dong,chi_tiet',
+    ...nhatKy.map(l => [l.luc.toISOString(), l.nguoi, l.hanhDong, l.chiTiet].map(cell).join(','))
+  ].join('\r\n');
+  const url = URL.createObjectURL(new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `nhat-ky-eda-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  ghiLog('Tải nhật ký', nhatKy.length + ' dòng');
+};
+
+// ── Nội dung trang ─────────────────────────────────────────────────────────
+// Khoá phải khớp với thuộc tính data-noi-dung trên TuyenSinh-eDA2026.dc.html.
+// Giá trị mặc định KHÔNG nằm ở đây mà nằm trong chính trang đó: trang phải hiện đủ
+// nội dung ngay cả khi tệp nội dung hỏng hoặc chưa có, nên mặc định là markup gốc.
+const KHOA_NOI_DUNG = [
+  ['hero_tieu_de', 'Tiêu đề lớn ở đầu trang'],
+  ['khai_giang',   'Ngày khai giảng — hiện ở 12 chỗ, đổi một lần là đổi hết'],
+  ['gio_hoc',      'Khung giờ học'],
+  ['mo_ta_khoa',   'Câu mô tả khoá học'],
+];
+const KHOA_LUU_NOI_DUNG = 'eda-noi-dung';        // bản đã xuất bản
+const KHOA_NHAP = 'eda-noi-dung-nhap';           // bản nháp, chưa xuất bản
+let macDinh = {};      // đọc từ chính trang tuyển sinh
+let nhap = {};
+
+/**
+ * Lấy giá trị mặc định từ chính trang tuyển sinh.
+ *
+ * Đọc từ trang thật chứ không chép cứng vào đây: chép cứng thì sửa trang mà quên sửa ở
+ * đây, ô "Đang hiển thị" sẽ nói một đằng còn trang hiện một nẻo. Trang có sẵn thẻ
+ * <script id="noi-dung-mac-dinh"> đúng để làm nguồn duy nhất cho việc này.
+ */
+async function docMacDinh() {
+  try {
+    const html = await (await fetch('/')).text();
+    // Cắt bằng regex chứ không dựng DOMParser: DOMParser đặt base URI của tài liệu mới,
+    // vi phạm "base-uri 'none'" trong CSP và đổ cảnh báo ra console mỗi lần mở tab.
+    // Ở đây chỉ cần đúng một thẻ script chứa JSON, không cần dựng cả cây DOM.
+    const m = html.match(/id="noi-dung-mac-dinh"[^>]*>([\s\S]*?)<\/script>/);
+    macDinh = JSON.parse(m[1]);
+  } catch {
+    macDinh = {};
+    showErr($('noiDungErr'),
+      'Không đọc được nội dung mặc định từ trang tuyển sinh. Cột "Đang hiển thị" sẽ trống.');
+  }
+}
+
+function veNoiDung() {
+  const daXuat = docJson(KHOA_LUU_NOI_DUNG);
+  $('dongNoiDung').innerHTML = KHOA_NOI_DUNG.map(([k, mo_ta]) => {
+    const dangHien = daXuat[k] ?? macDinh[k];
+    const doi = daXuat[k] !== undefined && daXuat[k] !== macDinh[k];
+    return `<tr>
+      <td>${esc(mo_ta)}</td>
+      <td><code>${esc(k)}</code></td>
+      <td class="note">${esc(dangHien) || '<span class="muted">(trống)</span>'}
+        ${doi ? '<span class="sub"><span class="nhan no">đã đổi khỏi mặc định</span></span>' : ''}</td>
+      <td><input data-khoa="${esc(k)}" value="${esc(nhap[k] ?? dangHien)}"></td>
+    </tr>`;
+  }).join('');
+}
+
+const docJson = (k) => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch { return {}; } };
+
+function thuNhap() {
+  for (const i of $('dongNoiDung').querySelectorAll('input[data-khoa]'))
+    nhap[i.dataset.khoa] = i.value;
+  return nhap;
+}
+
+/**
+ * Lọc HTML lúc GHI chứ không phải lúc đọc.
+ *
+ * Người sửa nội dung không được phép chèn thẻ vào trang công khai. Đây là XSS do người
+ * trong nhà gây ra, vẫn là XSS - và lọc lúc ghi thì dữ liệu đã sạch từ trong kho, mọi
+ * chỗ đọc về sau đều an toàn mà không phải nhớ lọc lại.
+ */
+const locThe = (s) => String(s).replace(/[<>]/g, '');
+
+$('luuNhap').onclick = () => {
+  const n = thuNhap();
+  localStorage.setItem(KHOA_NHAP, JSON.stringify(n));
+  $('trangThaiNoiDung').textContent = 'đã lưu nháp, chưa lên trang công khai';
+  ghiLog('Lưu nháp nội dung', Object.keys(n).length + ' khoá');
+};
+
+$('xuatBan').onclick = () => {
+  hideErr($('noiDungErr'));
+  const n = thuNhap();
+  const ra = {};
+  for (const [k] of KHOA_NOI_DUNG) {
+    const v = locThe(n[k] ?? '').trim();
+    if (v && v !== macDinh[k]) ra[k] = v;      // chỉ ghi những khoá thật sự khác mặc định
+  }
+  localStorage.setItem(KHOA_LUU_NOI_DUNG, JSON.stringify(ra));
+  localStorage.removeItem(KHOA_NHAP);
+  nhap = {};
+  $('trangThaiNoiDung').textContent =
+    `đã xuất bản ${Object.keys(ra).length} khoá — mở trang tuyển sinh để xem`;
+  ghiLog('Xuất bản nội dung', Object.keys(ra).length
+    ? Object.keys(ra).join(', ') : 'hoàn tất cả về mặc định');
+  veNoiDung();
+};
+
+$('hoanNoiDung').onclick = () => {
+  localStorage.removeItem(KHOA_LUU_NOI_DUNG);
+  localStorage.removeItem(KHOA_NHAP);
+  nhap = {};
+  $('trangThaiNoiDung').textContent = 'đã hoàn về nội dung mặc định';
+  ghiLog('Hoàn nội dung về mặc định', 'tất cả khoá');
+  veNoiDung();
+};
+
+$('xemThu').onclick = () => {
+  localStorage.setItem(KHOA_NHAP, JSON.stringify(thuNhap()));
+  // ?xem-thu=1 để trang tuyển sinh áp bản NHÁP thay vì bản đã xuất bản. Không có tham
+  // số này thì khách vào trang vẫn thấy bản đã xuất bản, không thấy bản đang sửa dở.
+  window.open('/?xem-thu=1', '_blank');
+  ghiLog('Xem thử nội dung', 'mở trang tuyển sinh với bản nháp');
+};
 
 // Tab
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
@@ -1031,11 +1316,14 @@ Object.assign(window, { LA_DASHBOARD, render, locNhanh, doiSoat, saoKeMau, xacNh
 // Phai la defineProperties chu khong phai Object.assign: Object.assign GOI getter roi
 // gan gia tri tinh, nen ben ngoai se doc phai ban chup luc nap trang chu khong phai
 // gia tri hien tai - test se xanh trong khi giao dien da doi.
+Object.assign(window, { veNhatKy, veNoiDung });
 Object.defineProperties(window, {
   rows:    { get: () => rows },
   hienThi: { get: () => hienThi },
   nhatKy:  { get: () => nhatKy },
   ketQua:  { get: () => ketQua },
+  macDinh: { get: () => macDinh },
+  taiKhoan: { get: () => taiKhoan },
 });
 </script>
 </body>
