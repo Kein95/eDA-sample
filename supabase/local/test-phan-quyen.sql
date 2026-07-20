@@ -108,6 +108,12 @@ select pg_temp.phai_rong(
   'tro giang KHONG doc duoc cac dot dong tien',
   $$select count(*) from eda_registration_installment$$);
 
+-- Nhat ky chua ban chup truoc/sau duoi dang jsonb, tuc la chua ca SDT phu huynh va so
+-- tien. Doc duoc nhat ky la di duong vong qua dung cac cot bi cam xem.
+select pg_temp.phai_rong(
+  'tro giang KHONG doc duoc nhat ky',
+  $$select count(*) from eda_audit$$);
+
 select pg_temp.phai_khong_doi(
   'tro giang KHONG sua duoc don dang ky',
   $$update eda_registration set name = 'bi doi ten' where code = 'eDA26-ABC123'$$);
@@ -152,6 +158,10 @@ select pg_temp.phai_khong_doi(
   'ke toan KHONG doi duoc hoc phi cua phuong an',
   $$update eda_payment_plan set tong_tien = 1 where code = 'PA1'$$);
 
+select pg_temp.phai_rong(
+  'ke toan KHONG doc duoc nhat ky',
+  $$select count(*) from eda_audit$$);
+
 select pg_temp.phai_khong_doi(
   'ke toan KHONG xac nhan ho nguoi khac duoc',
   $$update eda_bank_txn
@@ -171,6 +181,14 @@ do $$ begin
 
   update eda_registration set ghi_chu_noi_bo = 'da goi dien' where code = 'eDA26-ABC123';
   perform pg_temp.dat('admin sua duoc don dang ky');
+end $$;
+
+do $$
+declare n integer;
+begin
+  select count(*) into n from eda_audit;
+  if n < 1 then raise exception 'THAT BAI: admin khong doc duoc nhat ky - nhat ky khong doc duoc thi vo dung'; end if;
+  perform pg_temp.dat(format('admin DOC duoc nhat ky (%s dong)', n));
 end $$;
 
 do $$

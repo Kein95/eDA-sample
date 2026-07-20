@@ -105,6 +105,17 @@ create policy "tro giang doc don" on public.eda_registration
 grant select on public.eda_registration_tro_giang to authenticated;
 grant select on public.eda_cong_no to authenticated;
 
+-- ── Doc nhat ky ────────────────────────────────────────────────────────────
+-- 0006 bat RLS tren eda_audit nhung khong dat policy SELECT nao, nghia la KHONG AI doc
+-- duoc - ke ca admin. Mot nhat ky khong doc duoc thi khong lam duoc viec cua no.
+--
+-- Chi admin: moi dong chua ban chup truoc/sau cua ban ghi duoi dang jsonb, tuc la chua
+-- ca SDT phu huynh va so tien. Cho ke toan hay tro giang doc nhat ky la di duong vong
+-- qua dung cac cot ma ho bi cam xem.
+create policy "doc nhat ky" on public.eda_audit
+  for select to authenticated using (public.eda_la_admin());
+grant select on public.eda_audit to authenticated;
+
 -- ── Gan vai cho tai khoan ──────────────────────────────────────────────────
 -- Chay trong SQL editor cua Supabase sau khi da tao user o muc Authentication.
 -- Nguoi do phai dang xuat rong dang nhap lai thi JWT moi mang claim moi.

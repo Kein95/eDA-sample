@@ -24,7 +24,8 @@
      (Cloudflare Pages). Neu doi sang host khac thi phai tu cau hinh header tuong duong,
      neu khong trang quan tri co the bi nhung vao iframe de lua bam. -->
 <title>eDA 2026 · Quản trị đăng ký</title>
-<link rel="icon" href="assets/logo-mark.png">
+<!-- Duong dan tu goc: o /dashboard/web thi "assets/..." se tinh thanh /dashboard/assets/ -->
+<link rel="icon" href="/assets/logo-mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
@@ -117,6 +118,15 @@ td.note{white-space:pre-wrap}
    cuon giua chung ma khong biet dang o tab nao cua trang thi sua nham cho. */
 tr.nhomND td{position:sticky;top:32px;z-index:1;background:var(--deep);color:#fff;
   font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+/* Vai khong duoc xem tien thi an luon cot Hoc phi, ca tieu de lan moi o trong cot */
+body.an-tien .cot-tien{display:none}
+/* Vai chi duoc XEM noi dung trang: an cac nut ghi, o sua da co thuoc tinh readonly.
+   Day chi la giao dien - chan that nam o policy "sua noi dung" trong CSDL. */
+body.chi-xem-noidung #luuNhap,
+body.chi-xem-noidung #xuatBan,
+body.chi-xem-noidung #xemThu,
+body.chi-xem-noidung #hoanNoiDung{display:none}
+body.chi-xem-noidung #dongNoiDung textarea{background:#f0ece4;color:#6b6357}
 #dongNoiDung textarea{width:100%;font-size:13px;font-family:inherit;resize:vertical;
   border:1.5px solid var(--ink);padding:4px 6px}
 .count{font-family:'Space Grotesk',sans-serif;font-weight:700}
@@ -157,6 +167,13 @@ tr.new td{animation:newrow 2.4s ease-out}
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <span id="live" class="livedot" title="Trạng thái kết nối trực tiếp">•  đang nối…</span>
       <span id="vai" class="livedot" title="Vai của tài khoản đang đăng nhập"></span>
+      <!-- Chỉ hiện ở bản demo. Vai thật đến từ claim trong JWT, đổi vai là việc của
+           bảng điều khiển Supabase - ô chọn này mà có ở bản thật thì ai cũng tự lên
+           admin được. -->
+      <label id="oDoiVai" class="hide" style="display:flex;gap:6px;align-items:center;font-size:13px">
+        <span class="muted">xem như:</span>
+        <select id="doiVai" style="width:auto"></select>
+      </label>
       <button id="out" class="ghost">Thoát</button>
     </div>
   </div>
@@ -202,7 +219,7 @@ tr.new td{animation:newrow 2.4s ease-out}
         <th style="width:8%">Đang là</th>
         <th style="width:7%">Ngành</th>
         <th style="width:9%">Quan tâm</th>
-        <th style="width:11%">Học phí</th>
+        <th style="width:11%" class="cot-tien">Học phí</th>
         <th style="width:7%">Kênh thông tin</th>
         <th style="width:10%">Ghi chú</th>
       </tr></thead>
@@ -392,9 +409,15 @@ tr.new td{animation:newrow 2.4s ease-out}
 //
 // Duong dan giu nguyen vi tri trong repo (khong chep ra thu muc goc) de local va ban
 // live nap dung mot file; scripts/dung-thu-muc-xuat-ban.mjs giu nguyen duong dan nay.
-import { khopGiaoDich, locGiaoDichMoi } from './supabase/functions/_shared/doi-soat.js';
+//
+// Bat dau bang "/" chu KHONG phai "./": moi tab la mot duong dan that (/dashboard/web),
+// nen "./" se tinh tu /dashboard/ va di tim /dashboard/supabase/... Duong dan do lai
+// khop luat rewrite cua chinh trang quan tri nen may chu tra ve HTML thay vi JS - trinh
+// duyet tu choi module sai MIME va CA TRANG chet trang. Duong dan tu goc thi o do cung
+// tro dung mot file.
+import { khopGiaoDich, locGiaoDichMoi } from '/supabase/functions/_shared/doi-soat.js';
 import { docBang, timDongTieuDe, doanAnhXa, apDungAnhXa, doanDauPhanCach }
-  from './supabase/functions/_shared/doc-sao-ke.js';
+  from '/supabase/functions/_shared/doc-sao-ke.js';
 
 // Cung du an Supabase voi edge function eda-register.
 // Anon key la khoa cong khai theo thiet ke; thu chan truy cap la RLS
@@ -490,7 +513,8 @@ function vaoDemo() {
   $('app').classList.remove('hide');
   $('demoBanner').classList.remove('hide');
   setLive('off', '•  demo, không nối trực tiếp');
-  $('vai').textContent = 'vai: quản trị (demo)';
+  $('oDoiVai').classList.remove('hide');
+  apVai(vaiHienTai);
   veTaiKhoan();
   // Nháp lưu theo dạng đã xuất bản ({bien, chu:[…]}), đổi về dạng đang soạn để đổ vào ô.
   const nd = docJson(KHOA_NHAP);
@@ -534,6 +558,22 @@ async function login() {
   }
 }
 
+/**
+ * Đọc vai từ JWT để biết bày tab nào ra.
+ *
+ * CHỈ để bày giao diện. Không kiểm chữ ký, và cũng không cần: token do trình duyệt giữ,
+ * người dùng sửa được nó thành bất cứ vai nào. Sửa xong thì thấy thêm vài tab, nhưng mọi
+ * truy vấn vẫn đi qua RLS với claim do máy chủ Supabase ký - đọc và ghi đều bị chặn y
+ * như cũ. Chỗ chặn thật nằm ở CSDL, đây chỉ là chuyện bày biện.
+ */
+function vaiTrongToken(token) {
+  try {
+    const p = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const v = JSON.parse(decodeURIComponent(escape(atob(p)))).app_metadata?.role;
+    return VAI[v] ? v : 'EDA_TA';     // không rõ vai thì cho quyền thấp nhất
+  } catch { return 'EDA_TA'; }
+}
+
 async function load() {
   const token = sessionStorage.getItem('eda_token');
   if (!token) return;
@@ -548,6 +588,7 @@ async function load() {
     return;
   }
   $('login').classList.add('hide'); $('app').classList.remove('hide');
+  apVai(vaiTrongToken(token));
   if (!r.ok) { showErr($('listErr'), 'Không tải được danh sách (' + r.status + ').'); return; }
 
   rows = await r.json();
@@ -608,7 +649,7 @@ function render() {
     + `<td>${esc(r.job)}</td>`
     + `<td>${esc(r.field)}</td>`
     + `<td>${esc(r.interest)}</td>`
-    + `<td>${oHocPhi(r)}</td>`
+    + `<td class="cot-tien">${oHocPhi(r)}</td>`
     + `<td>${esc(r.channel)}</td>`
     + `<td class="note">${esc(r.note)}</td>`
     + '</tr>').join('');
@@ -1040,6 +1081,39 @@ function veNhatKy() {
 const VAI = {
   EDA_TA: 'Trợ giảng', EDA_ACCOUNTANT: 'Kế toán', EDA_ADMIN: 'Quản trị',
 };
+
+/**
+ * Tab nào hiện với vai nào.
+ *
+ * Bảng này CHÉP LẠI chính sách RLS trong migration 0007, không phải quy tắc riêng của
+ * giao diện. Ẩn tab không phải là phân quyền - ai cũng gọi thẳng REST API được - nên
+ * chỗ chặn thật vẫn là CSDL. Việc của bảng này là đừng bày ra thứ mà bấm vào sẽ trả về
+ * rỗng, và đừng hứa hẹn quyền mà máy chủ sẽ từ chối.
+ *
+ * Nội dung trang: mọi vai ĐỌC được (policy "doc noi dung"), chỉ admin ghi - nên trợ
+ * giảng và kế toán vẫn thấy tab nhưng ô sửa để chế độ chỉ xem.
+ */
+const TAB_THEO_VAI = {
+  EDA_TA:         ['dangky', 'noidung'],
+  EDA_ACCOUNTANT: ['dangky', 'doisoat', 'noidung'],
+  EDA_ADMIN:      ['dangky', 'doisoat', 'noidung', 'taikhoan', 'nhatky'],
+};
+let vaiHienTai = 'EDA_ADMIN';
+const laAdmin = () => vaiHienTai === 'EDA_ADMIN';
+
+function apVai(vai) {
+  vaiHienTai = vai;
+  $('vai').textContent = `vai: ${VAI[vai].toLowerCase()}${LA_DASHBOARD ? ' (demo)' : ''}`;
+  const duoc = TAB_THEO_VAI[vai];
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('hide', !duoc.includes(t.dataset.tab)));
+  // Trợ giảng không thấy tiền. Cột Học phí ẩn bằng CSS theo lớp trên <body> để một
+  // chỗ đổi là cả tiêu đề lẫn mọi ô trong cột cùng ẩn, không phải sửa hai nơi.
+  document.body.classList.toggle('an-tien', !TAB_THEO_VAI[vai].includes('doisoat'));
+  document.body.classList.toggle('chi-xem-noidung', !laAdmin());
+  veNoiDung();                       // vẽ lại để ô sửa nhận đúng chế độ chỉ xem
+  moTab(tabTrenDuongDan());
+}
 const TAI_KHOAN_DANG_DUNG = 'admin@example.com';
 // Dữ liệu mẫu: tên miền example.com (RFC 2606 dành riêng cho tài liệu), không phải
 // địa chỉ thật của ai.
@@ -1378,8 +1452,8 @@ function dongNoiDung(khoa, dangHien, giaTri, daDoi, ghiChu) {
   return `<tr data-tim="${esc((dangHien + ' ' + giaTri).toLowerCase())}">
     <td class="note">${esc(dangHien) || '<span class="muted">(trống)</span>'}
       ${ghiChu ? `<span class="sub">${ghiChu}</span>` : ''}</td>
-    <td><textarea data-khoa="${esc(khoa)}" rows="${String(giaTri).includes('\n') ? 3 : 1}"
-      >${esc(giaTri)}</textarea></td>
+    <td><textarea data-khoa="${esc(khoa)}" rows="${String(giaTri).includes('\n') ? 3 : 1}"${
+      laAdmin() ? '' : ' readonly'}>${esc(giaTri)}</textarea></td>
     <td>${daDoi ? '<span class="nhan no">đã đổi</span>' : '<span class="muted">gốc</span>'}</td>
   </tr>`;
 }
@@ -1477,24 +1551,65 @@ $('xemThu').onclick = () => {
   ghiLog('Xem thử nội dung', 'mở trang tuyển sinh với bản nháp');
 };
 
-// Tab
-document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+// ── Mỗi tab một đường dẫn ──────────────────────────────────────────────────
+// Cùng cách làm với trang tuyển sinh (/pathway, /early...): F5 quay lại đúng tab đang
+// xem, gửi link cho người khác là họ mở thẳng vào đó, nút Back của trình duyệt chạy
+// đúng. Thêm tab mới thì thêm một dòng ở đây - _redirects đã có luật chung cho cả
+// thư mục nên không phải sửa thêm.
+const SLUG = {
+  dangky: 'list', doisoat: 'payments', noidung: 'web', taikhoan: 'users', nhatky: 'log',
+};
+const TAB_THEO_SLUG = Object.fromEntries(Object.entries(SLUG).map(([t, s]) => [s, t]));
+
+// /dashboard vao thang bang du lieu mau, khong qua man dang nhap. /admin van giu man
+// dang nhap vi do la duong dan that khi noi Supabase. Duong dan giu nguyen nho
+// _redirects rewrite 200 (khong phai chuyen huong 301).
+const GOC_QT = location.pathname.startsWith('/dashboard') ? '/dashboard' : '/admin';
+const LA_DASHBOARD = GOC_QT === '/dashboard';
+
+function tabTrenDuongDan() {
+  const s = location.pathname.slice(GOC_QT.length).replace(/^\/|\/$/g, '');
+  return TAB_THEO_SLUG[s] || 'dangky';
+}
+
+function moTab(tab, dayDuongDan = true) {
+  // Đường dẫn của tab bị cấm vẫn có thể gõ tay hoặc còn trong lịch sử trình duyệt;
+  // rơi về tab đầu tiên được phép thay vì hiện khung trống.
+  const duoc = TAB_THEO_VAI[vaiHienTai];
+  if (!duoc.includes(tab)) tab = duoc[0];
   document.querySelectorAll('.tab').forEach(x => {
-    const on = x === t;
+    const on = x.dataset.tab === tab;
     x.classList.toggle('on', on);
     x.setAttribute('aria-selected', String(on));
   });
   document.querySelectorAll('[data-khung]').forEach(k =>
-    k.classList.toggle('hide', k.dataset.khung !== t.dataset.tab));
-});
+    k.classList.toggle('hide', k.dataset.khung !== tab));
+  const dich = GOC_QT + '/' + SLUG[tab];
+  // Lần đầu vào bằng đường dẫn trống (/dashboard) thì THAY chứ không ĐẨY: đẩy thì bấm
+  // Back một cái quay về /dashboard rồi lại nhảy sang /dashboard/list, người dùng kẹt.
+  const dangTrong = location.pathname.replace(/\/$/, '') === GOC_QT;
+  if (dayDuongDan && location.pathname !== dich)
+    history[dangTrong ? 'replaceState' : 'pushState']({ tab }, '', dich);
+  return tab;
+}
+
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => moTab(t.dataset.tab));
+// Nút Back/Forward của trình duyệt: đổi tab theo đường dẫn mới, KHÔNG đẩy thêm mục vào
+// lịch sử - đẩy tiếp thì bấm Back sẽ mắc kẹt tại chỗ.
+addEventListener('popstate', () => moTab(tabTrenDuongDan(), false));
 $('csv').onclick = toCsv;
 $('reload').onclick = load;
 $('out').onclick = () => { sessionStorage.removeItem('eda_token'); location.reload(); };
 
-// /dashboard vao thang bang du lieu mau, khong qua man dang nhap. /admin van giu man
-// dang nhap vi do la duong dan that khi noi Supabase. Duong dan giu nguyen /dashboard
-// nho _redirects rewrite 200 (khong phai chuyen huong 301).
-const LA_DASHBOARD = /\/dashboard\/?$/.test(location.pathname);
+// Ô chọn vai chỉ có ở bản demo, để xem thử mỗi vai nhìn thấy những gì. Vai thật đến từ
+// claim trong JWT: ô chọn này mà có ở bản thật thì ai cũng tự lên admin được.
+$('doiVai').innerHTML = Object.entries(VAI)
+  .map(([k, t]) => `<option value="${k}">${t}</option>`).join('');
+$('doiVai').onchange = () => {
+  const cu = vaiHienTai;
+  apVai($('doiVai').value);
+  ghiLog('Đổi vai đang xem', `${VAI[cu]} → ${VAI[vaiHienTai]}`);
+};
 
 if (LA_DASHBOARD && CHUA_CAU_HINH) vaoDemo();
 else if (sessionStorage.getItem('eda_token')) load();

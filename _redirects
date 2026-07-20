@@ -23,3 +23,11 @@
 # vao che do demo hay hien man dang nhap. Chuyen huong that se doi duong dan sang
 # /admin va mat dau hieu do.
 /dashboard    /admin                   200
+
+# Moi tab quan tri cung la mot duong dan that (/dashboard/web, /dashboard/log...).
+#
+# O day dung duoc "/*" trong khi o goc thi khong: luat chi khop trong thu muc
+# /dashboard/ va /admin/, ma duoi hai thu muc do khong co file that nao de bi nuot.
+# Nho vay them tab moi khong phai sua file nay.
+/dashboard/*  /admin                   200
+/admin/*      /admin                   200

@@ -27,3 +27,14 @@
 /dashboard
   Content-Security-Policy: frame-ancestors 'none'
   X-Frame-Options: DENY
+
+# Moi tab la mot duong dan rieng (/dashboard/web, /admin/log...), va Pages khop theo
+# duong dan duoc goi - thieu hai khoi duoi day thi chi trang goc duoc che, con moi tab
+# con deu nhung vao iframe duoc.
+/dashboard/*
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY
+
+/admin/*
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY

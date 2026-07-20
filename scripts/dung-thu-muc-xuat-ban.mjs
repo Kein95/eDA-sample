@@ -67,10 +67,17 @@ for (const f of readdirSync(join(GOC, 'ava'))) {
 // Da hai lan suyt day len ban thieu file: trang nap module bang <script type="module">
 // nen thieu mot file la CA trang chet, khong phai mat mot tinh nang. Danh sach FILE o
 // tren la thu cong nen se con quen nua - de may doi chieu thay vi tin tri nho.
+// Nhan ca "./x.js" lan "/x.js". admin.html dung duong dan tu goc vi moi tab la mot
+// duong dan that (/dashboard/web) va "./" se tinh sai tu do. Bat moi mot dang thi doi
+// cach viet import la bo canh nay im lang cho qua - dung luc no can len tieng nhat.
 const nguonHtml = readFileSync(join(GOC, 'admin.html'), 'utf8');
-const thieu = [...nguonHtml.matchAll(/from\s+'(\.\/[^']+)'/g)]
-  .map((m) => m[1].replace(/^\.\//, ''))
-  .filter((p) => !existsSync(join(RA, p)));
+const duongDanImport = [...nguonHtml.matchAll(/from\s+'(\.?\/[^']+)'/g)]
+  .map((m) => m[1].replace(/^\.?\//, ''));
+if (!duongDanImport.length) {
+  console.log('KHONG THAY import nao trong admin.html - bo canh nay da hong, sua regex.');
+  process.exit(1);
+}
+const thieu = duongDanImport.filter((p) => !existsSync(join(RA, p)));
 if (thieu.length) {
   console.log('THIEU trong ban xuat ban (admin.html import nhung khong duoc chep):');
   thieu.forEach((p) => console.log('  ' + p));
