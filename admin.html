@@ -52,15 +52,35 @@ button.ghost{background:var(--surface);color:var(--ink)}
   letter-spacing:.08em;color:var(--deep);margin:16px 0 6px}
 .err{color:#b3261e;font-size:13.5px;font-weight:600;margin-top:14px}
 .muted{color:color-mix(in srgb,var(--ink) 55%,transparent);font-size:13px}
-/* Bang */
-.tablewrap{overflow-x:auto;border:3px solid var(--ink);background:var(--surface);box-shadow:5px 5px 0 var(--ink)}
-table{border-collapse:collapse;width:100%;min-width:1180px;font-size:13.5px}
-th,td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
-th{background:color-mix(in srgb,var(--gold) 14%,transparent);font-family:'Space Grotesk',sans-serif;
-  font-weight:700;white-space:nowrap;position:sticky;top:0}
-tr:hover td{background:color-mix(in srgb,var(--gold) 6%,transparent)}
-td.code{font-weight:700;color:var(--deep);white-space:nowrap}
-td.note{max-width:280px;white-space:pre-wrap}
+/* Bang
+   table-layout:fixed + width theo % o <th>: cot chia theo be ngang man hinh thay vi
+   theo noi dung. Truoc day de min-width:1180px nen 15 cot day nhau tran ra ngoai va
+   luc nao cung phai keo ngang. Chi con keo ngang khi man hep hon 920px. */
+.tablewrap{max-height:72vh;overflow:auto;border:3px solid var(--ink);
+  background:var(--surface);box-shadow:5px 5px 0 var(--ink)}
+/* min-width 1160px: duoi muc nay cot hep den noi chu tran ra de len cot ben canh
+   (do duoc: cot "Luc" bat dau tran o khoang 1120px). Cho cuon ngang thay vi de chu
+   chong len nhau. Con o tren muc nay thi 11 cot vua khit, khong phai keo ngang. */
+table{border-collapse:collapse;width:100%;min-width:1160px;table-layout:fixed;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{word-break:break-word}
+/* break-word chi cat khi mot TU dai hon o (email, link facebook). Khong dung
+   "overflow-wrap:anywhere" vi no cat ca tu ngan vua du cho, nhin nhu loi chinh ta. */
+td{word-break:break-word;line-height:1.45}
+th{background:#efe6d5;font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:12px;line-height:1.3;position:sticky;top:0;z-index:1}
+tr:hover td{background:color-mix(in srgb,var(--gold) 7%,transparent)}
+/* nowrap vi trinh duyet mac dinh duoc phep ngat dong sau dau gach noi: ma
+   "eDA26-ABC123" bi be doi ngay ca khi o du rong.
+   Kem theo do cot Ma phai du rong that (11%, >= 118px o min-width 1080px): nowrap ma
+   o hep thi chu khong xuong dong nua nhung TRAN sang de len cot Luc - doi mot loi de
+   nhin thanh mot loi kho nhin hon. Font nho hon mot chut de chac chan vua. */
+td.code{font-weight:700;color:var(--deep);white-space:nowrap;font-size:12.5px}
+/* Dong phu trong o gop (email duoi SDT, SDT duoi ten phu huynh) */
+.sub{display:block;font-size:11.5px;color:color-mix(in srgb,var(--ink) 58%,transparent)}
+.thoi{white-space:nowrap;font-variant-numeric:tabular-nums}
+/* Ghi chu do nguoi dang ky go, co the xuong dong - giu nguyen ngat dong ho da go */
+td.note{white-space:pre-wrap}
 .count{font-family:'Space Grotesk',sans-serif;font-weight:700}
 .hide{display:none}
 .livedot{font-size:12px;font-weight:600;white-space:nowrap;
@@ -107,10 +127,21 @@ tr.new td{animation:newrow 2.4s ease-out}
   <div class="wrap">
     <p id="listErr" class="err hide"></p>
     <div class="tablewrap"><table>
+      <!-- 11 cot thay vi 15: gop lien lac (SDT/email/Zalo/Facebook) va phu huynh
+           (ten + SDT) vao mot o, moi thu mot dong. Tong width = 100% de vua khung.
+           Ban CSV van xuat du ca 15 cot goc, khong gop gi. -->
       <thead><tr>
-        <th>Mã</th><th>Lúc</th><th>Họ tên</th><th>SĐT</th><th>Email</th><th>Zalo</th>
-        <th>Facebook</th><th>Tỉnh</th><th>Đang là</th><th>Ngành/nghề</th><th>Hứng thú</th>
-        <th>Phụ huynh</th><th>SĐT phụ huynh</th><th>Biết qua</th><th>Ghi chú</th>
+        <th style="width:10%">Mã</th>
+        <th style="width:9%">Lúc</th>
+        <th style="width:11%">Họ tên</th>
+        <th style="width:14%">Liên lạc</th>
+        <th style="width:7%">Tỉnh</th>
+        <th style="width:8%">Đang là</th>
+        <th style="width:7%">Ngành</th>
+        <th style="width:8%">Hứng thú</th>
+        <th style="width:9%">Phụ huynh</th>
+        <th style="width:8%">Biết qua</th>
+        <th style="width:9%">Ghi chú</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
@@ -267,11 +298,36 @@ function render() {
   $('n').textContent = shown.length + (q ? ' / ' + rows.length : '');
   $('rows').innerHTML = shown.map(r => '<tr>'
     + `<td class="code">${esc(r.code)}</td>`
-    + `<td>${esc(fmtTime(r.created_at))}</td>`
-    + COLS.slice(2).map(c => c === 'note'
-        ? `<td class="note">${esc(r[c])}</td>`
-        : `<td>${esc(r[c])}</td>`).join('')
+    + `<td class="thoi">${esc(fmtTime(r.created_at))}</td>`
+    + `<td>${esc(r.name)}</td>`
+    + `<td>${oLienLac(r)}</td>`
+    + `<td>${esc(r.province)}</td>`
+    + `<td>${esc(r.job)}</td>`
+    + `<td>${esc(r.field)}</td>`
+    + `<td>${esc(r.interest)}</td>`
+    + `<td>${oPhuHuynh(r)}</td>`
+    + `<td>${esc(r.channel)}</td>`
+    + `<td class="note">${esc(r.note)}</td>`
     + '</tr>').join('');
+}
+
+// SDT lam dong chinh, phan con lai xuong dong nho ben duoi. Zalo thuong trung SDT nen
+// chi hien khi khac - lap lai cung mot so chi to o ma khong them thong tin.
+function oLienLac(r) {
+  const d = [];
+  if (r.phone) d.push(`<b>${esc(r.phone)}</b>`);
+  if (r.email) d.push(`<span class="sub">${esc(r.email)}</span>`);
+  const them = [];
+  if (r.zalo && r.zalo !== r.phone) them.push('Zalo ' + esc(r.zalo));
+  if (r.facebook) them.push(esc(r.facebook));
+  if (them.length) d.push(`<span class="sub">${them.join(' · ')}</span>`);
+  return d.join('');
+}
+
+function oPhuHuynh(r) {
+  if (!r.guardian_name && !r.guardian_phone) return '';
+  return esc(r.guardian_name)
+    + (r.guardian_phone ? `<span class="sub">${esc(r.guardian_phone)}</span>` : '');
 }
 
 function esc(v) {
