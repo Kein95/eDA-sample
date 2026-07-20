@@ -71,10 +71,14 @@ button.nho:hover{box-shadow:4px 4px 0 var(--ink)}
 table.ds{min-width:660px}
 code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
   background:color-mix(in srgb,var(--gold) 14%,transparent);padding:1px 5px}
-/* Bang */
+/* Bang
    table-layout:fixed + width theo % o <th>: cot chia theo be ngang man hinh thay vi
-   theo noi dung. Truoc day de min-width:1180px nen 15 cot day nhau tran ra ngoai va
-   luc nao cung phai keo ngang. Chi con keo ngang khi man hep hon 920px. */
+   theo noi dung. Neu de min-width lon thi cot day nhau tran ra ngoai va luc nao cung
+   phai keo ngang.
+
+   .tablewrap la KHUNG CUON: co max-height nen bang cuon trong no, nho vay tieu de
+   sticky moi bam duoc vao dinh khung. Bo max-height di thi ca trang cuon, tieu de
+   van "sticky" nhung bam theo man hinh roi troi len mat cung noi dung. */
 .tablewrap{max-height:72vh;overflow:auto;border:3px solid var(--ink);
   background:var(--surface);box-shadow:5px 5px 0 var(--ink)}
 /* min-width 1200px: duoi muc nay chu tran ra de len cot ben canh. Cot chat nhat quyet

@@ -13,7 +13,16 @@ alter publication supabase_realtime add table public.eda_registration;
 -- Trang tuyen sinh co the im hang tuan giua hai dot quang ba, va neu du an ngu
 -- thi don dang ky dau tien sau do se that bai. Mot truy van re moi ngay la du
 -- de giu thuc. Bai hoc lay tu VNCLO, du an do da phai lam dung viec nay.
-create extension if not exists pg_cron;
+-- Tren Supabase: tao extension nhu binh thuong.
+-- Tren Postgres thuan (docker/docker-compose.yml, de chay thu migration): khong co
+-- extension nay. supabase/local/00-auth-gia.sql tao san schema "cron" gia, va dieu kien
+-- duoi day nhan ra dieu do roi bo qua. Khong dung "exception when others" o day: nuot
+-- moi loi thi mot ngay nao do pg_cron hong that ma migration van bao thanh cong.
+do $$ begin
+  if not exists (select 1 from pg_namespace where nspname = 'cron') then
+    create extension if not exists pg_cron;
+  end if;
+end $$;
 
 -- Bang dau chan, giu vai dong gan nhat de con biet cron co that su chay khong.
 create table if not exists public.eda_keepalive (

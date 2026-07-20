@@ -17,3 +17,28 @@ services:
       - ..:/usr/share/nginx/html:ro
       - ./nginx-eda.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
+
+  # Postgres de chay THAT cac migration truoc khi tin la chung dung.
+  #
+  # Cong 5480: 5433 la LVT-AR, 5470 dang co thu khac dung. Doi cong o day thi phai doi
+  # ca scripts/test-db.mjs.
+  #
+  # Anh postgres:16 thuan, KHONG phai anh cua Supabase: muc dich la do xem schema nay
+  # can bao nhieu phan Supabase. Phan Supabase that su can (bang auth.users, ham
+  # auth.uid/auth.jwt) duoc dung lai boi supabase/local/00-auth-gia.sql.
+  eda-db:
+    image: postgres:16-alpine
+    container_name: eda-db
+    environment:
+      POSTGRES_PASSWORD: eda-local-only
+      POSTGRES_DB: eda
+    ports:
+      - "5480:5432"
+    # Khong gan volume du lieu: day la CSDL dung thu, xoa di dung lai la chuyen binh
+    # thuong. Giu du lieu lai chi lam migration chay lan hai gap trang thai cu.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d eda"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
