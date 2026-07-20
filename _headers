@@ -21,3 +21,9 @@
 /admin.html
   Content-Security-Policy: frame-ancestors 'none'
   X-Frame-Options: DENY
+
+# /dashboard la rewrite cua cung file admin.html, nen phai lap lai header o day:
+# Pages khop _headers theo duong dan NGUOI DUNG goi, khong theo file dich.
+/dashboard
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY

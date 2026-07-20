@@ -78,6 +78,9 @@ tr.new td{animation:newrow 2.4s ease-out}
 <div id="login">
   <h1>eDA 2026 · Quản trị</h1>
   <p class="muted" style="margin:8px 0 0">Xem danh sách đăng ký giữ chỗ.</p>
+  <p id="demoHint" class="muted hide" style="margin:10px 0 0;color:var(--deep);font-weight:600">
+    Bản demo: bấm <b>Đăng nhập</b> để xem thử giao diện với 10 đăng ký mẫu.
+    Bỏ trống email/mật khẩu cũng được.</p>
   <label for="em">Email</label>
   <input id="em" type="email" autocomplete="username">
   <label for="pw">Mật khẩu</label>
@@ -87,6 +90,10 @@ tr.new td{animation:newrow 2.4s ease-out}
 </div>
 
 <div id="app" class="hide">
+  <div id="demoBanner" class="hide" style="background:#211d17;color:#f5f2ec;padding:9px clamp(14px,3vw,28px);font-size:13.5px">
+    <b style="color:#d9a860">DỮ LIỆU MẪU</b> · 10 đăng ký bịa đặt để xem thử giao diện.
+    Chưa nối cơ sở dữ liệu nên không có đăng ký thật nào ở đây.
+  </div>
   <div class="bar">
     <h1>Đăng ký eDA 2026 · <span id="n" class="count">0</span></h1>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -149,14 +156,56 @@ function fmtTime(iso) {
 // cong - nguoi dung khong biet chuyen gi dang xay ra.
 const CHUA_CAU_HINH = SUPABASE_URL.includes('REPLACE-ME') || SUPABASE_ANON_KEY.includes('REPLACE-ME');
 
+// ── Du lieu mau cho che do demo ────────────────────────────────────────────
+// Toan bo la nguoi BIA DAT. So dien thoai deu thuoc dai 0900 0000 xx - dai nay khong
+// duoc cap phat o Viet Nam nen khong the trung so that cua ai. Email dung ten mien
+// example.com (RFC 2606 danh rieng cho tai lieu). Khong duoc thay bang du lieu that:
+// trang nay cong khai, khong co dang nhap that che chan.
+const DEMO = [
+  ['Nguyễn Thu Hà','Ninh Thuận','Sinh viên năm 3','Kinh tế','Dashboard bán hàng','','','Facebook','Đang làm khoá Excel cơ bản, muốn học tiếp Power BI'],
+  ['Trần Minh Quân','TP.HCM','Đi làm 2 năm','Logistics','Data pipeline','','','Bạn giới thiệu',''],
+  ['Lê Phương Anh','Hà Nội','Học sinh lớp 12','','Python cho phân tích','Lê Văn Thành','0900 0000 31','Facebook','Phụ huynh đăng ký giúp'],
+  ['Phạm Đức Huy','Đà Nẵng','Đi làm 5 năm','Ngân hàng','Credit risk model','','','LinkedIn','Muốn hỏi thêm về lịch học cuối tuần'],
+  ['Võ Thị Ngọc Mai','Cần Thơ','Sinh viên năm 4','Marketing','A/B testing','','','TikTok',''],
+  ['Đặng Hoàng Long','Bình Dương','Đi làm 1 năm','Sản xuất','Forecasting nhu cầu','','','Website',''],
+  ['Bùi Khánh Linh','Nghệ An','Học sinh lớp 11','','Excel & SQL','Bùi Văn Sơn','0900 0000 71','Bạn giới thiệu','Xin tư vấn lộ trình cho học sinh'],
+  ['Hoàng Anh Tuấn','Hải Phòng','Đi làm 8 năm','Bán lẻ','Snowflake, Fabric','','','LinkedIn',''],
+  ['Ngô Thanh Trúc','Khánh Hoà','Sinh viên năm 2','CNTT','Agentic AI','','','Facebook','Hỏi về học bổng Early Bird'],
+  ['Dương Gia Bảo','Lâm Đồng','Đi làm 3 năm','Nông nghiệp','Anomaly detection','','','Website',''],
+];
+
+function duLieuDemo() {
+  const now = Date.now();
+  return DEMO.map((d, i) => {
+    const [name, province, job, field, interest, gName, gPhone, channel, note] = d;
+    const sdt = '0900 0000 ' + String(i + 1).padStart(2, '0');
+    return {
+      code: 'eDA26-DEMO' + String(i + 1).padStart(2, '0'),
+      // Rai deu vai gio gan nhat de cot "Luc" trong nhu that
+      created_at: new Date(now - (i * 47 + 12) * 60000).toISOString(),
+      name, phone: sdt, email: 'nguoi' + (i + 1) + '@example.com',
+      zalo: sdt, facebook: 'fb.com/nguoidemo' + (i + 1),
+      province, job, field, interest,
+      guardian_name: gName, guardian_phone: gPhone, channel, note,
+    };
+  });
+}
+
+function vaoDemo() {
+  rows = duLieuDemo();
+  $('login').classList.add('hide');
+  $('app').classList.remove('hide');
+  $('demoBanner').classList.remove('hide');
+  setLive('off', '•  demo, không nối trực tiếp');
+  hideErr($('listErr'));
+  render();
+}
+
 async function login() {
   hideErr($('loginErr'));
-  if (CHUA_CAU_HINH) {
-    return showErr($('loginErr'),
-      'Chưa nối backend nên chưa đăng nhập được. Cần tạo project Supabase rồi điền '
-      + 'SUPABASE_URL, SUPABASE_ANON_KEY và hai URL trong thẻ CSP ở đầu admin.html. '
-      + 'Xem mục 4 trong README.');
-  }
+  // Chua noi Supabase thi cho xem thu bang du lieu mau thay vi bao loi cut.
+  // Muc dich cua trang nay o ban demo la cho thay giao dien sau khi dang nhap co gi.
+  if (CHUA_CAU_HINH) return vaoDemo();
   $('go').disabled = true;
   try {
     // Bo cuoc sau 15 giay thay vi cho vo han: mang hong hoac URL sai thi fetch co the
@@ -292,7 +341,14 @@ $('csv').onclick = toCsv;
 $('reload').onclick = load;
 $('out').onclick = () => { sessionStorage.removeItem('eda_token'); location.reload(); };
 
-if (sessionStorage.getItem('eda_token')) load();
+// /dashboard vao thang bang du lieu mau, khong qua man dang nhap. /admin van giu man
+// dang nhap vi do la duong dan that khi noi Supabase. Duong dan giu nguyen /dashboard
+// nho _redirects rewrite 200 (khong phai chuyen huong 301).
+const LA_DASHBOARD = /\/dashboard\/?$/.test(location.pathname);
+
+if (LA_DASHBOARD && CHUA_CAU_HINH) vaoDemo();
+else if (sessionStorage.getItem('eda_token')) load();
+else if (CHUA_CAU_HINH) $('demoHint').classList.remove('hide');
 </script>
 </body>
 </html>

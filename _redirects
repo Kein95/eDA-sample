@@ -17,3 +17,9 @@
 /docs         /TuyenSinh-eDA2026.dc    200
 /mentors      /TuyenSinh-eDA2026.dc    200
 /register     /TuyenSinh-eDA2026.dc    200
+
+# Xem thu bang dang ky voi du lieu mau, vao thang khong qua man dang nhap.
+# Phai la 200 (rewrite) chu khong phai 301: trang doc location.pathname de biet nen
+# vao che do demo hay hien man dang nhap. Chuyen huong that se doi duong dan sang
+# /admin va mat dau hieu do.
+/dashboard    /admin                   200

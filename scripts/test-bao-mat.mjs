@@ -113,6 +113,18 @@ test('trang quan tri bao ro khi chua noi backend', () => {
   assert.ok(/AbortSignal\.timeout/.test(s), 'fetch khong co thoi han, nut co the treo mai');
 });
 
+test('du lieu mau khong chua so dien thoai hay email that', () => {
+  const s = doc('admin.html');
+  const khoi = s.match(/const DEMO = \[(.*?)\n\];/s);
+  assert.ok(khoi, 'khong tim thay khoi DEMO');
+  // Dai 0900 0000 xx khong duoc cap phat o VN; example.com danh rieng cho tai lieu.
+  // Neu ai do dan du lieu that vao day thi test nay do: trang la cong khai.
+  for (const sdt of khoi[1].match(/0\d[\d ]{7,}/g) || [])
+    assert.match(sdt.trim(), /^0900 0000 \d\d$/, 'SDT khong thuoc dai bia dat: ' + sdt);
+  assert.equal(/@(?!example\.com)[a-z0-9.-]+\.[a-z]{2,}/.test(khoi[1]), false,
+    'co email ngoai example.com trong du lieu mau');
+});
+
 // ── 5. RLS: bang dang ky khong duoc mo cho anon ────────────────────────────
 test('migration khong cap quyen doc cho anon', () => {
   const m = doc('supabase/migrations/0002_eda_registration_admin_read.sql');

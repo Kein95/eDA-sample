@@ -5,7 +5,16 @@
 | | |
 |---|---|
 | Trang tuyển sinh | **https://eda.luonvuituoi.work** |
-| Trang quản trị | **https://eda.luonvuituoi.work/admin** |
+| Xem thử bảng đăng ký | **https://eda.luonvuituoi.work/dashboard** |
+| Trang quản trị (màn đăng nhập) | **https://eda.luonvuituoi.work/admin** |
+
+`/dashboard` và `/admin` là **cùng một file** `admin.html`, khác nhau ở điểm vào:
+
+- `/dashboard` mở thẳng bảng với **10 đăng ký mẫu bịa đặt** — để xem giao diện sau khi
+  đăng nhập có gì. Số điện thoại đều thuộc dải `0900 0000 xx` (Việt Nam không cấp phát
+  dải này) và email dùng `example.com`, nên không thể trùng người thật.
+- `/admin` giữ màn đăng nhập. Chưa nối Supabase thì bấm Đăng nhập cũng vào dữ liệu mẫu;
+  nối rồi thì đăng nhập thật.
 
 *(Cloudflare Pages cắt đuôi `.html`, nên `/admin.html` sẽ bị chuyển hướng sang `/admin`.)*
 
@@ -260,8 +269,13 @@ dữ liệu là RLS chứ không phải giấu URL.
 Nhưng khi bảng `eda_registration` đã có dữ liệu thật, quảng cáo công khai màn đăng nhập
 quản trị là mời người ta dò mật khẩu. Lúc đó gỡ **hai chỗ**:
 
-1. Link `/admin` trong dải miễn trừ ở `TuyenSinh-eDA2026.dc.html`
+1. Link `/dashboard` trong dải miễn trừ ở `TuyenSinh-eDA2026.dc.html`
 2. `'admin.html'` trong mảng `FILE` của `scripts/dung-thu-muc-xuat-ban.mjs`
+3. Dòng `/dashboard` trong `_redirects` (không thì vẫn còn đường vào bảng)
+
+Riêng khối `DEMO` trong `admin.html` thì để nguyên cũng được: khi đã điền
+`SUPABASE_URL`/`SUPABASE_ANON_KEY` thì `CHUA_CAU_HINH` thành `false` và chế độ demo
+không bao giờ chạy nữa.
 
 ### Việc còn phải làm
 
