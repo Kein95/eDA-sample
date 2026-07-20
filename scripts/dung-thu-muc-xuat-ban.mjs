@@ -2,7 +2,7 @@
 //
 // Vi sao can: "wrangler pages deploy ." day len TAT CA moi thu trong thu muc. No
 // khong doc .gitignore, cung khong doc .assetsignore (da thu, khong an). Deploy
-// thang tu goc repo la data/eDA_v9.xlsx, toan bo migration SQL va tai lieu PDF deu
+// thang tu goc repo la toan bo migration SQL, thu muc .git va tai lieu noi bo deu
 // thanh URL cong khai.
 //
 //   node scripts/dung-thu-muc-xuat-ban.mjs

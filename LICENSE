@@ -1,4 +1,53 @@
-MIT License
+PHAM VI GIAY PHEP / SCOPE OF THIS LICENSE
+=========================================
+
+Repo nay chua HAI thu khac nhau ve phap ly. Doc ky truoc khi clone ve dung.
+
+1. MA NGUON - cap phep theo MIT (toan van ben duoi)
+---------------------------------------------------
+   admin.html, scripts/, supabase/, _redirects, _headers, docker/,
+   package.json, va phan CO CHE cua TuyenSinh-eDA2026.dc.html
+   (dinh tuyen tab, lop phu CMS, logic doi soat, phan quyen RLS).
+
+   Dung, sua, ban, deploy thoai mai. Khong can xin phep.
+
+2. NOI DUNG KHOA HOC VA HINH ANH - KHONG cap phep
+--------------------------------------------------
+   Nhung thu duoi day thuoc ve AI VIETNAM va nhung nguoi trong anh.
+   MIT o muc 1 KHONG ap dung cho chung. Ban KHONG duoc phep dung lai:
+
+   - ava/*.jpg, ava/*.jpeg
+     Chan dung 4 giang vien co that. Quyen hinh anh thuoc ve ho, khong phai
+     thu chu repo cap phep duoc. Dung anh nguoi khac de quang cao khoa hoc
+     cua ban la vi pham quyen hinh anh, bat ke giay phep phan mem ghi gi.
+
+   - Ten nguoi that trong TuyenSinh-eDA2026.dc.html (phan Giang vien)
+
+   - assets/logo-full.png, assets/logo-mark.png
+     Nhan hieu. Nhan hieu khong bao gio di theo giay phep ma nguon.
+
+   - assets/dongson-*.svg, assets/dongson-*.png, assets/dongson-set.jpg,
+     assets/Overview_eDA2026.jpg, assets/video/*.jpg
+
+   - docs/eDA-2026-Syllabus.md, docs/eDA-2026-Syllabus.html
+     Giao trinh.
+
+   - Toan bo chu tren trang tuyen sinh: mo ta khoa, hoc phi, cam ket,
+     danh gia hoc vien.
+
+   TRUOC KHI DEPLOY BAN CLONE, PHAI THAY HET MUC 2 BANG NOI DUNG CUA BAN.
+   Xem muc "Doi thanh khoa cua ban" trong README.md.
+
+3. support.js, image-slot.js - sinh boi cong cu khac
+-----------------------------------------------------
+   Hai file nay do toolchain "dc-runtime" / "omelette starter" sinh ra,
+   khong phai viet cho repo nay ("GENERATED ... do not edit"). Giay phep
+   theo cong cu sinh ra chung. Neu ban phat hanh lai ban clone ra ngoai,
+   tu kiem tra dieu khoan cua toolchain do truoc.
+
+
+MIT License (ap dung cho muc 1)
+================================
 
 Copyright (c) 2026 Kein95
 

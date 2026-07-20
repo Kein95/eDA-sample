@@ -1,7 +1,11 @@
 import re
+from pathlib import Path
 
-with open(r"D:\Projects\eDA\TuyenSinh-eDA2026.dc.html", "r", encoding="utf-8") as f:
-    text = f.read()
+# Duong dan tinh theo vi tri file script, khong phai theo mot thu muc co dinh: nguoi
+# clone repo ve cho khac van chay duoc.
+HTML = Path(__file__).resolve().parent.parent / "TuyenSinh-eDA2026.dc.html"
+
+text = HTML.read_text(encoding="utf-8")
 
 # Find color:#fff on elements that do NOT have a dark background
 # These are elements with white text that might be unreadable on light backgrounds

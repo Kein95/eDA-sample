@@ -12,8 +12,8 @@ services:
     container_name: eda-web
     ports:
       # Chi lang nghe tren may nay, khong ra ca mang LAN. Gan ca thu muc repo lam web root
-      # (xem volume duoi) nghia la /supabase/migrations/*.sql, /data/eDA_v9.xlsx, /plans/
-      # va /.git deu tai ve duoc. O nha rieng thi khong sao, o quan ca phe hay mang cong ty
+      # (xem volume duoi) nghia la /supabase/migrations/*.sql, /plans/ va /.git deu tai
+      # ve duoc. O nha rieng thi khong sao, o quan ca phe hay mang cong ty
       # thi bat ky ai cung xem duoc. Doi thanh "8791:80" neu can may khac trong mang xem.
       - "127.0.0.1:8791:80"
     volumes:

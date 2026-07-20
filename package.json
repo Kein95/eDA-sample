@@ -1,0 +1,15 @@
+{
+  "name": "eda-sample",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Trang tuyen sinh mot file .dc.html + trang quan tri + backend Supabase. Dung lam mau de clone ve sua thanh khoa hoc cua rieng minh.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/test-bao-mat.mjs && node scripts/test-doi-soat.mjs && node scripts/test-doc-sao-ke.mjs",
+    "test:db": "bash scripts/test-db.sh",
+    "test:trinh-duyet": "node scripts/test-trinh-duyet-duong-dan-vai.mjs && node scripts/test-trinh-duyet-noi-dung.mjs && node scripts/test-trinh-duyet-nhat-ky.mjs",
+    "build": "node scripts/dung-thu-muc-xuat-ban.mjs",
+    "deploy": "npx wrangler pages deploy .xuat-ban --project-name eda --branch master"
+  }
+}
