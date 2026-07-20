@@ -7,7 +7,7 @@
 //
 //   node scripts/dung-thu-muc-xuat-ban.mjs
 //   npx wrangler pages deploy .xuat-ban --project-name eda --branch master
-import { rmSync, mkdirSync, cpSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { rmSync, mkdirSync, cpSync, existsSync, readdirSync, statSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
 const GOC = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
@@ -27,6 +27,8 @@ const FILE = [
   // vi chep ra goc: edge function eda-doi-soat cung import dung file nay, mot ban duy
   // nhat cho ca ba noi (edge function, trang demo, test).
   'supabase/functions/_shared/doi-soat.js',
+  'supabase/functions/_shared/doc-sao-ke.js',
+
   'assets/logo-full.png',
   'assets/logo-mark.png',
   'assets/dongson-drum.svg',
@@ -58,6 +60,22 @@ for (const f of readdirSync(join(GOC, 'ava'))) {
   if (!ANH_MENTOR.test(f)) continue;
   cpSync(join(GOC, 'ava', f), join(RA, 'ava', f));
   n++;
+}
+
+// Kiem: moi module admin.html import phai co mat trong thu muc xuat ban.
+//
+// Da hai lan suyt day len ban thieu file: trang nap module bang <script type="module">
+// nen thieu mot file la CA trang chet, khong phai mat mot tinh nang. Danh sach FILE o
+// tren la thu cong nen se con quen nua - de may doi chieu thay vi tin tri nho.
+const nguonHtml = readFileSync(join(GOC, 'admin.html'), 'utf8');
+const thieu = [...nguonHtml.matchAll(/from\s+'(\.\/[^']+)'/g)]
+  .map((m) => m[1].replace(/^\.\//, ''))
+  .filter((p) => !existsSync(join(RA, p)));
+if (thieu.length) {
+  console.log('THIEU trong ban xuat ban (admin.html import nhung khong duoc chep):');
+  thieu.forEach((p) => console.log('  ' + p));
+  console.log('Them vao mang FILE trong scripts/dung-thu-muc-xuat-ban.mjs');
+  process.exit(1);
 }
 
 const dem = (d) => readdirSync(d, { withFileTypes: true })

@@ -6,7 +6,7 @@
 // them nhieu dot dong tien.
 import assert from 'node:assert/strict';
 import {
-  bocKhoa, chuanHoaSdt, dotCanThu, khopGiaoDich, locGiaoDichMoi, maThayThe, docCsv,
+  bocKhoa, chuanHoaSdt, dotCanThu, khopGiaoDich, locGiaoDichMoi, maThayThe,
 } from '../supabase/functions/_shared/doi-soat.js';
 
 let so = 0;
@@ -183,33 +183,5 @@ await testAsync('ma thay the on dinh voi cung du lieu, khac khi du lieu khac', a
   assert.notEqual(await maThayThe(a), await maThayThe({ ...a, so_tien: 4_000_001 }));
 });
 
-// ── 5. Doc CSV ─────────────────────────────────────────────────────────────
-test('doc CSV, bo dong tien RA', () => {
-  const csv = [
-    'ma_gd,ngay,so_tien,noi_dung',
-    'G1,2026-07-20,4000000,"eDA26-ABC123 0900000001"',
-    'G2,2026-07-20,-500000,"PHI CHUYEN TIEN"',     // tien ra, phai bo
-    'G3,2026-07-20,0,"dong 0"',                    // phai bo
-  ].join('\n');
-  const t = docCsv(csv);
-  assert.equal(t.length, 1);
-  assert.equal(t[0].ma_gd, 'G1');
-  assert.equal(t[0].so_tien, 4_000_000);
-});
-
-test('doc CSV: so tien co dau phay ngan cach van doc duoc', () => {
-  const t = docCsv('ma_gd,ngay,so_tien,noi_dung\nG1,2026-07-20,"4.000.000","eDA26-ABC123"');
-  assert.equal(t[0].so_tien, 4_000_000);
-});
-
-test('doc CSV: noi dung chua dau phay khong lam lech cot', () => {
-  const t = docCsv('ma_gd,ngay,so_tien,noi_dung\nG1,2026-07-20,4000000,"CK eDA26-ABC123, dot 1"');
-  assert.equal(t[0].noi_dung, 'CK eDA26-ABC123, dot 1');
-});
-
-test('CSV rong hoac chi co header -> mang rong, khong no', () => {
-  assert.deepEqual(docCsv(''), []);
-  assert.deepEqual(docCsv('ma_gd,ngay,so_tien,noi_dung'), []);
-});
-
-console.log('\n' + so + ' kiem tra deu dat.');
+console.log('');
+console.log(so + ' kiem tra deu dat.');

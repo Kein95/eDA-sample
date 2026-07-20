@@ -205,17 +205,29 @@ tr.new td{animation:newrow 2.4s ease-out}
     <div class="loc">
       <button id="chonSaoKe">Chọn file sao kê…</button>
       <input id="fileSaoKe" type="file" accept=".csv,text/csv" class="hide">
-      <button id="saoKeMau" class="ghost">Dùng sao kê mẫu</button>
+      <!-- Hai mẫu bố cục KHÁC HẲN nhau, cùng một bộ đọc: chứng minh là không ngân hàng
+           nào bị viết cứng trong code. -->
+      <button class="ghost" data-mau="A">Sao kê mẫu kiểu A</button>
+      <button class="ghost" data-mau="B">Sao kê mẫu kiểu B</button>
       <span id="tomTat" class="muted"></span>
     </div>
     <p id="doiSoatErr" class="err hide"></p>
 
-    <!-- Chưa chọn ngân hàng thật nên chưa viết parser ngân hàng nào. Đọc CSV chuẩn hoá
-         của chính mình để phần khung (chống trùng, khớp, xác nhận, log) chạy và kiểm
-         được ngay. Parser ngân hàng thật cắm vào sau, đúng chỗ đã tách sẵn. -->
     <p class="muted" style="margin:0 0 12px">
-      Định dạng CSV: <code>ma_gd,ngay,so_tien,noi_dung</code>. Chỉ đọc dòng tiền vào.
+      Nhận sao kê CSV của bất kỳ ngân hàng nào. Tên cột, thứ tự cột, số hàng thừa ở đầu,
+      dấu phân cách <code>,</code> <code>;</code> hay tab đều tự nhận. Đoán sai thì chọn lại
+      ở bảng dưới.
     </p>
+
+    <!-- Bảng chọn cột. Đây là chỗ thay cho việc viết parser riêng cho từng ngân hàng:
+         khác biệt giữa các ngân hàng nằm ở đây, không nằm trong code. -->
+    <div id="khungAnhXa" class="nhomkq hide">
+      <h2>Cột nào là gì</h2>
+      <p class="muted" id="tomTatAnhXa" style="margin:0 0 10px"></p>
+      <div class="loc" id="chonCot"></div>
+      <button id="apDungAnhXa" class="ghost">Đọc lại theo cột đã chọn</button>
+      <span id="daNho" class="muted" style="margin-left:10px"></span>
+    </div>
 
     <div id="ketQua" class="hide">
       <div class="nhomkq">
@@ -298,7 +310,9 @@ tr.new td{animation:newrow 2.4s ease-out}
 //
 // Duong dan giu nguyen vi tri trong repo (khong chep ra thu muc goc) de local va ban
 // live nap dung mot file; scripts/dung-thu-muc-xuat-ban.mjs giu nguyen duong dan nay.
-import { docCsv, khopGiaoDich, locGiaoDichMoi } from './supabase/functions/_shared/doi-soat.js';
+import { khopGiaoDich, locGiaoDichMoi } from './supabase/functions/_shared/doi-soat.js';
+import { docBang, timDongTieuDe, doanAnhXa, apDungAnhXa, doanDauPhanCach }
+  from './supabase/functions/_shared/doc-sao-ke.js';
 
 // Cung du an Supabase voi edge function eda-register.
 // Anon key la khoa cong khai theo thiet ke; thu chan truy cap la RLS
@@ -624,7 +638,7 @@ const TIEN_DOT = { PA1: [4e6, 20e6], PA2: [4e6, 12e6, 10e6], PA3: [4e6, 5e6, 7e6
 let so = new Map();
 let ketQua = null;
 let nhatKy = [];
-let saoKeDaDung = null;   // giữ nguyên một bản: file thật không tự đổi giữa hai lần tải
+const saoKeDaDung = {};   // giữ nguyên một bản mỗi kiểu: file thật không tự đổi giữa hai lần tải
 
 /** Dựng danh bạ đúng kiểu NguoiDangKy[] mà khopGiaoDich() cần. */
 function danhBa() {
@@ -643,41 +657,125 @@ function danhBa() {
 /**
  * Sao kê mẫu, dựng từ chính dữ liệu demo để mã khớp được.
  *
+ * Hai kiểu bố cục KHÁC HẲN nhau, cùng một bộ đọc xử lý cả hai:
+ *   A - có 4 hàng thừa ở đầu, cột Ghi nợ / Ghi có tách riêng, ngày dd/mm/yyyy,
+ *       số tiền ngăn cách bằng dấu chấm, phân cách cột bằng dấu phẩy
+ *   B - tiêu đề ngay hàng đầu, tiếng Anh, MỘT cột số tiền mang dấu âm dương,
+ *       ngày ISO, số tiền ngăn cách bằng dấu phẩy, phân cách cột bằng chấm phẩy
+ *
  * Dựng MỘT LẦN rồi giữ nguyên: một file sao kê thật không tự đổi nội dung giữa hai lần
  * tải lên. Dựng lại mỗi lần thì sau khi xác nhận, người đó đã đóng đủ nên số tiền đợt
  * kế tiếp thành rỗng và dòng bị loại - lần tải thứ hai không còn gì để so, đúng thứ
  * cần chứng minh lại biến mất.
  */
-function saoKeMau() {
-  if (saoKeDaDung) return saoKeDaDung;
-  const d = (n) => new Date(Date.now() - n * 36e5).toISOString().slice(0, 10);
-  const dong = [['ma_gd', 'ngay', 'so_tien', 'noi_dung']];
-  const them = (ma, ngay, tien, nd) => dong.push([ma, ngay, tien, `"${nd}"`]);
+function saoKeMau(kieu) {
+  if (saoKeDaDung[kieu]) return saoKeDaDung[kieu];
+  const ngayVN = (n) => {
+    const d = new Date(Date.now() - n * 36e5), p = (x) => String(x).padStart(2, '0');
+    return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
+  };
+  const ngayISO = (n) => new Date(Date.now() - n * 36e5).toISOString().slice(0, 10);
+  const cham = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const phay = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
   // Chọn người theo tiêu chí "còn đợt chưa đóng", không theo vị trí trong mảng: chọn
   // theo vị trí thì gặp người đã đóng đủ là số tiền đợt kế tiếp thành undefined.
   const conNo = rows.filter(r => r.hoc_phi && r.hoc_phi[1] < r.hoc_phi[2]);
   const tienDot = (r) => TIEN_DOT[r.hoc_phi[0]][r.hoc_phi[1]];
   const [a, b, c, e] = conNo;
 
-  them('GD001', d(20), tienDot(a), `CK ${a.code} ${a.phone}`);                  // khớp mã, đủ tiền
-  them('GD002', d(18), tienDot(b),                                             // viết hoa dính liền
-       `CHUYEN TIEN ${b.code}${b.phone.replace(/\s/g, '')} ND HOC PHI`.toUpperCase());
-  them('GD003', d(9), tienDot(c), `nop hoc phi ${c.phone}`);                    // chỉ SĐT
-  them('GD004', d(6), Math.round(tienDot(e) / 4), `${e.code} dong truoc mot phan`); // thiếu tiền
-  them('GD005', d(4), 5e6, 'CHUYEN KHOAN');                                     // không nhận ra ai
-  them('GD006', d(3), -55000, 'PHI DICH VU');                                   // tiền ra, phải bỏ
-  saoKeDaDung = dong.map(r => r.join(',')).join('\n');
-  return saoKeDaDung;
+  // Cùng một bộ giao dịch cho cả hai kiểu, chỉ khác cách trình bày.
+  const gd = [
+    ['GD001', 20, tienDot(a), `CK ${a.code} ${a.phone}`, false],
+    ['GD002', 18, tienDot(b),                                  // ngân hàng viết hoa dính liền
+      `CHUYEN TIEN ${b.code}${b.phone.replace(/\s/g, '')} ND HOC PHI`.toUpperCase(), false],
+    ['GD003', 9, tienDot(c), `nop hoc phi ${c.phone}`, false],  // chỉ SĐT, không có mã
+    ['GD004', 6, Math.round(tienDot(e) / 4), `${e.code} dong truoc mot phan`, false],
+    ['GD005', 4, 5e6, 'CHUYEN KHOAN', false],                   // không nhận ra ai
+    ['GD006', 3, 55000, 'PHI DICH VU', true],                   // tiền RA, phải bỏ
+  ];
+
+  let s;
+  if (kieu === 'A') {
+    s = ['SAO KE TAI KHOAN', 'Chu tai khoan: AI VIETNAM', 'So tai khoan: 001100223344',
+         `Tu ngay ${ngayVN(720)} den ${ngayVN(0)}`, '',
+         'STT,Ngay giao dich,So tham chieu,Ghi no,Ghi co,Noi dung chi tiet']
+      .concat(gd.map(([ma, gio, tien, nd, ra], i) =>
+        `${i + 1},${ngayVN(gio)},${ma},${ra ? '"' + cham(tien) + '"' : ''},${
+          ra ? '' : '"' + cham(tien) + '"'},"${nd}"`)).join('\n');
+  } else {
+    s = ['Transaction Date;Reference;Amount;Description']
+      .concat(gd.map(([ma, gio, tien, nd, ra]) =>
+        `${ngayISO(gio)};${ma};${ra ? '-' : ''}${phay(tien)};${nd}`)).join('\n');
+  }
+  saoKeDaDung[kieu] = s;
+  return s;
+}
+
+// Lưới ô của file đang xử lý, giữ lại để đổi ánh xạ cột không phải chọn lại file.
+let luoiHienTai = null;
+let anhXaHienTai = null;
+
+const TEN_TRUONG = {
+  ma_gd: 'Mã giao dịch', ngay: 'Ngày', tien_vao: 'Tiền vào',
+  tien_ra: 'Tiền ra', noi_dung: 'Nội dung CK',
+};
+// Bản thật lưu vào bảng theo ngân hàng. Ở demo dùng localStorage cho thấy được ý:
+// chọn một lần, lần sau tự dùng lại.
+const KHOA_NHO = 'eda-anh-xa-cot';
+
+function veChonCot() {
+  const tieuDe = luoiHienTai[anhXaHienTai.dongTieuDe] || [];
+  $('tomTatAnhXa').textContent =
+    `Hàng tiêu đề: dòng ${anhXaHienTai.dongTieuDe + 1} · ${tieuDe.length} cột · `
+    + `dấu phân cách: ${{ ',': 'dấu phẩy', ';': 'chấm phẩy', '\t': 'tab' }[anhXaHienTai.dpc]}`;
+  $('chonCot').innerHTML = Object.entries(TEN_TRUONG).map(([k, ten]) => {
+    const chon = tieuDe.map((h, i) =>
+      `<option value="${i}"${anhXaHienTai[k] === i ? ' selected' : ''}>${
+        esc(String(h).trim() || '(cột ' + (i + 1) + ')')}</option>`).join('');
+    // "không có" cần cho ma_gd (nhiều sao kê không có) và tien_ra (sao kê một cột tiền)
+    return `<label class="nhan-loc">${ten}
+      <select data-truong="${k}"><option value="">— không có —</option>${chon}</select></label>`;
+  }).join('');
+  [...$('chonCot').querySelectorAll('select')].forEach(s => {
+    const k = s.dataset.truong;
+    s.value = anhXaHienTai[k] === null || anhXaHienTai[k] === undefined ? '' : String(anhXaHienTai[k]);
+  });
+  $('khungAnhXa').classList.remove('hide');
 }
 
 function doiSoat(vanBan) {
   hideErr($('doiSoatErr'));
-  const txns = docCsv(vanBan);
-  if (txns.length === 0) {
+  luoiHienTai = docBang(vanBan);
+  const dpc = doanDauPhanCach(vanBan);
+  const dong = timDongTieuDe(luoiHienTai);
+  if (dong < 0) {
+    $('khungAnhXa').classList.add('hide');
     return showErr($('doiSoatErr'),
-      'Không đọc được dòng tiền vào nào. Cần CSV có cột ma_gd,ngay,so_tien,noi_dung.');
+      'Không nhận ra hàng tiêu đề trong file này. Cần một hàng có tên cột kiểu '
+      + '"Ngày giao dịch", "Ghi có", "Nội dung"…');
   }
-  const { moi, daXuLy } = locGiaoDichMoi(txns, new Set(so.keys()));
+  // Ánh xạ người đã chọn lần trước thắng kết quả đoán, miễn là còn khớp số cột.
+  const daNho = docAnhXaDaNho(luoiHienTai[dong]);
+  anhXaHienTai = { dongTieuDe: dong, dpc, ...(daNho || doanAnhXa(luoiHienTai[dong])) };
+  $('daNho').textContent = daNho ? 'đang dùng cách chọn cột đã lưu' : '';
+  veChonCot();
+  chayAnhXa();
+}
+
+/** Tra ve true neu doc duoc it nhat mot giao dich. */
+function chayAnhXa() {
+  const { giao_dich, bo } = apDungAnhXa(luoiHienTai, anhXaHienTai);
+  if (giao_dich.length === 0) {
+    $('ketQua').classList.add('hide');
+    showErr($('doiSoatErr'),
+      'Không đọc được dòng tiền vào nào' + (bo.length ? ` (bỏ ${bo.length} dòng: `
+        + [...new Set(bo.map(b => b.ly_do))].join(', ') + ')' : '')
+      + '. Kiểm tra lại cột Ngày và cột Tiền vào ở bảng trên.');
+    return false;
+  }
+  hideErr($('doiSoatErr'));
+  const { moi, daXuLy } = locGiaoDichMoi(giao_dich, new Set(so.keys()));
   const db = danhBa();
   // Vào sổ ngay, chưa xác nhận. Khớp chỉ là ĐỀ XUẤT của máy, chưa phải quyết định.
   for (const t of moi) so.set(t.ma_gd, { txn: t, khop: khopGiaoDich(t, db), xacNhan: false });
@@ -690,10 +788,34 @@ function doiSoat(vanBan) {
     daVao: [...so.values()].filter(v => v.xacNhan),
     trung: daXuLy.length,
   };
-  $('tomTat').textContent = `${txns.length} giao dịch · ${moi.length} mới · `
-    + `${daXuLy.length} đã có trong sổ từ trước`;
+  $('tomTat').textContent = `${giao_dich.length} giao dịch · ${moi.length} mới · `
+    + `${daXuLy.length} đã có trong sổ từ trước`
+    + (bo.length ? ` · bỏ ${bo.length} dòng không phải tiền vào` : '');
   $('ketQua').classList.remove('hide');
   veKetQua();
+  return true;
+}
+
+// Nhớ cách chọn cột theo "chữ ký" của hàng tiêu đề, không theo tên ngân hàng: người
+// dùng không phải gõ tên ngân hàng, và cùng một ngân hàng đổi mẫu sao kê thì chữ ký
+// đổi theo nên không áp nhầm cách chọn cũ.
+const chuKyTieuDe = (tieuDe) => (tieuDe || []).map(h => String(h).trim()).join('|');
+
+function docAnhXaDaNho(tieuDe) {
+  try {
+    const kho = JSON.parse(localStorage.getItem(KHOA_NHO) || '{}');
+    return kho[chuKyTieuDe(tieuDe)] || null;
+  } catch { return null; }
+}
+
+function nhoAnhXa() {
+  try {
+    const kho = JSON.parse(localStorage.getItem(KHOA_NHO) || '{}');
+    const { dongTieuDe, dpc, ...cot } = anhXaHienTai;
+    kho[chuKyTieuDe(luoiHienTai[dongTieuDe])] = cot;
+    localStorage.setItem(KHOA_NHO, JSON.stringify(kho));
+    $('daNho').textContent = 'đã nhớ cách chọn cột cho mẫu sao kê này';
+  } catch { /* localStorage bi chan: khong nho duoc thi thoi, khong lam hong luong */ }
 }
 
 const LY_DO = {
@@ -725,7 +847,7 @@ function veKetQua() {
   }).join('') || '<tr><td colspan="6" class="muted">Không có dòng nào.</td></tr>';
 
   $('dongTruot').innerHTML = truot.map(({ khop: k }) => `<tr>
-      <td class="thoi">${esc(k.txn.posted_at)}</td>
+      <td class="thoi">${esc(fmtTime(k.txn.posted_at))}</td>
       <td>${TIEN_AN}</td>
       <td class="note">${esc(k.txn.noi_dung)}</td>
       <td>${esc(k.canh_bao.map(c => LY_DO[c] || c).join(', ') || 'Không nhận ra ai')}</td>
@@ -770,6 +892,22 @@ function ghiLog(hanhDong, chiTiet) {
     </tr>`).join('');
 }
 
+$('apDungAnhXa').onclick = () => {
+  for (const s of $('chonCot').querySelectorAll('select'))
+    anhXaHienTai[s.dataset.truong] = s.value === '' ? null : Number(s.value);
+  if (anhXaHienTai.ngay === null || anhXaHienTai.tien_vao === null) {
+    return showErr($('doiSoatErr'), 'Phải chọn được cột Ngày và cột Tiền vào.');
+  }
+  ghiLog('Đổi cách chọn cột', Object.entries(TEN_TRUONG)
+    .map(([k, t]) => `${t}=${anhXaHienTai[k] === null ? '—' : 'cột ' + (anhXaHienTai[k] + 1)}`)
+    .join(', '));
+  // CHỈ nhớ khi cách chọn đó thật sự đọc ra được giao dịch. Nhớ cả cách chọn hỏng thì
+  // lần sau mở đúng mẫu sao kê đó sẽ tự dùng lại cách hỏng, và người dùng thấy "đang
+  // dùng cách chọn cột đã lưu" nên càng tin là đúng.
+  if (chayAnhXa()) nhoAnhXa();
+  else $('daNho').textContent = 'chưa nhớ: cách chọn này không đọc được giao dịch nào';
+};
+
 $('chonSaoKe').onclick = () => $('fileSaoKe').click();
 $('fileSaoKe').onchange = async (e) => {
   const f = e.target.files[0];
@@ -778,7 +916,10 @@ $('fileSaoKe').onchange = async (e) => {
   doiSoat(await f.text());
   e.target.value = '';        // chọn lại đúng file đó vẫn kích hoạt onchange
 };
-$('saoKeMau').onclick = () => { ghiLog('Tải lên sao kê', 'sao-ke-mau.csv'); doiSoat(saoKeMau()); };
+document.querySelectorAll('[data-mau]').forEach(b => b.onclick = () => {
+  ghiLog('Tải lên sao kê', `sao-ke-mau-${b.dataset.mau}.csv`);
+  doiSoat(saoKeMau(b.dataset.mau));
+});
 $('xacNhan').onclick = xacNhan;
 $('tickHet').onchange = (e) => {
   document.querySelectorAll('#dongKhop input[type=checkbox]').forEach(c => c.checked = e.target.checked);
