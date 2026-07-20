@@ -10,7 +10,7 @@
 
 `/dashboard` và `/admin` là **cùng một file** `admin.html`, khác nhau ở điểm vào:
 
-- `/dashboard` mở thẳng bảng với **10 đăng ký mẫu bịa đặt** — để xem giao diện sau khi
+- `/dashboard` mở thẳng bảng với **10 đăng ký demo** — để xem giao diện sau khi
   đăng nhập có gì. Số điện thoại đều thuộc dải `0900 0000 xx` (Việt Nam không cấp phát
   dải này) và email dùng `example.com`, nên không thể trùng người thật.
 - `/admin` giữ màn đăng nhập. Chưa nối Supabase thì bấm Đăng nhập cũng vào dữ liệu mẫu;
