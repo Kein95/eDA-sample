@@ -80,6 +80,13 @@ td.code{font-weight:700;color:var(--deep);white-space:nowrap;font-size:12.5px}
 /* Dong phu trong o gop (email duoi SDT, SDT duoi ten phu huynh) */
 .sub{display:block;font-size:11.5px;color:color-mix(in srgb,var(--ink) 58%,transparent)}
 .thoi{white-space:nowrap;font-variant-numeric:tabular-nums}
+/* Nhan trang thai hoc phi. Khong chi dua vao mau: mau kem chu ("Đã đủ", "Quá hạn")
+   de nguoi mu mau van doc duoc, va de con thay duoc khi in den trang. */
+.nhan{display:inline-block;padding:1px 6px;font-size:11px;font-weight:700;
+  border:1.5px solid currentColor;white-space:nowrap}
+.nhan.du{color:#1a7f37}
+.nhan.no{color:#8a6228}
+.nhan.qua{color:#b3261e}
 /* Ghi chu do nguoi dang ky go, co the xuong dong - giu nguyen ngat dong ho da go */
 td.note{white-space:pre-wrap}
 .count{font-family:'Space Grotesk',sans-serif;font-weight:700}
@@ -140,15 +147,16 @@ tr.new td{animation:newrow 2.4s ease-out}
            ca 15 truong - chi la khong bay san ra bang. -->
       <thead><tr>
         <th style="width:10%">Mã</th>
-        <th style="width:9%">Thời gian đăng ký</th>
-        <th style="width:12%">Họ tên</th>
-        <th style="width:15%">Liên lạc</th>
-        <th style="width:7%">Tỉnh</th>
-        <th style="width:9%">Đang là</th>
-        <th style="width:8%">Ngành</th>
-        <th style="width:10%">Quan tâm</th>
-        <th style="width:8%">Kênh thông tin</th>
-        <th style="width:12%">Ghi chú</th>
+        <th style="width:8%">Thời gian đăng ký</th>
+        <th style="width:11%">Họ tên</th>
+        <th style="width:13%">Liên lạc</th>
+        <th style="width:6%">Tỉnh</th>
+        <th style="width:8%">Đang là</th>
+        <th style="width:7%">Ngành</th>
+        <th style="width:9%">Quan tâm</th>
+        <th style="width:11%">Học phí</th>
+        <th style="width:7%">Kênh thông tin</th>
+        <th style="width:10%">Ghi chú</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
@@ -216,6 +224,27 @@ const DEMO = [
 // So gio truoc thoi diem mo trang, cho tung dong mau.
 const GIO_TRUOC = [0.4, 2, 5, 26, 50, 100, 170, 300, 500, 700];
 
+// Hoc phi cua tung dong mau: [ma phuong an, so dot da dong, tong so dot, co qua han].
+// null = moi dang ky giu cho, chua chon phuong an.
+//
+// KHONG dien so tien that vao day, va cung khong dien so gia cho "trong that hon":
+// trang cong khai da noi khoa hoc la CO THAT, nen mot con so hoc phi bia dat tren do
+// la thong tin sai ve mot khoa co that - se co nguoi tin va tinh toan theo. Thu dang
+// demo o day la CAU TRUC (may phuong an, may dot, dot nao da dong), khong phai chu so.
+const HOC_PHI = [
+  null,                  // vua dang ky vai phut truoc, chua chon phuong an
+  ['PA1', 1, 2, false],
+  null,
+  ['PA2', 3, 3, false],  // da dong du
+  ['PA3', 2, 5, false],
+  ['PA1', 2, 2, false],  // da dong du
+  ['PA2', 1, 3, true],   // qua han dot 2
+  ['PA3', 1, 5, false],
+  ['PA2', 2, 3, false],
+  ['PA1', 1, 2, true],   // qua han dot 2
+];
+const TIEN_AN = 'xx.xxx.xxx';   // chua co hoc phi that, xem plan.md
+
 function duLieuDemo() {
   const now = Date.now();
   return DEMO.map((d, i) => {
@@ -231,6 +260,7 @@ function duLieuDemo() {
       zalo: sdt, facebook: 'fb.com/nguoidemo' + (i + 1),
       province, job, field, interest,
       guardian_name: gName, guardian_phone: gPhone, channel, note,
+      hoc_phi: HOC_PHI[i],
     };
   });
 }
@@ -333,9 +363,25 @@ function render() {
     + `<td>${esc(r.job)}</td>`
     + `<td>${esc(r.field)}</td>`
     + `<td>${esc(r.interest)}</td>`
+    + `<td>${oHocPhi(r)}</td>`
     + `<td>${esc(r.channel)}</td>`
     + `<td class="note">${esc(r.note)}</td>`
     + '</tr>').join('');
+}
+
+// Trang thai hoc phi: phuong an + da dong may dot + con no bao nhieu.
+//
+// Mot co true/false khong dien ta duoc "da dong dot 2/4", nen o day hien ca thu tu dot.
+// So tien de an (TIEN_AN) vi chua co hoc phi that.
+function oHocPhi(r) {
+  if (!r.hoc_phi) return '<span class="sub">chưa chọn phương án</span>';
+  const [pa, daDong, tong, quaHan] = r.hoc_phi;
+  const xong = daDong >= tong;
+  const nhan = xong ? ['du', 'Đã đủ']
+             : quaHan ? ['qua', 'Quá hạn đợt ' + (daDong + 1)]
+             : ['no', 'Còn ' + TIEN_AN];
+  return `${esc(pa)} · ${daDong}/${tong} đợt`
+    + `<span class="sub"><span class="nhan ${nhan[0]}">${nhan[1]}</span></span>`;
 }
 
 // SDT lam dong chinh, phan con lai xuong dong nho ben duoi. Zalo thuong trung SDT nen

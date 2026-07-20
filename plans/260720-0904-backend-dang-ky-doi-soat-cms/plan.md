@@ -52,14 +52,26 @@ khớp lại từ đầu. Nó thoát lỗi chỉ vì mỗi thí sinh trả đún
   nội dung mặc định đã nhúng sẵn, không thay thế.
 - Migration chạy lại lần hai không sinh cron job trùng (đã theo đúng cách của 0003/0004).
 
+## Học phí và ngân hàng: chưa có số thật
+
+Chốt 20/07: **chưa có học phí, chưa chọn ngân hàng, làm demo trước.**
+
+Hệ quả:
+
+- **Số tiền hiển thị là `xx.xxx.xxx đ` ở mọi nơi**, kể cả trang quản trị. Cố ý không điền
+  số giả cho "trông thật hơn": trang đã tuyên bố khoá học là có thật, nên một con số học
+  phí bịa nằm trên đó là thông tin sai về một khoá có thật, ai đó sẽ tin và tính toán
+  theo. Cấu trúc mới là thứ đáng demo (mấy phương án, mấy đợt, đợt nào đã đóng), không
+  phải chữ số.
+- **Chưa viết parser sao kê nào.** Không có sao kê thật thì không biết layout, mà đoán
+  layout là viết code không chạy được. Đợt 2 làm phần khung (băm file, chống trùng, khớp,
+  xem trước, xác nhận) với một parser đọc CSV chuẩn hoá của chính mình; parser ngân hàng
+  thật thêm sau, đúng chỗ ranh giới đã tách sẵn.
+- Toàn bộ schema đợt 1 vẫn dựng được: nó tổng quát, chỉ thiếu dữ liệu seed.
+
 ## Câu chưa có lời giải
 
-1. **eDA thu học phí bao nhiêu, mấy phương án, mấy đợt, mốc ngày nào?** Trang hiện không
-   có học phí ở bất kỳ tab nào. Ví dụ AIO (3 phương án, 2–5 đợt) chỉ cho biết *kiểu*
-   cấu trúc, không phải số thật của eDA. Schema ở đợt 1 thiết kế tổng quát nên không bị
-   chặn, nhưng **không seed được dữ liệu thật** cho tới khi có câu trả lời.
-2. **Ngân hàng nhận tiền là ngân hàng nào?** Parser sao kê phụ thuộc layout từng ngân
-   hàng. VNCLO hardcode Vietcombank và sẽ hỏng nếu đổi.
-3. Có cần hoá đơn/biên lai cho người đóng tiền không (ảnh hưởng schema và nghĩa vụ thuế)?
-4. CMS cho sửa tới đâu: chỉ chữ và số, hay cả thêm/bớt khối nội dung? Đợt 3 hiện giả
+1. Có cần hoá đơn/biên lai cho người đóng tiền không (ảnh hưởng schema và nghĩa vụ thuế)?
+2. CMS cho sửa tới đâu: chỉ chữ và số, hay cả thêm/bớt khối nội dung? Đợt 3 hiện giả
    định **chỉ chữ và số** — xem lý do trong phase-03.
+3. Khi có học phí thật rồi thì ai được sửa con số đó — chỉ admin, hay kế toán cũng được?
