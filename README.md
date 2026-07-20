@@ -681,6 +681,92 @@ dò các chỗ chữ trắng trên nền sáng.
 
 ---
 
+## B9. Bảng màu
+
+Toàn bộ mã màu dưới đây trích thẳng từ `TuyenSinh-eDA2026.dc.html`, kèm số lần dùng thật.
+Đổi thành thương hiệu của bạn thì đổi theo bảng này.
+
+### B9.1 Biến theme
+
+Đây là gốc của cả trang. Hai chuỗi này nằm ở `themeVars` trong lớp component cuối file,
+đổi một chuỗi là đổi nền toàn trang.
+
+| Biến | Sáng | Tối | Dùng cho |
+|---|---|---|---|
+| `--bg` | `#FAF9F7` | `#14110c` | Nền trang |
+| `--surface` | `#FFFFFF` | `#1e1913` | Nền thẻ, ô, khối nổi |
+| `--ink` | *(không đặt)* | `#f0ece3` | Chữ và viền |
+| `--tint` | `#F1EFEA` | `rgba(217,168,96,0.16)` | Nền phụ, vùng nhấn nhẹ |
+| `--tintdeep` | *(không đặt)* | `#d9a860` | Nhấn đậm |
+| `--deep` | *(không đặt)* | `#d9a860` | Chữ nhấn |
+
+> **Bẫy quan trọng:** ở chế độ sáng, ba biến `--ink`, `--tintdeep`, `--deep` **không hề
+> được đặt**. Mọi chỗ viết `var(--ink,#211d17)` đều rơi về giá trị dự phòng. Nghĩa là
+> muốn đổi màu chữ ở light mode thì **sửa giá trị dự phòng**, đặt biến không có tác dụng
+> gì cả. Đây là lý do `#211d17` xuất hiện 787 lần trong file.
+
+### B9.2 Vàng Đông Sơn
+
+| Mã | Số lần | Vai trò |
+|---|---|---|
+| `#211d17` | 787 | Chữ và viền ở light mode (dự phòng của `--ink`) |
+| `#b68235` | 107 | Vàng chủ đạo: nút chính, nhấn mạnh |
+| `#fffdf9` | 66 | Kem trắng, nền thẻ |
+| `#8a6228` | 40 | Vàng đậm |
+| `#d9a860` | 23 | Vàng sáng, dùng nhiều ở dark mode |
+| `#7c5a24` | 17 | Vàng trầm (dự phòng của `--deep`) |
+| `#f1e5cf` | 12 | Kem nhạt, chữ trên nền tối |
+| `#f5f2ec` | 11 | Kem cũ, còn sót ở vài giá trị dự phòng |
+| `#17140f` | 6 | Nền tối nhất |
+
+### B9.3 Màu 8 module
+
+Định nghĩa tập trung ở `.module-chip--m1` đến `--m8` trong khối `<style>`. Mỗi module một
+sắc, và sắc đó dùng lại nhất quán ở sơ đồ tổng quan lẫn lộ trình, nên đổi một module thì
+đổi ở cả hai nơi.
+
+| Module | Mã | Sắc |
+|---|---|---|
+| 01 | `#2563EB` | Xanh dương |
+| 02 | `#16A34A` | Xanh lá |
+| 03 | `#EA580C` | Cam |
+| 04 | `#D96C6C` | Hồng đất |
+| 05 | `#0D9488` | Xanh mòng két |
+| 06 | `#4F46E5` | Chàm |
+| 07 | `#CA8A04` | Hổ phách |
+| 08 | `#0891B2` | Xanh lơ |
+| Final Exam | `#E11D48` | Đỏ hồng |
+
+### B9.4 Màu sơ đồ tổng quan
+
+Sơ đồ ở tab Tổng quan giữ đúng bảng màu của tấm infographic gốc, không theo bộ module ở
+trên. Đây là lý do trang có hai hệ màu song song. Sinh lại bằng
+`scripts/build-overview-diagram.py`, sửa tay trong SVG sẽ bị ghi đè.
+
+| Mã | Số lần | Nhóm |
+|---|---|---|
+| `#3b1a02` / `#fb923c` | 41 / 41 | Nâu đậm và cam, cặp nhấn chính |
+| `#4472c4` | 31 | Xanh dương |
+| `#548235` / `#70ad47` / `#a9d18e` | 22 / 7 / 4 | Ba mức xanh lá |
+| `#fef3c7` | 19 | Vàng nhạt, nền callout |
+| `#5a4708` | 19 | Ô liu đậm |
+| `#c55a11` | 18 | Cam cháy |
+| `#bf9000` | 15 | Vàng mù tạt |
+| `#10239e` | 9 | Xanh đậm |
+| `#b87c9c` / `#e3a9c4` | 8 / 8 | Cặp hồng |
+| `#b01513` | 6 | Đỏ |
+
+### B9.5 Đổi màu mà không vỡ chỗ khác
+
+1. Đổi `themeVars` trước, xem cả sáng lẫn tối.
+2. Nhớ là light mode chạy bằng **giá trị dự phòng**, không phải bằng biến.
+3. Chạy `python scripts/audit_white_text.py` để bắt chữ trắng rơi trên nền sáng.
+4. Đổi màu module thì đổi ở `.module-chip--mN`, rồi chạy lại
+   `python scripts/build-overview-diagram.py`.
+5. Kiểm bằng mắt ở **cả hai chế độ**, đây là lỗi đã tái đi tái lại ba lần trên trang này.
+
+---
+
 ## Giấy phép và dữ liệu cá nhân
 
 **Repo chứa hai thứ khác nhau về pháp lý.** [`LICENSE`](LICENSE) tách rõ:
