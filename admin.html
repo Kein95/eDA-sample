@@ -119,6 +119,12 @@ tr.new td{animation:newrow 2.4s ease-out}
     <h1>Đăng ký eDA 2026 · <span id="n" class="count">0</span></h1>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <span id="live" class="livedot" title="Trạng thái kết nối trực tiếp">•  đang nối…</span>
+      <select id="kyHan" style="width:auto" title="Lọc theo thời điểm đăng ký">
+        <option value="tat-ca">Mọi thời điểm</option>
+        <option value="hom-nay">Hôm nay</option>
+        <option value="7">7 ngày qua</option>
+        <option value="30">30 ngày qua</option>
+      </select>
       <input id="q" type="search" placeholder="Tìm tên, SĐT, email, tỉnh…" style="width:min(300px,52vw)">
       <button id="reload" class="ghost">Tải lại</button>
       <button id="csv" class="ghost">Tải CSV</button>
@@ -172,7 +178,8 @@ const SUPABASE_ANON_KEY = 'REPLACE-ME';
 const $ = (id) => document.getElementById(id);
 const COLS = ['code','created_at','name','phone','email','zalo','facebook','province',
               'job','field','interest','guardian_name','guardian_phone','channel','note'];
-let rows = [];
+let rows = [];      // toan bo dong tai ve
+let hienThi = [];   // phan con lai sau khi loc, cung la phan xuat CSV
 
 const showErr = (el, msg) => { el.textContent = msg; el.classList.remove('hide'); };
 const hideErr = (el) => el.classList.add('hide');
@@ -206,6 +213,9 @@ const DEMO = [
   ['Dương Gia Bảo','Lâm Đồng','Đi làm 3 năm','Nông nghiệp','Anomaly detection','','','Website',''],
 ];
 
+// So gio truoc thoi diem mo trang, cho tung dong mau.
+const GIO_TRUOC = [0.4, 2, 5, 26, 50, 100, 170, 300, 500, 700];
+
 function duLieuDemo() {
   const now = Date.now();
   return DEMO.map((d, i) => {
@@ -213,8 +223,10 @@ function duLieuDemo() {
     const sdt = '0900 0000 ' + String(i + 1).padStart(2, '0');
     return {
       code: 'eDA26-DEMO' + String(i + 1).padStart(2, '0'),
-      // Rai deu vai gio gan nhat de cot "Luc" trong nhu that
-      created_at: new Date(now - (i * 47 + 12) * 60000).toISOString(),
+      // Rai tu vai gio den ~29 ngay truoc, KHONG dan deu: co the thu ca 4 muc loc
+      // thoi gian va thay so dong doi that. Dan deu trong mot ngay thi loc kieu gi
+      // cung ra 10, khong biet no chay hay khong.
+      created_at: new Date(now - GIO_TRUOC[i] * 3600000).toISOString(),
       name, phone: sdt, email: 'nguoi' + (i + 1) + '@example.com',
       zalo: sdt, facebook: 'fb.com/nguoidemo' + (i + 1),
       province, job, field, interest,
@@ -291,12 +303,27 @@ async function load() {
   render();
 }
 
+// Moc dau cua khoang thoi gian dang loc; null = khong loc.
+// "Hom nay" tinh tu 0h00 theo lich, khong phai 24 gio truoc: nguoi truc hoi "hom nay
+// co ai dang ky khong" la hoi theo ngay lich.
+function mocThoiGian() {
+  const v = $('kyHan').value;
+  if (v === 'tat-ca') return null;
+  const d = new Date();
+  if (v === 'hom-nay') { d.setHours(0, 0, 0, 0); return d; }
+  d.setDate(d.getDate() - Number(v));
+  return d;
+}
+
 function render() {
   const q = $('q').value.trim().toLowerCase();
-  const shown = q
-    ? rows.filter(r => COLS.some(c => String(r[c] ?? '').toLowerCase().includes(q)))
-    : rows;
-  $('n').textContent = shown.length + (q ? ' / ' + rows.length : '');
+  const moc = mocThoiGian();
+  let shown = rows;
+  if (moc) shown = shown.filter(r => new Date(r.created_at) >= moc);
+  if (q) shown = shown.filter(r => COLS.some(c => String(r[c] ?? '').toLowerCase().includes(q)));
+  // Giu lai de nut Tai CSV xuat dung nhung dong dang nhin thay, khong xuat ca bang.
+  hienThi = shown;
+  $('n').textContent = shown.length + (q || moc ? ' / ' + rows.length : '');
   $('rows').innerHTML = shown.map(r => '<tr>'
     + `<td class="code">${esc(r.code)}</td>`
     + `<td class="thoi">${esc(fmtTime(r.created_at))}</td>`
@@ -338,7 +365,9 @@ function toCsv() {
     if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
     return '"' + s.replace(/"/g, '""') + '"';
   };
-  const body = [COLS.join(','), ...rows.map(r => COLS.map(c => cell(r[c])).join(','))].join('\r\n');
+  // Xuat dung nhung dong dang nhin thay: loc xong bam Tai CSV ma ra ca bang thi nguoi
+  // dung khong biet, va de gui nham ca danh sach cho ben ngoai.
+  const body = [COLS.join(','), ...hienThi.map(r => COLS.map(c => cell(r[c])).join(','))].join('\r\n');
   // BOM de Excel mo tieng Viet khong bi loi font
   const url = URL.createObjectURL(new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8' }));
   const a = document.createElement('a');
@@ -387,6 +416,7 @@ function subscribe(token) {
 $('go').onclick = login;
 $('pw').onkeydown = (e) => { if (e.key === 'Enter') login(); };
 $('q').oninput = render;
+$('kyHan').onchange = render;
 $('csv').onclick = toCsv;
 $('reload').onclick = load;
 $('out').onclick = () => { sessionStorage.removeItem('eda_token'); location.reload(); };
