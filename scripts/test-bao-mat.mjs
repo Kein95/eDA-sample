@@ -85,6 +85,36 @@ test('admin.html ghim phien ban supabase-js va co SRI', () => {
   assert.ok(/crossorigin="anonymous"/.test(s), 'thieu crossorigin, SRI se khong hieu luc');
 });
 
+test('thu vien doc Excel: ghim phien ban, co SRI, khong dung ban dinh CVE', () => {
+  const s = doc('admin.html');
+  assert.ok(/https:\/\/cdn\.sheetjs\.com\/xlsx-\d+\.\d+\.\d+\//.test(s),
+    'thu vien doc Excel khong ghim phien ban');
+  // Goi npm cua SheetJS dung lai o 0.18.5, ban do dinh CVE-2023-30533 (prototype
+  // pollution) va CVE-2024-22363 (ReDoS). Trang nay xu ly du lieu tien.
+  assert.equal(/xlsx@0\.18\./.test(s), false, 'dang dung ban SheetJS co lo hong da biet');
+  assert.ok(/XLSX_SRI\s*=\s*'sha384-[A-Za-z0-9+/=]{40,}'/.test(s), 'thieu SRI cho thu vien Excel');
+});
+
+test('MOI script tai tu CDN deu phai co SRI', () => {
+  // Kiem tong quat thay vi liet ke tung thu vien: them thu vien thu ba ma quen SRI thi
+  // test nay do ngay. Truoc day chi kiem rieng supabase-js nen khi them SheetJS vao,
+  // bo test van xanh du chua ai kiem SRI cua no.
+  const s = doc('admin.html');
+  const urls = [...s.matchAll(/https:\/\/cdn\.[a-z0-9.]+\/[^\s'"]+\.js/g)].map((m) => m[0]);
+  assert.ok(urls.length >= 2, 'khong tim thay script CDN nao');
+  const soSri = (s.match(/sha384-/g) || []).length;
+  assert.ok(soSri >= urls.length,
+    `co ${urls.length} script tu CDN nhung chi ${soSri} chuoi SRI`);
+});
+
+test('CSP cho phep dung nhung host thuc su duoc dung', () => {
+  const s = doc('admin.html');
+  const meta = s.match(/<meta http-equiv="Content-Security-Policy" content="([^"]*)"/s)[1];
+  const script = meta.match(/script-src([^;]*)/)[1];
+  for (const host of [...new Set([...s.matchAll(/https:\/\/(cdn\.[a-z0-9.]+)\//g)].map((m) => m[1]))])
+    assert.ok(script.includes(host), `CSP khong cho phep ${host} nhung trang van tai script tu do`);
+});
+
 test('admin.html co CSP chan script la', () => {
   const s = doc('admin.html');
   assert.ok(/Content-Security-Policy/.test(s), 'thieu CSP');

@@ -158,6 +158,48 @@ test('cot ghi no KHONG bi nhan nham thanh cot tien vao', () => {
   assert.equal(a.tien_vao, 3);
 });
 
+// ── 4b. Hang tieu de CHEP DUNG tu sao ke Vietcombank that ──────────────────
+// Chi lay hang TIEU DE tu file that (khong phai du lieu ca nhan). Day la bo cuc kho
+// nhat gap phai: tieu de song ngu co XUONG DONG ngay trong o, cot "Ngay" gop chung voi
+// "So CT" trong mot o, va cot "So du" nam ngay canh cot "Ghi co".
+const TIEU_DE_VCB = [
+  'STT\nNo.',
+  'Ngày1/\nTNX Date/ Số CT/ Doc No',
+  'Ngày hiệu lực2/\nEffective date',
+  'Số tiền ghi nợ/\nDebit',
+  'Số tiền ghi có/\nCredit',
+  'Số dư/\nBalance',
+  'Nội dung chi tiết/\nTransactions in detail',
+];
+
+test('tieu de Vietcombank that: doan dung tung cot', () => {
+  const a = doanAnhXa(TIEU_DE_VCB);
+  assert.equal(a.tien_vao, 4, 'phai la cot Ghi co');
+  assert.equal(a.tien_ra, 3, 'phai la cot Ghi no');
+  assert.equal(a.noi_dung, 6);
+  assert.notEqual(a.tien_vao, 5, 'KHONG duoc lay cot So du lam tien vao');
+  assert.notEqual(a.ngay, null);
+  assert.notEqual(a.ma_gd, null);
+});
+
+test('cot So du KHONG bao gio bi lay lam so tien', () => {
+  // Lay nham cot So du thi moi giao dich deu mang so du tai khoan - sai hoan toan
+  // nhung van la so duong hop le nen khong co gi bao loi.
+  const a = doanAnhXa(TIEU_DE_VCB);
+  for (const k of ['tien_vao', 'tien_ra']) assert.notEqual(a[k], 5);
+});
+
+test('tieu de xuong dong trong o khong lam hong viec tim hang tieu de', () => {
+  const luoi = [['SAO KÊ TÀI KHOẢN'], [''], ['Chủ tài khoản/ Account name:', 'X'],
+                TIEU_DE_VCB, ['1', '31/10/2025 / 0001 - 12345', '31/10/2025', '', '500,000',
+                              '900,000,000', 'CK eDA26-ABC123']];
+  assert.equal(timDongTieuDe(luoi), 3);
+  const { giao_dich } = apDungAnhXa(luoi, { dongTieuDe: 3, ...doanAnhXa(TIEU_DE_VCB) });
+  assert.equal(giao_dich.length, 1);
+  assert.equal(giao_dich[0].so_tien, 500000, 'phai lay Ghi co, khong phai So du');
+  assert.equal(giao_dich[0].posted_at.slice(0, 10), '2025-10-31');
+});
+
 // ── 5. Nguoi tu chon cot khi doan sai ──────────────────────────────────────
 test('anh xa do nguoi dat de len ket qua doan', () => {
   const luoi = docBang(SAO_KE_B);

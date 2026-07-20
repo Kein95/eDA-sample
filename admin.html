@@ -11,7 +11,7 @@
      Luu y: 'unsafe-inline' con can vi toan bo logic nam trong <script> noi tuyen. -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'none';
-  script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+  script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src https://fonts.gstatic.com;
   img-src 'self' data:;
@@ -204,7 +204,7 @@ tr.new td{animation:newrow 2.4s ease-out}
   <div class="wrap khung hide" data-khung="doisoat">
     <div class="loc">
       <button id="chonSaoKe">Chọn file sao kê…</button>
-      <input id="fileSaoKe" type="file" accept=".csv,text/csv" class="hide">
+      <input id="fileSaoKe" type="file" accept=".csv,.xls,.xlsx,text/csv" class="hide">
       <!-- Hai mẫu bố cục KHÁC HẲN nhau, cùng một bộ đọc: chứng minh là không ngân hàng
            nào bị viết cứng trong code. -->
       <button class="ghost" data-mau="A">Sao kê mẫu kiểu A</button>
@@ -214,9 +214,10 @@ tr.new td{animation:newrow 2.4s ease-out}
     <p id="doiSoatErr" class="err hide"></p>
 
     <p class="muted" style="margin:0 0 12px">
-      Nhận sao kê CSV của bất kỳ ngân hàng nào. Tên cột, thứ tự cột, số hàng thừa ở đầu,
-      dấu phân cách <code>,</code> <code>;</code> hay tab đều tự nhận. Đoán sai thì chọn lại
-      ở bảng dưới.
+      Nhận sao kê <code>.xls</code> <code>.xlsx</code> <code>.csv</code> của bất kỳ ngân hàng nào.
+      Tên cột, thứ tự cột, số hàng thừa ở đầu, dấu phân cách <code>,</code> <code>;</code> hay tab,
+      ngày <code>dd/mm/yyyy</code> hay ISO đều tự nhận. Đoán sai thì chọn lại ở bảng dưới,
+      lần sau tự nhớ.
     </p>
 
     <!-- Bảng chọn cột. Đây là chỗ thay cho việc viết parser riêng cho từng ngân hàng:
@@ -697,12 +698,31 @@ function saoKeMau(kieu) {
 
   let s;
   if (kieu === 'A') {
-    s = ['SAO KE TAI KHOAN', 'Chu tai khoan: AI VIETNAM', 'So tai khoan: 001100223344',
-         `Tu ngay ${ngayVN(720)} den ${ngayVN(0)}`, '',
-         'STT,Ngay giao dich,So tham chieu,Ghi no,Ghi co,Noi dung chi tiet']
-      .concat(gd.map(([ma, gio, tien, nd, ra], i) =>
-        `${i + 1},${ngayVN(gio)},${ma},${ra ? '"' + cham(tien) + '"' : ''},${
-          ra ? '' : '"' + cham(tien) + '"'},"${nd}"`)).join('\n');
+    // Bố cục CHÉP ĐÚNG từ một sao kê Vietcombank thật (chỉ lấy hàng tiêu đề và khung,
+    // dữ liệu là bịa): 13 hàng đầu là thông tin tài khoản, tiêu đề song ngữ có xuống
+    // dòng NGAY TRONG ô, cột Số dư nằm ngay cạnh cột Ghi có.
+    const q = (x) => `"${x}"`;
+    s = [
+      ',,,' + q('SAO KÊ TÀI KHOẢN\nSTATEMENT OF ACCOUNT') + ',,,',
+      ',,,,,,',
+      'Chủ tài khoản/ Account name:,,AI VIETNAM,,Ngày thực hiện/ Date:,' + ngayVN(0) + ',',
+      'Số tài khoản/ Account number:,,0011002233445,,Kênh giao dịch/ Trans.Channel:,VCB DigiBiz,',
+      'Loại tài khoản/ Type of account:,,Tài khoản thanh toán,,,,',
+      'Địa chỉ/ Address:,,HA NOI,,,,',
+      'Mã số thuế/Đăng ký kinh doanh:,,0100000000,,,,',
+      'CIF:,,00000000,,,,',
+      'Loại tiền/ Currency:,,VND,,,,',
+      'Từ/ From:,,' + ngayVN(720) + ',,Đến/ To:,' + ngayVN(0) + ',',
+      'Số dư đầu kỳ/ Opening balance:,,0 VND,,,,',
+      '(Bằng chữ/ Inwords: ….),,Không đồng,,,,',
+      ',,,,,,',
+      [q('STT\nNo.'), q('Ngày/\nTNX Date/ Số CT/ Doc No'), q('Ngày hiệu lực/\nEffective date'),
+       q('Số tiền ghi nợ/\nDebit'), q('Số tiền ghi có/\nCredit'), q('Số dư/\nBalance'),
+       q('Nội dung chi tiết/\nTransactions in detail')].join(','),
+    ].concat(gd.map(([ma, gio, tien, nd, ra], i) =>
+      [i + 1, q(`${ngayVN(gio)} / 0001 - ${ma}`), ngayVN(gio),
+       ra ? q(cham(tien)) : '', ra ? '' : q(cham(tien)), q(cham(9e8)), q(nd)].join(',')))
+      .join('\n');
   } else {
     s = ['Transaction Date;Reference;Amount;Description']
       .concat(gd.map(([ma, gio, tien, nd, ra]) =>
@@ -745,9 +765,19 @@ function veChonCot() {
 }
 
 function doiSoat(vanBan) {
+  doiSoatTuLuoi(docBang(vanBan), doanDauPhanCach(vanBan));
+}
+
+/**
+ * Từ lưới ô trở đi, CSV và Excel đi chung một đường.
+ *
+ * Tách ra ở đây chứ không tách sau: chỉ khác nhau ở khâu biến file thành lưới. Nếu để
+ * hai nhánh riêng chạy tiếp thì phần đoán cột và khớp sẽ có hai bản, và bản ít dùng sẽ
+ * lặng lẽ trôi khác bản kia.
+ */
+function doiSoatTuLuoi(luoi, dpc) {
   hideErr($('doiSoatErr'));
-  luoiHienTai = docBang(vanBan);
-  const dpc = doanDauPhanCach(vanBan);
+  luoiHienTai = luoi;
   const dong = timDongTieuDe(luoiHienTai);
   if (dong < 0) {
     $('khungAnhXa').classList.add('hide');
@@ -909,12 +939,56 @@ $('apDungAnhXa').onclick = () => {
 };
 
 $('chonSaoKe').onclick = () => $('fileSaoKe').click();
+// Đọc .xls/.xlsx cần thư viện. Nạp KHI CẦN chứ không nạp sẵn: nó gần 1MB, mà phần lớn
+// lượt vào trang quản trị chỉ để xem danh sách đăng ký chứ không đối soát.
+//
+// Dùng bản 0.20.3 từ CDN chính chủ SheetJS, KHÔNG dùng bản trên jsDelivr: gói npm của
+// SheetJS đứng yên ở 0.18.5 và bản đó dính CVE-2023-30533 (prototype pollution) cùng
+// CVE-2024-22363 (ReDoS). Trang này xử lý dữ liệu tiền, không nhận thư viện có lỗ hổng
+// đã biết. Có SRI nên CDN bị chiếm cũng không chạy được mã lạ.
+const XLSX_URL = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+const XLSX_SRI = 'sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT';
+let dangNapXlsx = null;
+
+function napXlsx() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (dangNapXlsx) return dangNapXlsx;
+  dangNapXlsx = new Promise((ok, hong) => {
+    const s = document.createElement('script');
+    s.src = XLSX_URL;
+    s.integrity = XLSX_SRI;
+    s.crossOrigin = 'anonymous';
+    s.referrerPolicy = 'no-referrer';
+    s.onload = () => (window.XLSX ? ok(window.XLSX) : hong(new Error('thu vien nap nhung khong co XLSX')));
+    s.onerror = () => hong(new Error('khong tai duoc thu viec doc Excel'));
+    document.head.appendChild(s);
+  });
+  return dangNapXlsx;
+}
+
+/** Đọc .xls/.xlsx thành lưới ô, cùng dạng docBang() trả về cho CSV. */
+async function doiSoatExcel(file) {
+  const XLSX = await napXlsx();
+  const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+  // raw:false để lấy chuỗi ĐÃ ĐỊNH DẠNG như người nhìn thấy trong Excel: ngày ra
+  // "31/10/2025" chứ không phải số serial 45961, số tiền giữ nguyên dấu ngăn cách.
+  // defval:'' để ô trống vẫn chiếm chỗ, không thì các cột bị dồn lên và lệch hết.
+  const luoi = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],
+    { header: 1, raw: false, defval: '' }).map((h) => h.map((o) => String(o ?? '')));
+  doiSoatTuLuoi(luoi, ',');
+}
+
 $('fileSaoKe').onchange = async (e) => {
   const f = e.target.files[0];
   if (!f) return;
+  e.target.value = '';        // đặt lại sớm: chọn lại đúng file đó vẫn kích hoạt onchange
   ghiLog('Tải lên sao kê', f.name);
-  doiSoat(await f.text());
-  e.target.value = '';        // chọn lại đúng file đó vẫn kích hoạt onchange
+  try {
+    if (/\.xlsx?$/i.test(f.name)) await doiSoatExcel(f);
+    else doiSoat(await f.text());
+  } catch (err) {
+    showErr($('doiSoatErr'), 'Không đọc được file: ' + err.message);
+  }
 };
 document.querySelectorAll('[data-mau]').forEach(b => b.onclick = () => {
   ghiLog('Tải lên sao kê', `sao-ke-mau-${b.dataset.mau}.csv`);
