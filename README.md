@@ -515,22 +515,99 @@ kiểm 60 điểm phía cơ sở dữ liệu bằng cách **giả lập đăng n
 
 ### Trước khi nối Supabase thật, phải làm
 
-1. Bỏ dòng link `/dashboard` trong banner cảnh báo demo.
-2. Bỏ `'admin.html'` khỏi danh sách trong `scripts/dung-thu-muc-xuat-ban.mjs` nếu không
-   muốn trang quản trị nằm ở URL đoán được.
-3. Bỏ dòng `/dashboard` trong `_redirects` (giữ `/admin` và `/admin/*`).
-4. Đổi vai mặc định của bản demo: `vaiHienTai` trong `admin.html`.
+Bản demo cố ý mở cửa cho ai cũng vào xem. Nối dữ liệu thật vào mà quên đóng thì cửa vẫn mở.
 
-### Việc còn phải làm
+| # | Việc | Ở đâu | Không làm thì sao |
+|---|---|---|---|
+| 1 | Bỏ dòng `/dashboard` | `_redirects` (giữ `/admin` và `/admin/*`) | Ai cũng vào thẳng trang quản trị, không cần mật khẩu |
+| 2 | Bỏ link `/dashboard` trong banner cảnh báo | `admin.html`, khối `#demoBanner` | Trang tự chỉ đường vào cửa đang mở |
+| 3 | Bỏ `'admin.html'` khỏi danh sách deploy | `scripts/dung-thu-muc-xuat-ban.mjs` | Trang quản trị nằm ở URL đoán được. Bỏ thì phải deploy nó riêng, hoặc chấp nhận rằng RLS mới là thứ chặn chứ không phải URL |
+| 4 | Tắt **Enable Sign Ups** | Supabase → Authentication → Providers → Email | Ai cũng tự tạo được tài khoản. Các policy đã kiểm *vai* nên tài khoản không vai đọc không được gì, nhưng tắt hẳn vẫn gọn hơn |
+| 5 | Kiểm `service_role key` chưa từng lọt vào repo | `git log -p \| grep -i service_role` | Khoá đó bỏ qua toàn bộ RLS. Lọt rồi thì phải xoay khoá, không phải xoá commit |
 
-- Edge function `eda-doi-soat` và `eda-xac-nhan-gd`: logic khớp đã xong và đã kiểm, chưa
-  có project Supabase để chạy.
-- Gửi email: `eda-email` với 3 mẫu (nhận đăng ký, đã nhận tiền, nhắc hạn).
-- Học phí và ngân hàng thật: hiện đang để `xx.xxx.xxx`.
-- Nội dung trang hiện lưu trong `localStorage` của trình duyệt (bản demo). Bản thật cần
-  đọc ghi qua bảng `eda_noi_dung`.
+Kiểm lại sau khi làm xong: mở `https://<tên miền>/dashboard` ở cửa sổ ẩn danh. Phải ra 404
+hoặc màn đăng nhập, không được ra bảng dữ liệu.
 
-## B7. Những chỗ dễ vấp
+## B7. Việc còn phải làm, và làm thế nào
+
+Bốn việc dưới đây chưa làm vì **chưa có project Supabase thật**, không phải vì khó. Mỗi
+việc đều ghi đủ để người tiếp nhận làm được mà không cần hỏi lại.
+
+### B7.1 Hai edge function đối soát
+
+Logic khớp giao dịch đã xong và đã kiểm 22 phép ở `supabase/functions/_shared/doi-soat.js`.
+Còn thiếu tầng HTTP bọc quanh nó.
+
+| Function | Nhận gì | Làm gì |
+|---|---|---|
+| `eda-doi-soat` | File sao kê (`multipart/form-data`) | Đọc file, khớp với người đăng ký, ghi vào `eda_bank_txn` với `xac_nhan_luc = null`, trả về ba nhóm kết quả |
+| `eda-xac-nhan-gd` | Mảng `id` giao dịch | Đặt `xac_nhan_luc = now()`, `xac_nhan_boi = auth.uid()` cho những dòng được chọn |
+
+Ba điều bắt buộc, thiếu là hỏng:
+
+1. **Đọc file ở edge function, không đọc trong trình duyệt.** Bản demo đọc trong trình
+   duyệt để chạy được mà không cần máy chủ. Bản thật thì máy chủ phải là nơi quyết định:
+   trình duyệt gửi lên con số nào cũng được nếu tin nó.
+2. **Dùng chung `_shared/doi-soat.js`**, đừng chép ra bản thứ hai. Chép rồi thì bản demo và
+   bản thật trôi khác nhau lúc nào không biết, và bộ kiểm sẽ kiểm bản không ai chạy.
+3. **Chống đếm trùng nằm ở ràng buộc `unique (ngan_hang, ma_gd)`** trong migration 0006,
+   không nằm ở code. Nộp lại đúng file cũ thì `insert` vướng ràng buộc, bắt lỗi đó và
+   xếp giao dịch vào nhóm "đã vào sổ" thay vì báo lỗi cho người dùng.
+
+Deploy: `npx supabase functions deploy eda-doi-soat` (bỏ `--no-verify-jwt`, hai hàm này
+**phải** yêu cầu đăng nhập, khác với `eda-register` là hàm công khai).
+
+### B7.2 Gửi email
+
+Tạo `eda-email` với ba mẫu và một bảng `eda_email_log` (gửi cho ai, mẫu nào, lúc nào, kết
+quả) để không gửi trùng và để tra khi khách nói "em không nhận được".
+
+| Mẫu | Khi nào |
+|---|---|
+| `dang-ky-nhan` | Ngay sau khi form đăng ký lưu thành công |
+| `da-nhan-tien` | Sau khi kế toán bấm Xác nhận đã thu |
+| `nhac-han` | Cron chạy hằng ngày, tìm đợt sắp tới hạn |
+
+SMTP: dùng Brevo (miễn phí 300 thư/ngày). Khoá đặt ở Settings → Edge Functions → Secrets,
+**không** đặt trong repo.
+
+> **Địa chỉ email trong bảng là dữ liệu cá nhân của trẻ vị thành niên.** Đừng đưa danh
+> sách này vào công cụ marketing nào, và đừng gửi thư hàng loạt ngoài ba mẫu trên.
+
+### B7.3 Nội dung trang: chuyển từ trình duyệt sang máy chủ
+
+**Hiện tại bản sửa chữ chỉ nằm trong trình duyệt của chính người sửa** (`localStorage`).
+Người sửa bấm Xuất bản rồi mở lại trang thì thấy chữ mới, nhưng **khách vào vẫn thấy chữ
+cũ**, và mở trên máy khác cũng thấy chữ cũ. Đủ để xem thử cách làm, chưa dùng thật được.
+
+Bảng `eda_noi_dung` (migration 0008) đã có sẵn và đã kiểm phân quyền. Còn thiếu hai đầu:
+
+1. **Trang quản trị ghi vào bảng** thay vì `localStorage`: đổi ba chỗ đọc/ghi
+   `KHOA_LUU_NOI_DUNG` trong `admin.html` thành gọi PostgREST.
+2. **Trang tuyển sinh đọc được bản đã xuất bản.** Đừng cho trang gọi thẳng Supabase: trang
+   này là trang công khai, thêm một lần gọi mạng vào đường tải là chậm và là một thứ nữa
+   có thể hỏng. Thay vào đó, một edge function `eda-xuat-ban-noi-dung` ghi ra file tĩnh
+   `noi-dung.json`, trang tải file đó. Giữ nguyên nguyên tắc hiện có: **giá trị mặc định
+   nằm trong markup**, file JSON chỉ chồng lên, để trang vẫn hiện đủ chữ khi file hỏng
+   hoặc chưa có.
+
+### B7.4 Học phí và ngân hàng thật
+
+Hiện để `xx.xxx.xxx` và số đợt bịa. Có số thật thì điền vào `eda_payment_plan` và
+`eda_plan_installment`. Ràng buộc ở migration 0005 canh cả hai phía: tổng các đợt phải
+bằng tổng phương án, sai là không ghi được.
+
+### Nhật ký giữ vĩnh viễn
+
+**Có ý.** Không có cron xoá, không có hạn lưu. Nhật ký chỉ mất khi ai đó chủ động xoá bằng
+tay trong SQL Editor của Supabase, và việc đó cần quyền cao hơn mọi vai của ứng dụng:
+`revoke insert, update, delete, truncate` đã chặn cả ba vai lẫn `service_role` đi qua
+PostgREST. Không thao tác nào từ trình duyệt xoá được một dòng nào.
+
+Đổi lại, số điện thoại được **che ngay lúc ghi** nên bảng này không phải là bản sao dữ liệu
+cá nhân, và giữ mãi cũng không tích tụ thứ đáng lo.
+
+## B8. Những chỗ dễ vấp
 
 | Chỗ | Chuyện gì xảy ra |
 |---|---|

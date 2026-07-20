@@ -134,25 +134,13 @@ select r.id as registration_id,
 create or replace view public.eda_registration_tro_giang
 with (security_invoker = false) as
 select r.id, r.code, r.name, r.phone, r.email, r.province, r.job, r.field, r.interest,
-       r.facebook, r.zalo, r.channel, r.note, r.trang_thai, r.created_at,
-       -- Du de biet ai duoc vao lop, khong lo ra so tien. Tinh thang tu bang goc chu
-       -- KHONG qua view eda_cong_no: view do da chan lai cho vai dung tien, di qua no thi
-       -- tro giang chi nhan duoc null.
-       (coalesce(t.da_thu, 0) >= coalesce(i.can_thu, 0)) as da_dong_du
+       r.facebook, r.zalo, r.channel, r.note, r.trang_thai, r.created_at
   from public.eda_registration r
-  left join lateral (
-    select sum(x.so_tien - x.mien_giam) as can_thu
-      from public.eda_registration_installment x where x.registration_id = r.id
-  ) i on true
-  left join lateral (
-    select sum(b.so_tien) as da_thu
-      from public.eda_bank_txn b
-      join public.eda_registration_installment x2 on x2.id = b.installment_id
-     where x2.registration_id = r.id and b.xac_nhan_luc is not null
-  ) t on true
  -- Cong duy nhat cua view: khong dang nhap thi eda_vai() la null va loc het.
  where public.eda_vai() in ('EDA_TA', 'EDA_ACCOUNTANT', 'EDA_ADMIN');
- -- KHONG co guardian_name, guardian_phone, khong co so tien.
+ -- KHONG co guardian_name, guardian_phone, va khong co GI lien quan den tien - ke ca mot
+ -- cot boolean "da dong du chua". Tro giang khong lam viec voi tien, nen khong can biet;
+ -- va khong co duong nao dan tu view nay toi so tien thi ve sau khong ai vo tinh noi lai.
 
 drop policy if exists "tro giang doc don" on public.eda_registration;
 

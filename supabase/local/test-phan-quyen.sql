@@ -80,21 +80,18 @@ set local role authenticated;
 select pg_temp.dang_nhap('EDA_TA', 'aaaaaaaa-0000-0000-0000-000000000003');
 
 do $$
-declare n integer; v_du integer;
+declare n integer;
 begin
   select count(*) into n from eda_registration_tro_giang;
   if n < 1 then raise exception 'THAT BAI: tro giang khong doc duoc view cua chinh minh'; end if;
   perform pg_temp.dat(format('tro giang doc duoc danh sach hoc vien (%s dong)', n));
-
-  -- da_dong_du tinh thang tu bang goc chu khong qua view eda_cong_no (view do da chan lai
-  -- cho vai dung tien). Di qua no thi cot nay im lang thanh null va tro giang mat het thong
-  -- tin ai da dong du - hong ma khong bao gi.
-  select count(*) into v_du from eda_registration_tro_giang where da_dong_du is not null;
-  if v_du <> n then
-    raise exception 'THAT BAI: % / % dong co da_dong_du la null', n - v_du, n;
-  end if;
-  perform pg_temp.dat('tro giang van thay duoc da_dong_du (boolean, khong phai so tien)');
 end $$;
+
+-- View cua tro giang khong duoc co GI lien quan den tien, ke ca mot cot boolean. Kiem bang
+-- cach goi that tung cot chu khong doc dinh nghia view.
+select pg_temp.phai_hong(
+  'view tro giang KHONG co cot nao ve tien',
+  $$select da_dong_du from eda_registration_tro_giang limit 1$$);
 
 -- Cot nhay cam khong duoc co trong view. Kiem bang cach GOI THAT, khong phai bang
 -- cach doc dinh nghia view: dinh nghia doc duoc ma quyen sai thi van lo du lieu.
