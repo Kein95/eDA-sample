@@ -52,7 +52,26 @@ button.ghost{background:var(--surface);color:var(--ink)}
   letter-spacing:.08em;color:var(--deep);margin:16px 0 6px}
 .err{color:#b3261e;font-size:13.5px;font-weight:600;margin-top:14px}
 .muted{color:color-mix(in srgb,var(--ink) 55%,transparent);font-size:13px}
-/* Bang
+/* Tab */
+.tabs{display:flex;gap:0;padding:0 clamp(14px,3vw,28px);background:var(--surface);
+  border-bottom:3px solid var(--ink)}
+.tab{background:transparent;color:var(--ink);border:0;box-shadow:none;padding:11px 20px;
+  border-bottom:4px solid transparent;margin-bottom:-3px}
+.tab:hover{transform:none;box-shadow:none;background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.tab.on{border-bottom-color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,transparent)}
+/* Thanh loc */
+.loc{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.loc input[type=date]{width:auto}
+.nhan-loc{display:inline-flex;gap:6px;align-items:center;font-size:13px;white-space:nowrap}
+button.nho{padding:6px 11px;font-size:12.5px;box-shadow:2px 2px 0 var(--ink)}
+button.nho:hover{box-shadow:4px 4px 0 var(--ink)}
+.nhomkq{margin-bottom:26px}
+.nhomkq h2{font-family:'Space Grotesk',sans-serif;font-size:17px;margin:0 0 8px}
+/* Bang doi soat hep hon bang dang ky nen khong can min-width lon */
+table.ds{min-width:660px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+  background:color-mix(in srgb,var(--gold) 14%,transparent);padding:1px 5px}
+/* Bang */
    table-layout:fixed + width theo % o <th>: cot chia theo be ngang man hinh thay vi
    theo noi dung. Truoc day de min-width:1180px nen 15 cot day nhau tran ra ngoai va
    luc nao cung phai keo ngang. Chi con keo ngang khi man hep hon 920px. */
@@ -123,22 +142,37 @@ tr.new td{animation:newrow 2.4s ease-out}
     Chưa nối cơ sở dữ liệu nên không có đăng ký thật nào ở đây.
   </div>
   <div class="bar">
-    <h1>Đăng ký eDA 2026 · <span id="n" class="count">0</span></h1>
+    <h1>eDA 2026 · Quản trị</h1>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <span id="live" class="livedot" title="Trạng thái kết nối trực tiếp">•  đang nối…</span>
-      <select id="kyHan" style="width:auto" title="Lọc theo thời điểm đăng ký">
-        <option value="tat-ca">Mọi thời điểm</option>
-        <option value="hom-nay">Hôm nay</option>
-        <option value="7">7 ngày qua</option>
-        <option value="30">30 ngày qua</option>
-      </select>
-      <input id="q" type="search" placeholder="Tìm tên, SĐT, email, tỉnh…" style="width:min(300px,52vw)">
-      <button id="reload" class="ghost">Tải lại</button>
-      <button id="csv" class="ghost">Tải CSV</button>
+      <span id="vai" class="livedot" title="Vai của tài khoản đang đăng nhập"></span>
       <button id="out" class="ghost">Thoát</button>
     </div>
   </div>
-  <div class="wrap">
+
+  <!-- Tab. Nut that su chu khong phai <a>: khong dieu huong, chi doi khung dang hien.
+       role/aria-selected de doc man hinh biet day la tab chu khong phai nut bat ky. -->
+  <div class="tabs" role="tablist">
+    <button class="tab on" role="tab" aria-selected="true"  data-tab="dangky">Đăng ký</button>
+    <button class="tab"    role="tab" aria-selected="false" data-tab="doisoat">Đối soát</button>
+  </div>
+
+  <!-- ===== Tab Đăng ký ===== -->
+  <div class="wrap khung" data-khung="dangky">
+    <div class="loc">
+      <span class="count" id="n">0</span>
+      <label class="nhan-loc">Từ <input id="tuNgay" type="date"></label>
+      <label class="nhan-loc">đến <input id="denNgay" type="date"></label>
+      <button class="ghost nho" data-nhanh="hom-nay">Hôm nay</button>
+      <button class="ghost nho" data-nhanh="7">7 ngày</button>
+      <button class="ghost nho" data-nhanh="30">30 ngày</button>
+      <button class="ghost nho" data-nhanh="xoa">Bỏ lọc</button>
+      <input id="q" type="search" placeholder="Tìm tên, SĐT, email, tỉnh…" style="width:min(280px,48vw)">
+      <span style="margin-left:auto;display:flex;gap:8px">
+        <button id="reload" class="ghost">Tải lại</button>
+        <button id="csv" class="ghost">Tải CSV</button>
+      </span>
+    </div>
     <p id="listErr" class="err hide"></p>
     <div class="tablewrap"><table>
       <!-- 10 cot thay vi 15: gop SDT/email/Zalo/Facebook vao mot o "Lien lac", va bo
@@ -161,6 +195,83 @@ tr.new td{animation:newrow 2.4s ease-out}
       <tbody id="rows"></tbody>
     </table></div>
   </div>
+
+  <!-- ===== Tab Đối soát ===== -->
+  <div class="wrap khung hide" data-khung="doisoat">
+    <div class="loc">
+      <button id="chonSaoKe">Chọn file sao kê…</button>
+      <input id="fileSaoKe" type="file" accept=".csv,text/csv" class="hide">
+      <button id="saoKeMau" class="ghost">Dùng sao kê mẫu</button>
+      <span id="tomTat" class="muted"></span>
+    </div>
+    <p id="doiSoatErr" class="err hide"></p>
+
+    <!-- Chưa chọn ngân hàng thật nên chưa viết parser ngân hàng nào. Đọc CSV chuẩn hoá
+         của chính mình để phần khung (chống trùng, khớp, xác nhận, log) chạy và kiểm
+         được ngay. Parser ngân hàng thật cắm vào sau, đúng chỗ đã tách sẵn. -->
+    <p class="muted" style="margin:0 0 12px">
+      Định dạng CSV: <code>ma_gd,ngay,so_tien,noi_dung</code>. Chỉ đọc dòng tiền vào.
+    </p>
+
+    <div id="ketQua" class="hide">
+      <div class="nhomkq">
+        <h2>Đã khớp <span id="soKhop" class="count">0</span></h2>
+        <div class="tablewrap"><table class="ds">
+          <thead><tr>
+            <th style="width:5%"><input id="tickHet" type="checkbox" title="Chọn tất cả"></th>
+            <th style="width:16%">Mã đăng ký</th>
+            <th style="width:18%">Họ tên</th>
+            <th style="width:14%">Đợt</th>
+            <th style="width:14%">Số tiền</th>
+            <th style="width:33%">Nội dung CK</th>
+          </tr></thead>
+          <tbody id="dongKhop"></tbody>
+        </table></div>
+        <button id="xacNhan" style="margin-top:12px">Xác nhận đã thu (0)</button>
+      </div>
+
+      <div class="nhomkq">
+        <h2>Chưa khớp <span id="soTruot" class="count">0</span></h2>
+        <div class="tablewrap"><table class="ds">
+          <thead><tr>
+            <th style="width:20%">Lúc</th><th style="width:20%">Số tiền</th>
+            <th style="width:40%">Nội dung CK</th><th style="width:20%">Lý do</th>
+          </tr></thead>
+          <tbody id="dongTruot"></tbody>
+        </table></div>
+      </div>
+
+      <div class="nhomkq">
+        <h2>Đã xác nhận, đã vào sổ <span id="soCu" class="count">0</span></h2>
+        <p class="muted" style="margin:0 0 8px">
+          Đã thu rồi nên không cộng lại. Tải lên nhầm file cũ cũng không thay đổi
+          gì: mỗi mã giao dịch chỉ tồn tại một lần trong sổ.
+        </p>
+        <div class="tablewrap"><table class="ds">
+          <thead><tr>
+            <th style="width:25%">Mã GD</th><th style="width:25%">Số tiền</th>
+            <th style="width:50%">Nội dung CK</th>
+          </tr></thead>
+          <tbody id="dongCu"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="nhomkq">
+      <h2>Nhật ký thao tác</h2>
+      <p class="muted" style="margin:0 0 8px">
+        Mọi thao tác đụng tới tiền đều để lại một dòng. Bản thật ghi bằng trigger ở
+        cơ sở dữ liệu chứ không phải bằng mã ứng dụng, để không đường ghi nào lọt sổ.
+      </p>
+      <div class="tablewrap"><table class="ds">
+        <thead><tr>
+          <th style="width:18%">Lúc</th><th style="width:16%">Người</th>
+          <th style="width:20%">Hành động</th><th style="width:46%">Chi tiết</th>
+        </tr></thead>
+        <tbody id="dongLog"><tr><td colspan="4" class="muted">Chưa có thao tác nào.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
 </div>
 
 <!-- Chi dung cho Realtime. Supabase Realtime chay tren giao thuc Phoenix channel
@@ -176,7 +287,15 @@ tr.new td{animation:newrow 2.4s ease-out}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"
         integrity="sha384-KX6Y/AMIv9qA8TLCDul2JatZWeyrJVgj3Xu/0r30Nr05xO8md1+wHAgtdsRV9LoE"
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
+<script type="module">
+// type="module" de import duoc doi-soat.js - DUNG CHUNG mot ban voi edge function
+// eda-doi-soat va voi scripts/test-doi-soat.mjs. Chep tay ra ban thu hai thi ban demo
+// se troi khac ban that luc nao khong biet, va test se test nham ban khong ai chay.
+//
+// Duong dan giu nguyen vi tri trong repo (khong chep ra thu muc goc) de local va ban
+// live nap dung mot file; scripts/dung-thu-muc-xuat-ban.mjs giu nguyen duong dan nay.
+import { docCsv, khopGiaoDich, locGiaoDichMoi } from './supabase/functions/_shared/doi-soat.js';
+
 // Cung du an Supabase voi edge function eda-register.
 // Anon key la khoa cong khai theo thiet ke; thu chan truy cap la RLS
 // (chi tai khoan co app_metadata.role = 'EDA_ADMIN' moi doc duoc bang nay).
@@ -271,6 +390,7 @@ function vaoDemo() {
   $('app').classList.remove('hide');
   $('demoBanner').classList.remove('hide');
   setLive('off', '•  demo, không nối trực tiếp');
+  $('vai').textContent = 'vai: quản trị (demo)';
   hideErr($('listErr'));
   render();
 }
@@ -333,23 +453,39 @@ async function load() {
   render();
 }
 
-// Moc dau cua khoang thoi gian dang loc; null = khong loc.
-// "Hom nay" tinh tu 0h00 theo lich, khong phai 24 gio truoc: nguoi truc hoi "hom nay
-// co ai dang ky khong" la hoi theo ngay lich.
-function mocThoiGian() {
-  const v = $('kyHan').value;
-  if (v === 'tat-ca') return null;
-  const d = new Date();
-  if (v === 'hom-nay') { d.setHours(0, 0, 0, 0); return d; }
-  d.setDate(d.getDate() - Number(v));
-  return d;
+// Hai o ngay la NGUON DUY NHAT cua bo loc thoi gian. Cac nut "Hom nay / 7 ngay / 30
+// ngay" chi dien san vao hai o do chu khong phai mot co che loc thu hai - hai nguon
+// song song la bao dam co luc chung mau thuan nhau.
+const dauNgay = (s) => { const d = new Date(s + 'T00:00:00'); return isNaN(d) ? null : d; };
+const cuoiNgay = (s) => { const d = new Date(s + 'T23:59:59.999'); return isNaN(d) ? null : d; };
+
+function dienNgay(el, d) {
+  // toISOString() doi sang UTC nen o mui gio +7 no lui mot ngay vao buoi sang.
+  // Ghep tay theo gio may de "Hom nay" dung la hom nay.
+  const p = (n) => String(n).padStart(2, '0');
+  el.value = d ? `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` : '';
+}
+
+function locNhanh(loai) {
+  if (loai === 'xoa') { $('tuNgay').value = ''; $('denNgay').value = ''; return render(); }
+  const den = new Date();
+  const tu = new Date();
+  // "Hom nay" tinh tu 0h00 theo lich chu khong phai 24 gio truoc: nguoi truc hoi "hom
+  // nay co ai dang ky khong" la hoi theo ngay lich.
+  if (loai !== 'hom-nay') tu.setDate(tu.getDate() - Number(loai));
+  dienNgay($('tuNgay'), tu);
+  dienNgay($('denNgay'), den);
+  render();
 }
 
 function render() {
   const q = $('q').value.trim().toLowerCase();
-  const moc = mocThoiGian();
+  const tu = dauNgay($('tuNgay').value);
+  const den = cuoiNgay($('denNgay').value);
   let shown = rows;
-  if (moc) shown = shown.filter(r => new Date(r.created_at) >= moc);
+  if (tu) shown = shown.filter(r => new Date(r.created_at) >= tu);
+  if (den) shown = shown.filter(r => new Date(r.created_at) <= den);
+  const moc = tu || den;
   if (q) shown = shown.filter(r => COLS.some(c => String(r[c] ?? '').toLowerCase().includes(q)));
   // Giu lai de nut Tai CSV xuat dung nhung dong dang nhin thay, khong xuat ca bang.
   hienThi = shown;
@@ -462,7 +598,200 @@ function subscribe(token) {
 $('go').onclick = login;
 $('pw').onkeydown = (e) => { if (e.key === 'Enter') login(); };
 $('q').oninput = render;
-$('kyHan').onchange = render;
+$('tuNgay').onchange = render;
+$('denNgay').onchange = render;
+document.querySelectorAll('[data-nhanh]').forEach(b => b.onclick = () => locNhanh(b.dataset.nhanh));
+
+// ── Đối soát (bản demo) ────────────────────────────────────────────────────
+// Chạy đúng module doi-soat.js mà edge function sẽ chạy, nên những gì thấy ở đây là
+// hành vi thật của phần khớp, không phải mô phỏng riêng.
+//
+// Số tiền nội bộ chỉ để cơ chế khớp có cái mà so; giao diện KHÔNG hiện con số mà hiện
+// quan hệ (khớp đủ / thiếu / thừa). Chưa chốt học phí thì mọi con số bày ra đều là số
+// bịa, mà đây là màn hình tiền - người xem sẽ tin.
+const TIEN_DOT = { PA1: [4e6, 20e6], PA2: [4e6, 12e6, 10e6], PA3: [4e6, 5e6, 7e6, 7e6, 5e6] };
+
+// Sổ giao dịch: ma_gd -> {txn, khop, xacNhan}. Đây là bản thu nhỏ của bảng eda_bank_txn.
+//
+// Giao dịch vào sổ NGAY LÚC ĐỌC FILE, chưa xác nhận - đúng như thiết kế ở phase-02.
+// Nếu chỉ vào sổ lúc bấm xác nhận thì tải lại file cũ sẽ thấy mọi dòng chưa xác nhận
+// là "mới" và khớp lại từ đầu, tức là đúng lỗi đang muốn chặn.
+// Bản thật: unique (ngan_hang, ma_gd) trong eda_bank_txn mới là thứ chặn thật sự.
+let so = new Map();
+let ketQua = null;
+let nhatKy = [];
+let saoKeDaDung = null;   // giữ nguyên một bản: file thật không tự đổi giữa hai lần tải
+
+/** Dựng danh bạ đúng kiểu NguoiDangKy[] mà khopGiaoDich() cần. */
+function danhBa() {
+  return rows.filter(r => r.hoc_phi).map(r => {
+    const [pa, daDong] = r.hoc_phi;
+    return {
+      id: r.code, code: r.code, phone: r.phone,
+      dots: TIEN_DOT[pa].map((so_tien, k) => ({
+        id: `${r.code}#${k + 1}`, thu_tu: k + 1, so_tien, mien_giam: 0,
+        da_thu: k < daDong ? so_tien : 0,
+      })),
+    };
+  });
+}
+
+/**
+ * Sao kê mẫu, dựng từ chính dữ liệu demo để mã khớp được.
+ *
+ * Dựng MỘT LẦN rồi giữ nguyên: một file sao kê thật không tự đổi nội dung giữa hai lần
+ * tải lên. Dựng lại mỗi lần thì sau khi xác nhận, người đó đã đóng đủ nên số tiền đợt
+ * kế tiếp thành rỗng và dòng bị loại - lần tải thứ hai không còn gì để so, đúng thứ
+ * cần chứng minh lại biến mất.
+ */
+function saoKeMau() {
+  if (saoKeDaDung) return saoKeDaDung;
+  const d = (n) => new Date(Date.now() - n * 36e5).toISOString().slice(0, 10);
+  const dong = [['ma_gd', 'ngay', 'so_tien', 'noi_dung']];
+  const them = (ma, ngay, tien, nd) => dong.push([ma, ngay, tien, `"${nd}"`]);
+  // Chọn người theo tiêu chí "còn đợt chưa đóng", không theo vị trí trong mảng: chọn
+  // theo vị trí thì gặp người đã đóng đủ là số tiền đợt kế tiếp thành undefined.
+  const conNo = rows.filter(r => r.hoc_phi && r.hoc_phi[1] < r.hoc_phi[2]);
+  const tienDot = (r) => TIEN_DOT[r.hoc_phi[0]][r.hoc_phi[1]];
+  const [a, b, c, e] = conNo;
+
+  them('GD001', d(20), tienDot(a), `CK ${a.code} ${a.phone}`);                  // khớp mã, đủ tiền
+  them('GD002', d(18), tienDot(b),                                             // viết hoa dính liền
+       `CHUYEN TIEN ${b.code}${b.phone.replace(/\s/g, '')} ND HOC PHI`.toUpperCase());
+  them('GD003', d(9), tienDot(c), `nop hoc phi ${c.phone}`);                    // chỉ SĐT
+  them('GD004', d(6), Math.round(tienDot(e) / 4), `${e.code} dong truoc mot phan`); // thiếu tiền
+  them('GD005', d(4), 5e6, 'CHUYEN KHOAN');                                     // không nhận ra ai
+  them('GD006', d(3), -55000, 'PHI DICH VU');                                   // tiền ra, phải bỏ
+  saoKeDaDung = dong.map(r => r.join(',')).join('\n');
+  return saoKeDaDung;
+}
+
+function doiSoat(vanBan) {
+  hideErr($('doiSoatErr'));
+  const txns = docCsv(vanBan);
+  if (txns.length === 0) {
+    return showErr($('doiSoatErr'),
+      'Không đọc được dòng tiền vào nào. Cần CSV có cột ma_gd,ngay,so_tien,noi_dung.');
+  }
+  const { moi, daXuLy } = locGiaoDichMoi(txns, new Set(so.keys()));
+  const db = danhBa();
+  // Vào sổ ngay, chưa xác nhận. Khớp chỉ là ĐỀ XUẤT của máy, chưa phải quyết định.
+  for (const t of moi) so.set(t.ma_gd, { txn: t, khop: khopGiaoDich(t, db), xacNhan: false });
+
+  ketQua = {
+    // Hiện toàn bộ sổ chứ không chỉ phần vừa đọc: đây là màn hình đối soát, thứ cần
+    // thấy là những gì còn tồn chưa xử lý, không phải riêng lần tải này.
+    khop:  [...so.values()].filter(v => !v.xacNhan && v.khop.installment_id),
+    truot: [...so.values()].filter(v => !v.xacNhan && !v.khop.installment_id),
+    daVao: [...so.values()].filter(v => v.xacNhan),
+    trung: daXuLy.length,
+  };
+  $('tomTat').textContent = `${txns.length} giao dịch · ${moi.length} mới · `
+    + `${daXuLy.length} đã có trong sổ từ trước`;
+  $('ketQua').classList.remove('hide');
+  veKetQua();
+}
+
+const LY_DO = {
+  thieu_tien: 'Thiếu tiền', thua_tien: 'Thừa tiền',
+  chua_chon_phuong_an: 'Chưa chọn phương án', khong_co_dot: 'Đã đóng đủ',
+};
+
+function veKetQua() {
+  const { khop, truot, daVao } = ketQua;
+  $('soKhop').textContent = khop.length;
+  $('soTruot').textContent = truot.length;
+  $('soCu').textContent = daVao.length;
+
+  $('dongKhop').innerHTML = khop.map(({ khop: k }, i) => {
+    const ng = rows.find(r => r.code === k.registration_id) || {};
+    const dot = k.installment_id.split('#')[1];
+    const tong = TIEN_DOT[(ng.hoc_phi || ['PA1'])[0]].length;
+    const canhBao = k.canh_bao.map(c => LY_DO[c] || c).join(', ');
+    return `<tr>
+      <td><input type="checkbox" data-i="${i}" ${k.tick_san ? 'checked' : ''}></td>
+      <td class="code">${esc(k.registration_id)}</td>
+      <td>${esc(ng.name)}</td>
+      <td>Đợt ${esc(dot)}/${tong}</td>
+      <td>${TIEN_AN}<span class="sub"><span class="nhan ${canhBao ? 'qua' : 'du'}">${
+        canhBao || 'Khớp đủ'}</span></span></td>
+      <td class="note">${esc(k.txn.noi_dung)}<span class="sub">khớp bằng ${
+        k.khop_kieu === 'ma' ? 'mã đăng ký' : 'số điện thoại'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="muted">Không có dòng nào.</td></tr>';
+
+  $('dongTruot').innerHTML = truot.map(({ khop: k }) => `<tr>
+      <td class="thoi">${esc(k.txn.posted_at)}</td>
+      <td>${TIEN_AN}</td>
+      <td class="note">${esc(k.txn.noi_dung)}</td>
+      <td>${esc(k.canh_bao.map(c => LY_DO[c] || c).join(', ') || 'Không nhận ra ai')}</td>
+    </tr>`).join('') || '<tr><td colspan="4" class="muted">Không có dòng nào.</td></tr>';
+
+  $('dongCu').innerHTML = daVao.map(v => `<tr>
+      <td class="code">${esc(v.txn.ma_gd)}</td><td>${TIEN_AN}</td>
+      <td class="note">${esc(v.txn.noi_dung)}</td>
+    </tr>`).join('') || '<tr><td colspan="3" class="muted">Không có dòng nào.</td></tr>';
+
+  demSoTick();
+}
+
+const dangTick = () => [...document.querySelectorAll('#dongKhop input[type=checkbox]:checked')];
+function demSoTick() { $('xacNhan').textContent = `Xác nhận đã thu (${dangTick().length})`; }
+
+function xacNhan() {
+  const chon = dangTick().map(c => ketQua.khop[Number(c.dataset.i)]);
+  if (chon.length === 0) return;
+  for (const v of chon) {
+    // Bản thật: UPDATE eda_bank_txn đặt xac_nhan_boi/xac_nhan_luc, trigger ở DB tự ghi
+    // nhật ký. Ở đây chỉ đổi trạng thái trong sổ demo.
+    v.xacNhan = true;
+    const k = v.khop;
+    const ng = rows.find(r => r.code === k.registration_id);
+    if (ng && ng.hoc_phi) ng.hoc_phi = [ng.hoc_phi[0], ng.hoc_phi[1] + 1, ng.hoc_phi[2], false];
+    ghiLog('Xác nhận đã thu',
+      `${k.registration_id} · đợt ${k.installment_id.split('#')[1]} · GD ${k.txn.ma_gd}`);
+  }
+  ketQua.khop = ketQua.khop.filter(v => !v.xacNhan);
+  ketQua.daVao = [...so.values()].filter(v => v.xacNhan);
+  veKetQua();
+  render();
+}
+
+function ghiLog(hanhDong, chiTiet) {
+  nhatKy.unshift({ luc: new Date(), nguoi: 'demo@aivietnam.edu.vn', hanhDong, chiTiet });
+  $('dongLog').innerHTML = nhatKy.map(l => `<tr>
+      <td class="thoi">${esc(fmtTime(l.luc.toISOString()))}</td>
+      <td>${esc(l.nguoi)}</td><td>${esc(l.hanhDong)}</td>
+      <td class="note">${esc(l.chiTiet)}</td>
+    </tr>`).join('');
+}
+
+$('chonSaoKe').onclick = () => $('fileSaoKe').click();
+$('fileSaoKe').onchange = async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  ghiLog('Tải lên sao kê', f.name);
+  doiSoat(await f.text());
+  e.target.value = '';        // chọn lại đúng file đó vẫn kích hoạt onchange
+};
+$('saoKeMau').onclick = () => { ghiLog('Tải lên sao kê', 'sao-ke-mau.csv'); doiSoat(saoKeMau()); };
+$('xacNhan').onclick = xacNhan;
+$('tickHet').onchange = (e) => {
+  document.querySelectorAll('#dongKhop input[type=checkbox]').forEach(c => c.checked = e.target.checked);
+  demSoTick();
+};
+$('dongKhop').addEventListener('change', demSoTick);
+
+// Tab
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => {
+    const on = x === t;
+    x.classList.toggle('on', on);
+    x.setAttribute('aria-selected', String(on));
+  });
+  document.querySelectorAll('[data-khung]').forEach(k =>
+    k.classList.toggle('hide', k.dataset.khung !== t.dataset.tab));
+});
 $('csv').onclick = toCsv;
 $('reload').onclick = load;
 $('out').onclick = () => { sessionStorage.removeItem('eda_token'); location.reload(); };
@@ -475,6 +804,20 @@ const LA_DASHBOARD = /\/dashboard\/?$/.test(location.pathname);
 if (LA_DASHBOARD && CHUA_CAU_HINH) vaoDemo();
 else if (sessionStorage.getItem('eda_token')) load();
 else if (CHUA_CAU_HINH) $('demoHint').classList.remove('hide');
+
+// Script chay trong pham vi module nen khong tu tao bien toan cuc. Bay ra dung nhung
+// thu can cho kiem thu tu ngoai (scripts/ chay qua CDP) - co y liet ke tay tung cai
+// thay vi bay het, de biet chinh xac cai gi la be mat kiem thu.
+Object.assign(window, { LA_DASHBOARD, render, locNhanh, doiSoat, saoKeMau, xacNhan });
+// Phai la defineProperties chu khong phai Object.assign: Object.assign GOI getter roi
+// gan gia tri tinh, nen ben ngoai se doc phai ban chup luc nap trang chu khong phai
+// gia tri hien tai - test se xanh trong khi giao dien da doi.
+Object.defineProperties(window, {
+  rows:    { get: () => rows },
+  hienThi: { get: () => hienThi },
+  nhatKy:  { get: () => nhatKy },
+  ketQua:  { get: () => ketQua },
+});
 </script>
 </body>
 </html>

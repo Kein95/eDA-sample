@@ -23,6 +23,10 @@ const FILE = [
   'globe.html',                  // nhung bang iframe
   '_redirects',                  // dinh tuyen tab tren Pages
   '_headers',                    // frame-ancestors cho /admin (the meta khong an)
+  // Logic doi soat, admin.html import truc tiep. GIU NGUYEN duong dan trong repo thay
+  // vi chep ra goc: edge function eda-doi-soat cung import dung file nay, mot ban duy
+  // nhat cho ca ba noi (edge function, trang demo, test).
+  'supabase/functions/_shared/doi-soat.js',
   'assets/logo-full.png',
   'assets/logo-mark.png',
   'assets/dongson-drum.svg',
