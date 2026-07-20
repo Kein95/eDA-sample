@@ -537,7 +537,7 @@
           Tuyển sinh eDA 2026 · End2End Data Analytics
         </span>
         <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(46px,7vw,96px);line-height:1.02;letter-spacing:-0.03em;color:#f5f2ec;margin:22px 0 0">
-          <span style="display:block;animation:rise .6s ease .14s both" data-noi-dung="hero_tieu_de">Dữ liệu là nghề.</span>
+          <span style="display:block;animation:rise .6s ease .14s both">Dữ liệu là nghề.</span>
           <span style="display:block;animation:rise .6s ease .26s both">2026 là <span class="text-gradient-gold-light">năm của bạn</span>.</span>
         </h1>
         <div style="font-size:16px;line-height:1.75;max-width:56ch;margin:26px 0 0;color:rgba(245,242,236,0.9);animation:rise .6s ease .38s both;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.2);box-shadow:5px 5px 0 rgba(255,255,255,0.15);padding:20px 24px;backdrop-filter:blur(4px)">
@@ -572,7 +572,7 @@
         <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(44px,6.6vw,92px);line-height:1.04;letter-spacing:-0.03em;margin:22px 0 0;max-width:16ch">
           <!-- Khong dung lai cau cua dai CTA giua trang ("Khong hoc de biet...") - de nguyen
                thi tab Tong quan lap y hai lan. Giu tieu de cua ban hero toi. -->
-          <span style="display:block;animation:rise .6s ease .14s both" data-noi-dung="hero_tieu_de">Dữ liệu là nghề.</span>
+          <span style="display:block;animation:rise .6s ease .14s both">Dữ liệu là nghề.</span>
           <span style="display:block;animation:rise .6s ease .26s both">2026 là <span class="text-gradient-gold">năm của bạn</span>.</span>
         </h1>
         <div style="background:var(--surface,#fffdf9);border:2.5px solid var(--ink,#211d17);box-shadow:4px 4px 0 var(--ink,#211d17);padding:16px 20px;margin:26px 0 0;font-size:15px;line-height:1.7;color:var(--ink,#211d17);font-weight:500;text-align:justify;max-width:65ch;animation:rise .6s ease .38s both">
@@ -1767,10 +1767,14 @@ class Component extends DCLogic {
      máy chủ không phản hồi thì hỏng nặng hơn là hiện nội dung cũ vài phút.
 
      Hai cơ chế, dùng cái nào tuỳ chỗ:
-       - data-noi-dung="khoa" : đặt lên phần tử có nội dung riêng (tiêu đề lớn)
-       - thay theo giá trị     : với chuỗi lặp nhiều nơi giữa câu văn. Ngày khai giảng
-                                 xuất hiện 12 chỗ, gắn thẻ từng chỗ chắc chắn sẽ sót
-                                 một hai chỗ, mà sót thì trang hiện hai ngày khác nhau. -->
+       - chuỗi nguyên node : mặc định cho MỌI chữ trên trang. Khớp cả node văn bản sau
+                             khi cắt khoảng trắng, không khớp một phần — trang có 605
+                             chuỗi, trong đó có "8", "AI", "·"; thay theo chuỗi con với
+                             những chuỗi này sẽ sửa nhầm khắp trang.
+       - biến (khoá đặt tên): cho chuỗi lặp GIỮA câu văn. Ngày khai giảng xuất hiện 12
+                             chỗ, mỗi chỗ nằm trong một câu khác nhau nên không khớp
+                             nguyên node được; đổi một lần phải đổi cả 12 chỗ, sót một
+                             chỗ là trang hiện hai ngày khác nhau. -->
 <script id="noi-dung-mac-dinh" type="application/json">
 {
   "hero_tieu_de": "Dữ liệu là nghề.",
@@ -1781,47 +1785,59 @@ class Component extends DCLogic {
 </script>
 <script>
 (function () {
-  var macDinh = JSON.parse(document.getElementById('noi-dung-mac-dinh').textContent);
+  var tham = new URLSearchParams(location.search);
+  // ?goc=1 tắt hẳn việc thay chữ. Trang quản trị nhúng trang này để ĐỌC danh sách chuỗi
+  // gốc; nếu lúc đọc mà bản sửa đã được áp thì chuỗi sửa rồi sẽ bị ghi lại làm "gốc",
+  // và lần sửa sau không còn khớp vào đâu nữa.
+  if (tham.get('goc') === '1') return;
   // ?xem-thu=1 lấy bản NHÁP để người biên tập xem trước. Khách vào bình thường luôn
   // thấy bản đã xuất bản, không thấy bản đang sửa dở.
-  var xemThu = new URLSearchParams(location.search).get('xem-thu') === '1';
-  var moi;
+  var xemThu = tham.get('xem-thu') === '1';
+  var macDinh = JSON.parse(document.getElementById('noi-dung-mac-dinh').textContent);
+  var luu;
   try {
-    moi = JSON.parse(localStorage.getItem(xemThu ? 'eda-noi-dung-nhap' : 'eda-noi-dung') || '{}');
+    luu = JSON.parse(localStorage.getItem(xemThu ? 'eda-noi-dung-nhap' : 'eda-noi-dung') || '{}');
   } catch (e) { return; }                       // localStorage bị chặn: giữ nguyên mặc định
 
-  var thayTheoChu = {};
-  var theoThe = {};
-  Object.keys(moi).forEach(function (k) {
-    var v = String(moi[k]).replace(/[<>]/g, '').trim();   // không cho chèn thẻ vào trang công khai
-    if (!v || v === macDinh[k]) return;
-    theoThe[k] = v;
-    if (macDinh[k]) thayTheoChu[macDinh[k]] = v;
+  // Không cho chèn thẻ vào trang công khai. Người sửa nội dung gây ra XSS thì vẫn là XSS.
+  var sach = function (s) { return String(s).replace(/[<>]/g, '').trim(); };
+
+  var chu = {};
+  (luu.chu || []).forEach(function (o) {
+    var m = sach(o.m);
+    if (m && o.g && m !== o.g) chu[o.g] = m;
   });
-  var cu = Object.keys(thayTheoChu);
-  if (!Object.keys(theoThe).length) return;
+  // Bỏ cặp đổi vòng (A→B và B→A). Thay xong thì chuỗi mới lại khớp luật kia, bộ theo dõi
+  // sẽ chạy lại vô tận. Trường hợp hiếm nhưng người sửa hoàn toàn có thể tạo ra.
+  Object.keys(chu).forEach(function (g) { if (chu[chu[g]] !== undefined) delete chu[g]; });
+
+  var bienCu = [], bienMoi = {};
+  Object.keys(luu.bien || {}).forEach(function (k) {
+    var v = sach(luu.bien[k]);
+    if (v && macDinh[k] && v !== macDinh[k]) { bienCu.push(macDinh[k]); bienMoi[macDinh[k]] = v; }
+  });
+  if (!Object.keys(chu).length && !bienCu.length) return;
 
   function ap() {
-    Object.keys(theoThe).forEach(function (k) {
-      var el = document.querySelectorAll('[data-noi-dung="' + k + '"]');
-      for (var j = 0; j < el.length; j++)
-        if (el[j].textContent !== theoThe[k]) el[j].textContent = theoThe[k];
-    });
-    if (!cu.length) return;
     // Chỉ đụng NODE VĂN BẢN, không đụng thuộc tính hay nội dung thẻ script/style: thay
     // trong innerHTML sẽ phá cấu trúc và có thể sửa nhầm cả tên lớp CSS hay URL.
     var duyet = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode: function (n) {
-        return /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName)
+        // Cờ /i là bắt buộc: thẻ <style> trong <svg> có nodeName viết THƯỜNG ("style")
+        // vì thuộc không gian tên SVG. Thiếu /i thì CSS trong svg cũng bị thay chữ.
+        return /^(script|style|textarea|noscript)$/i.test(n.parentNode.nodeName)
           ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
       }
     });
     var n;
     while ((n = duyet.nextNode())) {
-      var t = n.nodeValue;
-      for (var i = 0; i < cu.length; i++)
-        if (t.indexOf(cu[i]) >= 0) t = t.split(cu[i]).join(thayTheoChu[cu[i]]);
-      if (t !== n.nodeValue) n.nodeValue = t;
+      var goc = n.nodeValue, t = goc, loi = goc.trim();
+      // Thay nguyên node trước, biến sau: câu đã được sửa tay vẫn phải được cập nhật
+      // ngày khai giảng mới, chứ không giữ ngày cũ trong câu mới.
+      if (loi && chu[loi]) t = t.replace(loi, chu[loi]);
+      for (var i = 0; i < bienCu.length; i++)
+        if (t.indexOf(bienCu[i]) >= 0) t = t.split(bienCu[i]).join(bienMoi[bienCu[i]]);
+      if (t !== goc) n.nodeValue = t;
     }
   }
 

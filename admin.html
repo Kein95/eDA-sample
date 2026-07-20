@@ -15,6 +15,7 @@
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src https://fonts.gstatic.com;
   img-src 'self' data:;
+  frame-src 'self';
   connect-src 'self' https://REPLACE-ME.supabase.co wss://REPLACE-ME.supabase.co;
   form-action 'none';
   base-uri 'none'">
@@ -112,6 +113,12 @@ td.code{font-weight:700;color:var(--deep);white-space:nowrap;font-size:12.5px}
 .nhan.qua{color:#b3261e}
 /* Ghi chu do nguoi dang ky go, co the xuong dong - giu nguyen ngat dong ho da go */
 td.note{white-space:pre-wrap}
+/* Dong tieu de nhom trong bang Noi dung trang. Dinh o tren khi cuon: bang co 605 dong,
+   cuon giua chung ma khong biet dang o tab nao cua trang thi sua nham cho. */
+tr.nhomND td{position:sticky;top:32px;z-index:1;background:var(--deep);color:#fff;
+  font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+#dongNoiDung textarea{width:100%;font-size:13px;font-family:inherit;resize:vertical;
+  border:1.5px solid var(--ink);padding:4px 6px}
 .count{font-family:'Space Grotesk',sans-serif;font-weight:700}
 .hide{display:none}
 .livedot{font-size:12px;font-weight:600;white-space:nowrap;
@@ -282,24 +289,25 @@ tr.new td{animation:newrow 2.4s ease-out}
   <!-- ===== Tab Nội dung trang ===== -->
   <div class="wrap khung hide" data-khung="noidung">
     <p class="muted" style="margin:0 0 14px">
-      Sửa chữ và số trên trang tuyển sinh mà không đụng code. Chỉ sửa được nội dung có
-      sẵn, <b>không</b> thêm hay bớt khối — trang này căn tay kỹ, cho thêm khối tuỳ ý là
-      mọi lần sửa đều có thể phá bố cục.
+      Toàn bộ chữ trên trang tuyển sinh, gom theo đúng tab của trang. Sửa ô bên phải rồi
+      bấm Xuất bản. Chỉ sửa được <b>chữ có sẵn</b>, không thêm hay bớt khối — trang này
+      căn tay kỹ, cho thêm khối tuỳ ý là mọi lần sửa đều có thể phá bố cục.
     </p>
     <div class="loc">
+      <input id="timChu" placeholder="Tìm chữ…" style="flex:0 0 260px">
       <button id="luuNhap" class="ghost">Lưu nháp</button>
       <button id="xuatBan">Xuất bản</button>
       <button id="xemThu" class="ghost">Xem thử trên trang</button>
       <button id="hoanNoiDung" class="ghost">Hoàn về mặc định</button>
+      <button id="docLaiTrang" class="ghost">Đọc lại trang</button>
       <span id="trangThaiNoiDung" class="muted"></span>
     </div>
     <p id="noiDungErr" class="err hide"></p>
     <div class="tablewrap"><table class="ds" id="bangNoiDung">
       <thead><tr>
-        <th style="width:22%">Chỗ nào trên trang</th>
-        <th style="width:14%">Khoá</th>
-        <th style="width:32%">Đang hiển thị</th>
-        <th style="width:32%">Sửa thành</th>
+        <th style="width:44%">Chữ đang trên trang</th>
+        <th style="width:44%">Sửa thành</th>
+        <th style="width:12%">Trạng thái</th>
       </tr></thead>
       <tbody id="dongNoiDung"></tbody>
     </table></div>
@@ -484,8 +492,11 @@ function vaoDemo() {
   setLive('off', '•  demo, không nối trực tiếp');
   $('vai').textContent = 'vai: quản trị (demo)';
   veTaiKhoan();
-  nhap = docJson(KHOA_NHAP);
-  docMacDinh().then(veNoiDung);
+  // Nháp lưu theo dạng đã xuất bản ({bien, chu:[…]}), đổi về dạng đang soạn để đổ vào ô.
+  const nd = docJson(KHOA_NHAP);
+  nhap = { bien: nd.bien || {}, chu: {} };
+  for (const o of nd.chu || []) nhap.chu[o.g] = o.m;
+  Promise.all([docMacDinh(), napChuGoc(false)]).then(veNoiDung);
   veNhatKy();
   hideErr($('listErr'));
   render();
@@ -1176,26 +1187,39 @@ $('taiLog').onclick = () => {
 };
 
 // ── Nội dung trang ─────────────────────────────────────────────────────────
-// Khoá phải khớp với thuộc tính data-noi-dung trên TuyenSinh-eDA2026.dc.html.
-// Giá trị mặc định KHÔNG nằm ở đây mà nằm trong chính trang đó: trang phải hiện đủ
-// nội dung ngay cả khi tệp nội dung hỏng hoặc chưa có, nên mặc định là markup gốc.
-const KHOA_NOI_DUNG = [
-  ['hero_tieu_de', 'Tiêu đề lớn ở đầu trang'],
+// Hai loại nội dung, hai cơ chế khác nhau:
+//
+//   BIẾN  - chuỗi lặp GIỮA câu văn, mỗi chỗ nằm trong một câu khác nhau nên không khớp
+//           nguyên node được. Ngày khai giảng hiện ở 12 chỗ; sót một chỗ là trang hiện
+//           hai ngày khác nhau. Khoá đặt tên, khớp với thẻ <script id="noi-dung-mac-dinh">
+//           trên trang tuyển sinh.
+//   CHỮ   - mọi chữ còn lại. Khoá là CHÍNH CHUỖI GỐC, khớp cả node văn bản chứ không
+//           khớp một phần: trang có 605 chuỗi, trong đó có "8", "AI", "·" — thay theo
+//           chuỗi con với những chuỗi này sẽ sửa nhầm khắp trang.
+//
+// Không gắn thẻ tay cho từng chỗ: 605 chuỗi thì gắn thẻ chắc chắn sót, mà sót chỗ nào
+// là chỗ đó vĩnh viễn không sửa được từ trang quản trị.
+const KHOA_BIEN = [
   ['khai_giang',   'Ngày khai giảng — hiện ở 12 chỗ, đổi một lần là đổi hết'],
   ['gio_hoc',      'Khung giờ học'],
   ['mo_ta_khoa',   'Câu mô tả khoá học'],
+  ['hero_tieu_de', 'Tiêu đề lớn ở đầu trang'],
 ];
 const KHOA_LUU_NOI_DUNG = 'eda-noi-dung';        // bản đã xuất bản
 const KHOA_NHAP = 'eda-noi-dung-nhap';           // bản nháp, chưa xuất bản
-let macDinh = {};      // đọc từ chính trang tuyển sinh
-let nhap = {};
+const KHOA_GOC = 'eda-noi-dung-goc';             // danh sách chuỗi gốc đã quét được
+let macDinh = {};      // giá trị gốc của các BIẾN, đọc từ chính trang tuyển sinh
+let gocTheoTab = [];   // [{ten, chuoi:[...]}] - chữ trên trang, gom theo tab
+let nhap = { bien: {}, chu: {} };
+
+const docJson = (k) => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch { return {}; } };
+const cho = (ms) => new Promise(r => setTimeout(r, ms));
 
 /**
- * Lấy giá trị mặc định từ chính trang tuyển sinh.
+ * Lấy giá trị mặc định của các BIẾN từ chính trang tuyển sinh.
  *
  * Đọc từ trang thật chứ không chép cứng vào đây: chép cứng thì sửa trang mà quên sửa ở
- * đây, ô "Đang hiển thị" sẽ nói một đằng còn trang hiện một nẻo. Trang có sẵn thẻ
- * <script id="noi-dung-mac-dinh"> đúng để làm nguồn duy nhất cho việc này.
+ * đây, cột "Chữ đang trên trang" sẽ nói một đằng còn trang hiện một nẻo.
  */
 async function docMacDinh() {
   try {
@@ -1207,31 +1231,131 @@ async function docMacDinh() {
     macDinh = JSON.parse(m[1]);
   } catch {
     macDinh = {};
-    showErr($('noiDungErr'),
-      'Không đọc được nội dung mặc định từ trang tuyển sinh. Cột "Đang hiển thị" sẽ trống.');
+    showErr($('noiDungErr'), 'Không đọc được giá trị mặc định từ trang tuyển sinh.');
+  }
+}
+
+/**
+ * Quét toàn bộ chữ trên trang tuyển sinh, gom theo tab.
+ *
+ * Phải nhúng trang thật rồi bấm qua từng tab chứ không đọc mã nguồn: trang do support.js
+ * DỰNG RA, nội dung từng tab chỉ tồn tại sau khi tab đó được bấm. Đọc file HTML thô sẽ
+ * ra khung rỗng.
+ *
+ * Nhúng với ?goc=1 để trang KHÔNG áp bản sửa. Đọc lúc bản sửa đang áp thì chuỗi đã sửa
+ * sẽ bị ghi lại làm "gốc", và lần sửa sau không còn khớp vào đâu nữa.
+ */
+async function quetChuTrenTrang() {
+  const f = document.createElement('iframe');
+  // Để ngoài màn hình chứ không display:none — khung ẩn có kích thước 0, trang căn theo
+  // bề ngang sẽ dựng ra bố cục khác và quét thiếu chữ.
+  f.style.cssText = 'position:fixed;left:-10000px;top:0;width:1280px;height:900px;border:0';
+  f.src = '/?goc=1';
+  document.body.appendChild(f);
+  try {
+    await new Promise(r => { f.onload = r; setTimeout(r, 10000); });
+    await cho(1500);                              // đợi support.js dựng xong tab đầu
+    const d = f.contentDocument;
+    const soTab = d.querySelectorAll('nav button, nav [role=tab]').length;
+    if (!soTab) throw new Error('không thấy tab nào trên trang');
+    const daThay = new Set();                     // chuỗi trùng giữa các tab chỉ hiện một lần
+    const ra = [];
+    for (let i = 0; i < soTab; i++) {
+      // Truy vấn lại mỗi vòng: support.js dựng lại cả thanh tab sau mỗi lần bấm nên
+      // tham chiếu lấy từ vòng trước đã trỏ vào phần tử không còn trong trang.
+      const nut = d.querySelectorAll('nav button, nav [role=tab]')[i];
+      const ten = nut.textContent.trim() || `Tab ${i + 1}`;
+      nut.click();
+      await cho(800);
+      const duyet = d.createTreeWalker(d.body, NodeFilter.SHOW_TEXT, {
+        // Cờ /i là bắt buộc, không phải cho chắc: thẻ <style> nằm trong <svg> có nodeName
+        // viết THƯỜNG ("style") vì thuộc không gian tên SVG. Thiếu /i thì cả khối CSS
+        // @keyframes trong svg lọt vào danh sách sửa được, người sửa gõ nhầm là hỏng CSS.
+        acceptNode: (n) => /^(script|style|textarea|noscript)$/i.test(n.parentNode.nodeName)
+          ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+      });
+      const chuoi = [];
+      let n;
+      while ((n = duyet.nextNode())) {
+        const s = n.nodeValue.trim();
+        if (s && !daThay.has(s)) { daThay.add(s); chuoi.push(s); }
+      }
+      if (chuoi.length) ra.push({ ten, chuoi });
+    }
+    return ra;
+  } finally {
+    f.remove();
+  }
+}
+
+async function napChuGoc(batBuocDocLai) {
+  const luu = docJson(KHOA_GOC);
+  if (!batBuocDocLai && Array.isArray(luu.tab) && luu.tab.length) { gocTheoTab = luu.tab; return; }
+  $('trangThaiNoiDung').textContent = 'đang đọc chữ trên trang tuyển sinh…';
+  try {
+    gocTheoTab = await quetChuTrenTrang();
+    localStorage.setItem(KHOA_GOC, JSON.stringify({ tab: gocTheoTab, luc: new Date().toISOString() }));
+    $('trangThaiNoiDung').textContent =
+      `đọc được ${gocTheoTab.reduce((t, g) => t + g.chuoi.length, 0)} chuỗi trên ${gocTheoTab.length} tab`;
+  } catch (e) {
+    gocTheoTab = [];
+    showErr($('noiDungErr'), 'Không đọc được chữ trên trang tuyển sinh: ' + e.message);
   }
 }
 
 function veNoiDung() {
   const daXuat = docJson(KHOA_LUU_NOI_DUNG);
-  $('dongNoiDung').innerHTML = KHOA_NOI_DUNG.map(([k, mo_ta]) => {
-    const dangHien = daXuat[k] ?? macDinh[k];
-    const doi = daXuat[k] !== undefined && daXuat[k] !== macDinh[k];
-    return `<tr>
-      <td>${esc(mo_ta)}</td>
-      <td><code>${esc(k)}</code></td>
-      <td class="note">${esc(dangHien) || '<span class="muted">(trống)</span>'}
-        ${doi ? '<span class="sub"><span class="nhan no">đã đổi khỏi mặc định</span></span>' : ''}</td>
-      <td><input data-khoa="${esc(k)}" value="${esc(nhap[k] ?? dangHien)}"></td>
-    </tr>`;
-  }).join('');
+  const chuDaXuat = {};
+  for (const o of daXuat.chu || []) chuDaXuat[o.g] = o.m;
+  const bienDaXuat = daXuat.bien || {};
+  const nhom = [];
+
+  nhom.push(`<tr class="nhomND"><td colspan="3">Giá trị lặp nhiều nơi</td></tr>` +
+    KHOA_BIEN.map(([k, mo_ta]) => {
+      const dang = bienDaXuat[k] ?? macDinh[k] ?? '';
+      return dongNoiDung(`bien:${k}`, dang, nhap.bien[k] ?? dang,
+        bienDaXuat[k] !== undefined, esc(mo_ta));
+    }).join(''));
+
+  for (const g of gocTheoTab) {
+    nhom.push(`<tr class="nhomND"><td colspan="3">Tab «${esc(g.ten)}» — ${g.chuoi.length} chuỗi</td></tr>` +
+      g.chuoi.map(s => dongNoiDung(`chu:${s}`, chuDaXuat[s] ?? s,
+        nhap.chu[s] ?? chuDaXuat[s] ?? s, chuDaXuat[s] !== undefined, '')).join(''));
+  }
+  $('dongNoiDung').innerHTML = nhom.join('');
+  locChu();
 }
 
-const docJson = (k) => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch { return {}; } };
+// Ô sửa là <textarea> chứ không phải <input>: <input> là ô MỘT DÒNG nên trình duyệt bỏ
+// hết ký tự xuống dòng khi đọc value. Chữ trên trang có chuỗi nhiều dòng, đọc ra là đã
+// khác chuỗi gốc dù chưa ai gõ gì - trang quản trị sẽ tự "xuất bản" một thay đổi không
+// ai yêu cầu, và nuốt luôn ngắt dòng của trang.
+function dongNoiDung(khoa, dangHien, giaTri, daDoi, ghiChu) {
+  return `<tr data-tim="${esc((dangHien + ' ' + giaTri).toLowerCase())}">
+    <td class="note">${esc(dangHien) || '<span class="muted">(trống)</span>'}
+      ${ghiChu ? `<span class="sub">${ghiChu}</span>` : ''}</td>
+    <td><textarea data-khoa="${esc(khoa)}" rows="${String(giaTri).includes('\n') ? 3 : 1}"
+      >${esc(giaTri)}</textarea></td>
+    <td>${daDoi ? '<span class="nhan no">đã đổi</span>' : '<span class="muted">gốc</span>'}</td>
+  </tr>`;
+}
+
+/** Lọc theo từ khoá. 605 dòng thì không cuộn tay tìm được. */
+function locChu() {
+  const q = ($('timChu').value || '').trim().toLowerCase();
+  for (const tr of $('dongNoiDung').children) {
+    if (tr.classList.contains('nhomND')) { tr.classList.remove('hide'); continue; }
+    tr.classList.toggle('hide', !!q && !tr.dataset.tim.includes(q));
+  }
+}
+$('timChu').oninput = locChu;
 
 function thuNhap() {
-  for (const i of $('dongNoiDung').querySelectorAll('input[data-khoa]'))
-    nhap[i.dataset.khoa] = i.value;
+  for (const i of $('dongNoiDung').querySelectorAll('textarea[data-khoa]')) {
+    const k = i.dataset.khoa;
+    if (k.startsWith('bien:')) nhap.bien[k.slice(5)] = i.value;
+    else nhap.chu[k.slice(4)] = i.value;
+  }
   return nhap;
 }
 
@@ -1244,42 +1368,65 @@ function thuNhap() {
  */
 const locThe = (s) => String(s).replace(/[<>]/g, '');
 
+/** Gom những ô THẬT SỰ khác chữ gốc. Ghi cả 605 chuỗi y nguyên thì tệp nội dung trở
+ *  thành bản sao thứ hai của trang, và sửa trang là hai bản lệch nhau ngay. */
+function gomThayDoi(n) {
+  const bien = {};
+  for (const [k] of KHOA_BIEN) {
+    const v = locThe(n.bien[k] ?? '').trim();
+    if (v && v !== macDinh[k]) bien[k] = v;
+  }
+  const chu = [];
+  for (const g of Object.keys(n.chu)) {
+    const v = locThe(n.chu[g]).trim();
+    if (v && v !== g) chu.push({ g, m: v });
+  }
+  return { bien, chu };
+}
+
 $('luuNhap').onclick = () => {
-  const n = thuNhap();
-  localStorage.setItem(KHOA_NHAP, JSON.stringify(n));
+  const ra = gomThayDoi(thuNhap());
+  localStorage.setItem(KHOA_NHAP, JSON.stringify(ra));
   $('trangThaiNoiDung').textContent = 'đã lưu nháp, chưa lên trang công khai';
-  ghiLog('Lưu nháp nội dung', Object.keys(n).length + ' khoá');
+  ghiLog('Lưu nháp nội dung', `${Object.keys(ra.bien).length} biến, ${ra.chu.length} chuỗi`);
 };
 
 $('xuatBan').onclick = () => {
   hideErr($('noiDungErr'));
-  const n = thuNhap();
-  const ra = {};
-  for (const [k] of KHOA_NOI_DUNG) {
-    const v = locThe(n[k] ?? '').trim();
-    if (v && v !== macDinh[k]) ra[k] = v;      // chỉ ghi những khoá thật sự khác mặc định
-  }
+  const ra = gomThayDoi(thuNhap());
   localStorage.setItem(KHOA_LUU_NOI_DUNG, JSON.stringify(ra));
   localStorage.removeItem(KHOA_NHAP);
-  nhap = {};
-  $('trangThaiNoiDung').textContent =
-    `đã xuất bản ${Object.keys(ra).length} khoá — mở trang tuyển sinh để xem`;
-  ghiLog('Xuất bản nội dung', Object.keys(ra).length
-    ? Object.keys(ra).join(', ') : 'hoàn tất cả về mặc định');
+  nhap = { bien: {}, chu: {} };
+  const so = Object.keys(ra.bien).length + ra.chu.length;
+  $('trangThaiNoiDung').textContent = so
+    ? `đã xuất bản ${so} thay đổi — mở trang tuyển sinh để xem`
+    : 'không có thay đổi nào, trang giữ nguyên nội dung gốc';
+  ghiLog('Xuất bản nội dung', so
+    ? [...Object.keys(ra.bien), ...ra.chu.map(o => o.g.slice(0, 40))].join(' | ')
+    : 'hoàn tất cả về mặc định');
   veNoiDung();
 };
 
 $('hoanNoiDung').onclick = () => {
   localStorage.removeItem(KHOA_LUU_NOI_DUNG);
   localStorage.removeItem(KHOA_NHAP);
-  nhap = {};
+  nhap = { bien: {}, chu: {} };
   $('trangThaiNoiDung').textContent = 'đã hoàn về nội dung mặc định';
   ghiLog('Hoàn nội dung về mặc định', 'tất cả khoá');
   veNoiDung();
 };
 
+// Đọc lại khi trang tuyển sinh đổi markup: chuỗi mới chưa có trong danh sách đã quét thì
+// không hiện ra để sửa, còn chuỗi đã bị xoá khỏi trang thì vẫn nằm đó gây hiểu nhầm.
+$('docLaiTrang').onclick = async () => {
+  hideErr($('noiDungErr'));
+  await napChuGoc(true);
+  veNoiDung();
+  ghiLog('Đọc lại chữ trên trang', `${gocTheoTab.length} tab`);
+};
+
 $('xemThu').onclick = () => {
-  localStorage.setItem(KHOA_NHAP, JSON.stringify(thuNhap()));
+  localStorage.setItem(KHOA_NHAP, JSON.stringify(gomThayDoi(thuNhap())));
   // ?xem-thu=1 để trang tuyển sinh áp bản NHÁP thay vì bản đã xuất bản. Không có tham
   // số này thì khách vào trang vẫn thấy bản đã xuất bản, không thấy bản đang sửa dở.
   window.open('/?xem-thu=1', '_blank');
@@ -1316,8 +1463,9 @@ Object.assign(window, { LA_DASHBOARD, render, locNhanh, doiSoat, saoKeMau, xacNh
 // Phai la defineProperties chu khong phai Object.assign: Object.assign GOI getter roi
 // gan gia tri tinh, nen ben ngoai se doc phai ban chup luc nap trang chu khong phai
 // gia tri hien tai - test se xanh trong khi giao dien da doi.
-Object.assign(window, { veNhatKy, veNoiDung });
+Object.assign(window, { veNhatKy, veNoiDung, locChu, timChu: () => $('timChu') });
 Object.defineProperties(window, {
+  gocTheoTab: { get: () => gocTheoTab },
   rows:    { get: () => rows },
   hienThi: { get: () => hienThi },
   nhatKy:  { get: () => nhatKy },

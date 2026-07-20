@@ -5,10 +5,18 @@
 -- timeline chevron); cho them khoi tuy y dong nghia voi viec moi thay doi noi dung deu
 -- co the pha bo cuc, va se can mot trinh dung trang that su - do la san pham khac.
 
+-- Hai loai noi dung, hai co che thay khac nhau:
+--   'bien' - chuoi lap GIUA cau van, khoa la ten dat san (khai_giang, gio_hoc...) va
+--            khop voi the <script id="noi-dung-mac-dinh"> tren trang. Ngay khai giang
+--            hien o 12 cho, moi cho mot cau khac nhau nen phai thay theo chuoi con.
+--   'chu'  - moi chu con lai. Khoa la CHINH CHUOI GOC, va trang khop CA node van ban
+--            chu khong khop mot phan: trang co hon 600 chuoi, trong do co "8", "AI",
+--            "·" - thay theo chuoi con voi nhung chuoi nay se sua nham khap trang.
 create table if not exists public.eda_noi_dung (
-  khoa       text primary key,               -- khop data-noi-dung tren trang tuyen sinh
+  khoa       text primary key,               -- 'bien': ten khoa | 'chu': chinh chuoi goc
+  loai       text not null default 'chu' check (loai in ('bien', 'chu')),
   gia_tri    text not null,
-  mo_ta      text not null,                  -- hien cho nguoi sua biet day la cho nao
+  mo_ta      text not null default '',       -- hien cho nguoi sua biet day la cho nao
   da_xuat_ban boolean not null default false,
   sua_boi    uuid references auth.users(id),
   sua_luc    timestamptz not null default now()

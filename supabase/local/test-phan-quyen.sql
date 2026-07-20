@@ -202,14 +202,14 @@ select pg_temp.dang_nhap('EDA_ADMIN', 'aaaaaaaa-0000-0000-0000-000000000001');
 do $$
 declare v text;
 begin
-  insert into eda_noi_dung (khoa, gia_tri, mo_ta)
-  values ('khai_giang', '15.10.2026', 'Ngay khai giang');
+  insert into eda_noi_dung (khoa, loai, gia_tri, mo_ta)
+  values ('khai_giang', 'bien', '15.10.2026', 'Ngay khai giang');
   perform pg_temp.dat('admin sua duoc noi dung trang');
 
   -- Loc the o luc GHI: du lieu sach tu trong kho, moi cho doc ve sau deu an toan ma
   -- khong phai nho loc lai.
-  insert into eda_noi_dung (khoa, gia_tri, mo_ta)
-  values ('hero_tieu_de', '<img src=x onerror=alert(1)>Xin chao', 'Tieu de');
+  insert into eda_noi_dung (khoa, loai, gia_tri, mo_ta)
+  values ('hero_tieu_de', 'bien', '<img src=x onerror=alert(1)>Xin chao', 'Tieu de');
   select gia_tri into v from eda_noi_dung where khoa = 'hero_tieu_de';
   if v like '%<%' or v like '%>%' then
     raise exception 'THAT BAI: the HTML khong bi loc, con "%"', v;
