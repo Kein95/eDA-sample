@@ -139,14 +139,13 @@
         gap: 28px !important;
       }
 
-      /* Nhiệm vụ 1: Khắc phục tràn nội dung 10px thẻ Tài liệu và Giảng viên */
-      a[style*="flex-direction:column"][style*="gap:8px"],
-      div[style*="flex-direction:column"][style*="align-items:flex-start"][style*="gap:20px"],
-      div[style*="padding:32px 26px"][style*="justify-content:center"] {
-        min-width: 0 !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-      }
+      /* KHONG co rule nao cho "the tran 10px" o day, va do la co y.
+         Con so 10px tung bi ghi nhan la loi. Do lai thi no den tu mot the
+         position:absolute (top:-14px; right:-10px) co tinh tho ra ngoai goc thet
+         de lam nhan dan, dung phong cach cua trang. No khong bao gio lam trang
+         cuon ngang: scrollWidth cua trang van bang clientWidth o ca 360 lan 390px.
+         Ai do lai va thay "scrollWidth - clientWidth = 10" tren cac the nay thi
+         dung "sua": do la thiet ke, khong phai loi. */
 
       /* Nhiệm vụ 2: Nâng cỡ chữ các nhãn nhỏ lên tối thiểu 11px (ưu tiên 12px) */
       .legend-symbol,
