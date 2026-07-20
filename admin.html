@@ -58,10 +58,11 @@ button.ghost{background:var(--surface);color:var(--ink)}
    luc nao cung phai keo ngang. Chi con keo ngang khi man hep hon 920px. */
 .tablewrap{max-height:72vh;overflow:auto;border:3px solid var(--ink);
   background:var(--surface);box-shadow:5px 5px 0 var(--ink)}
-/* min-width 1160px: duoi muc nay cot hep den noi chu tran ra de len cot ben canh
-   (do duoc: cot "Luc" bat dau tran o khoang 1120px). Cho cuon ngang thay vi de chu
-   chong len nhau. Con o tren muc nay thi 11 cot vua khit, khong phai keo ngang. */
-table{border-collapse:collapse;width:100%;min-width:1160px;table-layout:fixed;font-size:13px}
+/* min-width 1200px: duoi muc nay chu tran ra de len cot ben canh. Cot chat nhat quyet
+   dinh con so nay - hien la "Ma": chuoi eDA26-ABC123 khong xuong dong duoc (xem td.code)
+   nen can ~93px, cong padding 20px la 113px, tuc 10% cua >= 1130px. Lay 1200 cho du.
+   Them cot moi thi phai do lai: mo bang, tim o co scrollWidth > clientWidth. */
+table{border-collapse:collapse;width:100%;min-width:1200px;table-layout:fixed;font-size:13px}
 th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
 th{word-break:break-word}
 /* break-word chi cat khi mot TU dai hon o (email, link facebook). Khong dung
@@ -127,21 +128,21 @@ tr.new td{animation:newrow 2.4s ease-out}
   <div class="wrap">
     <p id="listErr" class="err hide"></p>
     <div class="tablewrap"><table>
-      <!-- 11 cot thay vi 15: gop lien lac (SDT/email/Zalo/Facebook) va phu huynh
-           (ten + SDT) vao mot o, moi thu mot dong. Tong width = 100% de vua khung.
-           Ban CSV van xuat du ca 15 cot goc, khong gop gi. -->
+      <!-- 10 cot thay vi 15: gop SDT/email/Zalo/Facebook vao mot o "Lien lac", va bo
+           hai cot phu huynh khoi bang. Tong width = 100% de vua khung.
+           Ban CSV van xuat du ca 15 cot goc (ke ca phu huynh) va o tim kiem van quet
+           ca 15 truong - chi la khong bay san ra bang. -->
       <thead><tr>
         <th style="width:10%">Mã</th>
-        <th style="width:9%">Lúc</th>
-        <th style="width:11%">Họ tên</th>
-        <th style="width:14%">Liên lạc</th>
+        <th style="width:9%">Thời gian đăng ký</th>
+        <th style="width:12%">Họ tên</th>
+        <th style="width:15%">Liên lạc</th>
         <th style="width:7%">Tỉnh</th>
-        <th style="width:8%">Đang là</th>
-        <th style="width:7%">Ngành</th>
-        <th style="width:8%">Hứng thú</th>
-        <th style="width:9%">Phụ huynh</th>
-        <th style="width:8%">Biết qua</th>
-        <th style="width:9%">Ghi chú</th>
+        <th style="width:9%">Đang là</th>
+        <th style="width:8%">Ngành</th>
+        <th style="width:10%">Quan tâm</th>
+        <th style="width:8%">Kênh thông tin</th>
+        <th style="width:12%">Ghi chú</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table></div>
@@ -305,7 +306,6 @@ function render() {
     + `<td>${esc(r.job)}</td>`
     + `<td>${esc(r.field)}</td>`
     + `<td>${esc(r.interest)}</td>`
-    + `<td>${oPhuHuynh(r)}</td>`
     + `<td>${esc(r.channel)}</td>`
     + `<td class="note">${esc(r.note)}</td>`
     + '</tr>').join('');
@@ -322,12 +322,6 @@ function oLienLac(r) {
   if (r.facebook) them.push(esc(r.facebook));
   if (them.length) d.push(`<span class="sub">${them.join(' · ')}</span>`);
   return d.join('');
-}
-
-function oPhuHuynh(r) {
-  if (!r.guardian_name && !r.guardian_phone) return '';
-  return esc(r.guardian_name)
-    + (r.guardian_phone ? `<span class="sub">${esc(r.guardian_phone)}</span>` : '');
 }
 
 function esc(v) {
